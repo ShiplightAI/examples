@@ -12,7 +12,7 @@
  * - Password: secret_sauce
  *
  * Prerequisites:
- * - Set GOOGLE_API_KEY in .env file or environment variable
+ * - Set ANTHROPIC_API_KEY in .env file or environment variable
  */
 
 import { config } from 'dotenv';
@@ -29,13 +29,13 @@ const { chromium } = await import('playwright');
 const { createAgent, configureSdk } = await import('@shiplightai/sdk');
 
 // Configure SDK with API key
-const apiKey = process.env.GOOGLE_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY;
+const apiKey = process.env.ANTHROPIC_API_KEY;
 if (!apiKey) {
-  console.error('❌ Error: GOOGLE_API_KEY not set');
-  console.log('   Add to .env file or get your key from: https://aistudio.google.com/app/apikey');
+  console.error('Error: ANTHROPIC_API_KEY not set');
+  console.log('   Add to .env file or get your key from: https://console.anthropic.com/settings/keys');
   process.exit(1);
 }
-configureSdk({ env: { GOOGLE_API_KEY: apiKey } });
+configureSdk({ env: { ANTHROPIC_API_KEY: apiKey } });
 
 async function loginExample() {
   const browser = await chromium.launch({ headless: false });
@@ -43,11 +43,12 @@ async function loginExample() {
   const page = await context.newPage();
 
   const agent = createAgent({
-    model: 'gemini-2.5-pro',
+    model: 'claude-haiku-4-5',
   });
 
   try {
-    console.log('=== Login Example ===\n');
+    console.log('=== Login Example ===');
+    console.log('Model: claude-haiku-4-5\n');
 
     // Use the agent's smart login - it handles everything automatically
     console.log('1. Performing smart login...');

@@ -4,15 +4,12 @@ Examples demonstrating AI-powered browser automation with the Shiplight SDK.
 
 ## Setup
 
-### 1. Set GitHub Token
-
-The SDK is hosted on GitHub Packages. Set your GitHub token:
+### 1. Clone the Repository
 
 ```bash
-export GITHUB_TOKEN=ghp_xxxxxxxxxxxx
+git clone https://github.com/ShiplightAI/sdk-examples.git
+cd sdk-examples
 ```
-
-> Contact Shiplight to get the access token.
 
 ### 2. Install Dependencies
 
@@ -28,18 +25,27 @@ npx playwright install chromium
 
 ### 4. Configure API Key
 
-Copy the example env file and add your Google API key:
+Copy the example env file and add your API key:
 
 ```bash
 cp .env.example .env
 ```
 
-Edit `.env` and add your key (get one from https://aistudio.google.com/app/apikey):
+Edit `.env` and add at least one API key:
 
 ```
+# For Claude examples (quickStart, login, customActions, extraction)
+ANTHROPIC_API_KEY=your-anthropic-api-key
+
+# For Gemini examples (basicUsage, selfHealing, variables, fileOperations)
 GOOGLE_API_KEY=your-google-api-key
+
 PWDEBUG=console
 ```
+
+Get your keys from:
+- Anthropic: https://console.anthropic.com/settings/keys
+- Google AI: https://aistudio.google.com/app/apikey
 
 ## Running Examples
 
@@ -55,16 +61,16 @@ npx tsx examples/loginExample.ts
 
 ## Examples
 
-| Example | Description | Run |
-|---------|-------------|-----|
-| `quickStart.ts` | Basic SDK usage - login, assert, extract | `npm run quickstart` |
-| `basicUsage.ts` | Core features - act, assert, evaluate, extract | `npm run basic` |
-| `loginExample.ts` | Smart login with 2FA support | `npm run login` |
-| `selfHealingExample.ts` | Self-healing with `step()` | `npm run self-healing` |
-| `customActions.ts` | Extend agent with custom actions | `npm run custom-actions` |
-| `variablesExample.ts` | Variable management | `npm run variables` |
-| `fileOperationsExample.ts` | File upload | `npm run file-upload` |
-| `extractionExample.ts` | Data extraction patterns | `npm run extraction` |
+| Example | Model | Description | Run |
+|---------|-------|-------------|-----|
+| `quickStart.ts` | Claude | Basic SDK usage - login, assert, extract | `npm run quickstart` |
+| `basicUsage.ts` | Gemini | Core features - act, assert, evaluate, extract | `npm run basic` |
+| `loginExample.ts` | Claude | Smart login with 2FA support | `npm run login` |
+| `selfHealingExample.ts` | Gemini | Self-healing with `step()` | `npm run self-healing` |
+| `customActions.ts` | Claude | Extend agent with custom actions | `npm run custom-actions` |
+| `variablesExample.ts` | Gemini | Variable management | `npm run variables` |
+| `fileOperationsExample.ts` | Gemini | File upload | `npm run file-upload` |
+| `extractionExample.ts` | Claude | Data extraction patterns | `npm run extraction` |
 
 ## Test Site
 
@@ -80,15 +86,17 @@ Examples use the Sauce Labs demo site (public):
 ```typescript
 import { createAgent, configureSdk } from '@shiplightai/sdk';
 
+// Use Claude
+configureSdk({
+  env: { ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY },
+});
+const agent = createAgent({ model: 'claude-haiku-4-5' });
+
+// Or use Gemini
 configureSdk({
   env: { GOOGLE_API_KEY: process.env.GOOGLE_API_KEY },
 });
-
-const agent = createAgent({
-  model: 'gemini-2.5-pro',
-  variables: { username: 'test@example.com' },
-  sensitiveKeys: ['password'],
-});
+const agent = createAgent({ model: 'gemini-2.5-pro' });
 ```
 
 ### Core Methods

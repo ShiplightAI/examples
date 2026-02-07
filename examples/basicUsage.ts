@@ -61,6 +61,9 @@ async function basicExample() {
   });
 
   try {
+    console.log('=== Basic Usage Example ===');
+    console.log('Model: gemini-2.5-pro\n');
+
     // Navigate to a website
     await page.goto('https://example.com');
 

@@ -49,7 +49,8 @@ async function variablesExample() {
   });
 
   try {
-    console.log('=== Variables Example ===\n');
+    console.log('=== Variables Example ===');
+    console.log('Model: gemini-2.5-pro\n');
 
     // Step 1: Show initial variables set via createAgent
     console.log('1. Initial variables (set via createAgent):');

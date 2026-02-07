@@ -56,7 +56,8 @@ async function fileUploadExample() {
   });
 
   try {
-    console.log('=== File Upload Example ===\n');
+    console.log('=== File Upload Example ===');
+    console.log('Model: gemini-2.5-pro\n');
 
     console.log('1. Navigating to upload test page...');
     await page.goto('https://the-internet.herokuapp.com/upload');

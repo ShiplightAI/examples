@@ -43,7 +43,8 @@ async function selfHealingExample() {
   });
 
   try {
-    console.log('=== Self-Healing Example ===\n');
+    console.log('=== Self-Healing Example ===');
+    console.log('Model: gemini-2.5-pro\n');
 
     // ================================
     // PART 1: Basic Self-Healing (maxSteps: 1)
