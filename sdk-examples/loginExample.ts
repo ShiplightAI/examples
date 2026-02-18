@@ -22,7 +22,7 @@ import { fileURLToPath } from 'url';
 // Load .env BEFORE importing playwright (PWDEBUG must be set before playwright loads)
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-config({ path: resolve(__dirname, '..', '.env') });
+config({ path: resolve(__dirname, '.env') });
 
 // Dynamic import to ensure PWDEBUG is set before playwright initializes
 const { chromium } = await import('playwright');

@@ -1,0 +1,19 @@
+# Frames — interacting with elements inside iframes
+# Target: https://the-internet.herokuapp.com/iframe
+
+goal: Type text inside an iframe editor
+url: https://the-internet.herokuapp.com/iframe
+
+statements:
+  - description: Type inside the TinyMCE iframe editor
+    action_entity:
+      action_description: Type in the editor body
+      frame_path:
+        - "iframe#mce_0_ifr"
+      locator: "getByRole('textbox')"
+      action_data:
+        action_name: input_text
+        kwargs:
+          text: "Hello from Shiplight!"
+
+  - "VERIFY: The editor contains 'Hello from Shiplight!'"

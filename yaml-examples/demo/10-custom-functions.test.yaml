@@ -1,0 +1,58 @@
+# 10 — Custom Functions
+# Demonstrates: function action with file#export syntax
+# Call TypeScript functions from YAML. The function receives
+# `page` as a parameter so it can interact with the browser.
+
+goal: Use a custom function to check and clear the cart
+url: https://www.saucedemo.com/inventory.html
+
+statements:
+  - description: Add Sauce Labs Backpack to cart
+    action_entity:
+      action_description: Add Sauce Labs Backpack to cart
+      locator: "getByRole('button', { name: 'Add to cart' }).first()"
+      action_data:
+        action_name: click
+        kwargs: {}
+
+  - description: Add Sauce Labs Bike Light to cart
+    action_entity:
+      action_description: Add Sauce Labs Bike Light to cart
+      locator: "locator('[data-test=\"add-to-cart-sauce-labs-bike-light\"]')"
+      action_data:
+        action_name: click
+        kwargs: {}
+
+  # Call getCartCount — a custom TypeScript function
+  - description: Check the cart count with a custom function
+    action_entity:
+      action_data:
+        action_name: function
+        kwargs:
+          functionName: "../helpers/cart.ts#getCartCount"
+          parameterNames:
+            - page
+          parameterValues:
+            - page
+
+  # Call clearCart to remove all items
+  - description: Clear the cart using a custom function
+    action_entity:
+      action_data:
+        action_name: function
+        kwargs:
+          functionName: "../helpers/cart.ts#clearCart"
+          parameterNames:
+            - page
+          parameterValues:
+            - page
+
+  - description: Click the shopping cart icon
+    action_entity:
+      action_description: Click the shopping cart icon
+      locator: "locator('[data-test=\"shopping-cart-link\"]')"
+      action_data:
+        action_name: click
+        kwargs: {}
+
+  - "VERIFY: The cart is empty"

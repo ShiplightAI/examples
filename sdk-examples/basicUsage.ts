@@ -15,7 +15,7 @@
  * - agent.extract() - Extract data into a variable
  *
  * Prerequisites:
- * - Set GOOGLE_API_KEY in .env file or environment variable
+ * - Set ANTHROPIC_API_KEY in .env file or environment variable
  * - Install playwright: pnpm add playwright
  */
 
@@ -26,22 +26,22 @@ import { fileURLToPath } from 'url';
 // Load .env BEFORE importing playwright (PWDEBUG must be set before playwright loads)
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-config({ path: resolve(__dirname, '..', '.env') });
+config({ path: resolve(__dirname, '.env') });
 
 // Dynamic import to ensure PWDEBUG is set before playwright initializes
 const { chromium } = await import('playwright');
 const { createAgent, configureSdk, LogLevel } = await import('@shiplightai/sdk');
 
 // Configure SDK with API key
-const apiKey = process.env.GOOGLE_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY;
+const apiKey = process.env.ANTHROPIC_API_KEY;
 if (!apiKey) {
-  console.error('❌ Error: GOOGLE_API_KEY not set');
-  console.log('   Add to .env file or get your key from: https://aistudio.google.com/app/apikey');
+  console.error('Error: ANTHROPIC_API_KEY not set');
+  console.log('   Add to .env file or get your key from: https://console.anthropic.com/settings/keys');
   process.exit(1);
 }
 configureSdk({
   logLevel: LogLevel.INFO,
-  env: { GOOGLE_API_KEY: apiKey },
+  env: { ANTHROPIC_API_KEY: apiKey },
 });
 
 async function basicExample() {
@@ -52,7 +52,7 @@ async function basicExample() {
 
   // Create an agent with variables
   const agent = createAgent({
-    model: 'gemini-2.5-pro',
+    model: 'claude-haiku-4-5',
     variables: {
       username: 'testuser@example.com',
       password: 'secret123',
@@ -62,7 +62,7 @@ async function basicExample() {
 
   try {
     console.log('=== Basic Usage Example ===');
-    console.log('Model: gemini-2.5-pro\n');
+    console.log('Model: claude-haiku-4-5\n');
 
     // Navigate to a website
     await page.goto('https://example.com');

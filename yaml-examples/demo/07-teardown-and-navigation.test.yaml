@@ -1,0 +1,75 @@
+# 07 — Teardown and Navigation
+# Demonstrates: teardown, go_back, go_to_url, reload_page, save_variable
+
+goal: Navigate through the site and clean up with teardown
+url: https://www.saucedemo.com/inventory.html
+
+statements:
+  # save_variable — capture current URL
+  - description: Save the inventory URL
+    action_entity:
+      action_data:
+        action_name: save_variable
+        kwargs:
+          name: inventory_url
+          value: "js: page.url()"
+
+  # Navigate to a product
+  - description: Click the first product name
+    action_entity:
+      action_description: Click the first product name
+      locator: "locator('.inventory_item_name').first()"
+      action_data:
+        action_name: click
+        kwargs: {}
+
+  - "VERIFY: The product detail page is displayed"
+
+  # go_back
+  - description: Go back to inventory
+    action_entity:
+      action_data:
+        action_name: go_back
+        kwargs: {}
+
+  - "VERIFY: The inventory page is displayed"
+
+  # go_to_url
+  - description: Navigate to the cart page
+    action_entity:
+      action_data:
+        action_name: go_to_url
+        kwargs:
+          url: "https://www.saucedemo.com/cart.html"
+
+  - "VERIFY: The cart page is displayed"
+
+  # reload_page
+  - description: Reload the page
+    action_entity:
+      action_data:
+        action_name: reload_page
+        kwargs: {}
+
+  - "VERIFY: The cart page is still displayed after reload"
+
+  # verify — the AI agent has access to saved variables at runtime
+  - "VERIFY: The current page URL is different from the saved inventory_url"
+
+teardown:
+  # Teardown runs even if the test fails — use it for cleanup
+  - description: Open the sidebar menu
+    action_entity:
+      action_description: Open the sidebar menu
+      locator: "getByRole('button', { name: 'Open Menu' })"
+      action_data:
+        action_name: click
+        kwargs: {}
+
+  - description: Click Reset App State
+    action_entity:
+      action_description: Click Reset App State
+      locator: "getByText('Reset App State')"
+      action_data:
+        action_name: click
+        kwargs: {}

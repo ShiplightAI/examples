@@ -24,7 +24,7 @@ import type { Page } from 'playwright';
 // Load .env BEFORE importing playwright (PWDEBUG must be set before playwright loads)
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-config({ path: resolve(__dirname, '..', '.env') });
+config({ path: resolve(__dirname, '.env') });
 
 // Dynamic import to ensure PWDEBUG is set before playwright initializes
 const { chromium } = await import('playwright');
@@ -131,7 +131,7 @@ async function customActionsExample() {
     await agent.act(page, 'Get the verification code for {{ testEmail }}');
 
     const verificationCode = agent.getVariable('verificationCode');
-    console.log(`  Variable 'verificationCode' set: ${verificationCode ? `✅ Yes (${verificationCode})` : '❌ No'}`);
+    console.log(`  Variable 'verificationCode' set: ${verificationCode ? `Yes (${verificationCode})` : 'No'}`);
 
     // Test 2: Ask the agent to check user status
     console.log('\n--- Test 2: Database Check ---');
@@ -139,7 +139,7 @@ async function customActionsExample() {
     await agent.act(page, 'Check if user abc123 is verified in the database');
 
     const userVerified = agent.getVariable('userVerified');
-    console.log(`  Variable 'userVerified' set: ${userVerified ? `✅ Yes (${userVerified})` : '❌ No'}`);
+    console.log(`  Variable 'userVerified' set: ${userVerified ? `Yes (${userVerified})` : 'No'}`);
 
     // Test 3: Ask the agent to send an SMS
     console.log('\n--- Test 3: SMS Verification ---');
@@ -147,7 +147,7 @@ async function customActionsExample() {
     await agent.act(page, 'Send an SMS verification code to +1234567890');
 
     const smsCode = agent.getVariable('smsCode');
-    console.log(`  Variable 'smsCode' set: ${smsCode ? `✅ Yes (${smsCode})` : '❌ No'}`);
+    console.log(`  Variable 'smsCode' set: ${smsCode ? `Yes (${smsCode})` : 'No'}`);
 
     // Summary
     console.log('\n--- Summary ---');

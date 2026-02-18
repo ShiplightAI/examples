@@ -1,0 +1,12 @@
+# 02 — VERIFY Assertions
+# Demonstrates: multiple VERIFY statements to check page state
+
+goal: Verify inventory page elements
+url: https://www.saucedemo.com/inventory.html
+
+statements:
+  - "VERIFY: The text 'Products' is visible as a heading on the page"
+  - "VERIFY: There are 6 product items displayed"
+  - "VERIFY: The shopping cart icon is visible in the top right"
+  - "VERIFY: The sidebar menu button is visible"
+  - "VERIFY: Each product has a name, description, price, and Add to cart button"

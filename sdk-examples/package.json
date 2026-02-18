@@ -1,0 +1,27 @@
+{
+  "name": "shiplightai-sdk-examples",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "description": "Examples for Shiplight SDK",
+  "scripts": {
+    "quickstart": "tsx quickStart.ts",
+    "basic": "tsx basicUsage.ts",
+    "login": "tsx loginExample.ts",
+    "self-healing": "tsx selfHealingExample.ts",
+    "custom-actions": "tsx customActions.ts",
+    "variables": "tsx variablesExample.ts",
+    "file-upload": "tsx fileOperationsExample.ts",
+    "extraction": "tsx extractionExample.ts"
+  },
+  "dependencies": {
+    "@shiplightai/sdk": "^0.1.0",
+    "@shiplightai/sdk-pro": "^0.2.1",
+    "dotenv": "^16.4.5",
+    "playwright": "^1.52.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.0",
+    "typescript": "^5.5.0"
+  }
+}

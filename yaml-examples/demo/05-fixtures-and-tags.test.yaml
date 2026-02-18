@@ -1,0 +1,38 @@
+# 05 — Fixtures and Tags
+# Demonstrates: name (custom test name), tags, use (viewport, locale)
+
+name: Mobile inventory browsing
+tags:
+  - smoke
+  - mobile
+
+use:
+  viewport:
+    width: 375
+    height: 812
+  locale: en-US
+
+goal: Verify inventory works on a mobile viewport
+url: https://www.saucedemo.com/inventory.html
+
+statements:
+  - "VERIFY: The inventory page is displayed"
+  - "VERIFY: The page layout is usable on mobile"
+
+  - description: Add Sauce Labs Backpack to cart
+    action_entity:
+      action_description: Add Sauce Labs Backpack to cart
+      locator: "getByRole('button', { name: 'Add to cart' }).first()"
+      action_data:
+        action_name: click
+        kwargs: {}
+
+  - description: Click the shopping cart icon
+    action_entity:
+      action_description: Click the shopping cart icon
+      locator: "locator('[data-test=\"shopping-cart-link\"]')"
+      action_data:
+        action_name: click
+        kwargs: {}
+
+  - "VERIFY: The cart contains the selected product"

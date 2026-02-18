@@ -1,0 +1,53 @@
+# 04 — Steps and Control Flow
+# Demonstrates: STEP grouping, IF/ELSE with AI and js: conditions
+
+goal: Browse products with conditional logic
+url: https://www.saucedemo.com/inventory.html
+
+statements:
+  - STEP: Add a product to the cart
+    statements:
+      - description: Add Sauce Labs Backpack to cart
+        action_entity:
+          action_description: Add Sauce Labs Backpack to cart
+          locator: "getByRole('button', { name: 'Add to cart' }).first()"
+          action_data:
+            action_name: click
+            kwargs: {}
+      - "VERIFY: The shopping cart badge shows 1"
+
+  # IF with AI condition
+  - IF: The shopping cart badge shows a number greater than 0
+    THEN:
+      - description: Click the shopping cart icon
+        action_entity:
+          action_description: Click the shopping cart icon
+          locator: "locator('[data-test=\"shopping-cart-link\"]')"
+          action_data:
+            action_name: click
+            kwargs: {}
+      - "VERIFY: The cart page is displayed with items"
+    ELSE:
+      - "VERIFY: This branch should not execute"
+
+  # IF with JavaScript condition
+  - IF: "js: page.url().includes('/cart')"
+    THEN:
+      - STEP: Proceed to checkout
+        statements:
+          - description: Click the Checkout button
+            action_entity:
+              action_description: Click the Checkout button
+              locator: "getByRole('button', { name: 'Checkout' })"
+              action_data:
+                action_name: click
+                kwargs: {}
+          - "VERIFY: The checkout information page is displayed"
+          - description: Click the Cancel button
+            action_entity:
+              action_description: Click the Cancel button
+              locator: "getByRole('button', { name: 'Cancel' })"
+              action_data:
+                action_name: click
+                kwargs: {}
+          - "VERIFY: The cart page is displayed"

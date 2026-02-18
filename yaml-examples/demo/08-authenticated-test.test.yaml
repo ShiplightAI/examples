@@ -1,0 +1,29 @@
+# 08 — Authenticated Test
+# Demonstrates: storageState via setup project
+# Auth is handled by the auto-generated auth.setup.ts,
+# so this test starts already logged in.
+
+goal: Verify authenticated user can access inventory directly
+url: https://www.saucedemo.com/inventory.html
+
+statements:
+  - "VERIFY: The inventory page is displayed without needing to log in"
+  - "VERIFY: The text 'Products' is visible on the page"
+
+  - description: Add Sauce Labs Backpack to cart
+    action_entity:
+      action_description: Add Sauce Labs Backpack to cart
+      locator: "getByRole('button', { name: 'Add to cart' }).first()"
+      action_data:
+        action_name: click
+        kwargs: {}
+
+  - description: Click the shopping cart icon
+    action_entity:
+      action_description: Click the shopping cart icon
+      locator: "locator('[data-test=\"shopping-cart-link\"]')"
+      action_data:
+        action_name: click
+        kwargs: {}
+
+  - "VERIFY: The cart contains the selected product"

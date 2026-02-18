@@ -1,0 +1,68 @@
+# 06 — Variables
+# Demonstrates: {{VAR_NAME}} in action_entity kwargs
+# Variables are defined in shiplight.config.json
+
+goal: Use variables to fill checkout information
+url: https://www.saucedemo.com/inventory.html
+
+statements:
+  - description: Add Sauce Labs Backpack to cart
+    action_entity:
+      action_description: Add Sauce Labs Backpack to cart
+      locator: "getByRole('button', { name: 'Add to cart' }).first()"
+      action_data:
+        action_name: click
+        kwargs: {}
+
+  - description: Click the shopping cart icon
+    action_entity:
+      action_description: Click the shopping cart icon
+      locator: "locator('[data-test=\"shopping-cart-link\"]')"
+      action_data:
+        action_name: click
+        kwargs: {}
+
+  - description: Click the Checkout button
+    action_entity:
+      action_description: Click the Checkout button
+      locator: "getByRole('button', { name: 'Checkout' })"
+      action_data:
+        action_name: click
+        kwargs: {}
+
+  - description: Enter first name from variable
+    action_entity:
+      action_description: Enter first name
+      locator: "getByPlaceholder('First Name')"
+      action_data:
+        action_name: input_text
+        kwargs:
+          text: "{{SAUCE_USER}}"
+
+  - description: Enter last name
+    action_entity:
+      action_description: Enter last name
+      locator: "getByPlaceholder('Last Name')"
+      action_data:
+        action_name: input_text
+        kwargs:
+          text: "Tester"
+
+  - description: Enter zip code
+    action_entity:
+      action_description: Enter zip code
+      locator: "getByPlaceholder('Zip/Postal Code')"
+      action_data:
+        action_name: input_text
+        kwargs:
+          text: "12345"
+
+  - description: Click Continue
+    action_entity:
+      action_description: Click Continue
+      locator: "getByRole('button', { name: 'Continue' })"
+      action_data:
+        action_name: click
+        kwargs: {}
+
+  - "VERIFY: The checkout overview page is displayed"

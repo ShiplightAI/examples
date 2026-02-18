@@ -1,0 +1,50 @@
+# 09 — Templates
+# Demonstrates: template: with params
+# Templates extract reusable flows into separate files.
+# Params ({{first_name}}) are substituted at transpile time.
+
+goal: Complete checkout using a reusable template
+url: https://www.saucedemo.com/inventory.html
+
+statements:
+  - description: Add Sauce Labs Backpack to cart
+    action_entity:
+      action_description: Add Sauce Labs Backpack to cart
+      locator: "getByRole('button', { name: 'Add to cart' }).first()"
+      action_data:
+        action_name: click
+        kwargs: {}
+
+  - description: Click the shopping cart icon
+    action_entity:
+      action_description: Click the shopping cart icon
+      locator: "locator('[data-test=\"shopping-cart-link\"]')"
+      action_data:
+        action_name: click
+        kwargs: {}
+
+  - description: Click the Checkout button
+    action_entity:
+      action_description: Click the Checkout button
+      locator: "getByRole('button', { name: 'Checkout' })"
+      action_data:
+        action_name: click
+        kwargs: {}
+
+  - template: ../templates/checkout.yaml
+    params:
+      first_name: "Test"
+      last_name: "User"
+      zip_code: "90210"
+
+  - "VERIFY: The checkout overview page is displayed"
+
+  - description: Click the Finish button
+    action_entity:
+      action_description: Click the Finish button
+      locator: "getByRole('button', { name: 'Finish' })"
+      action_data:
+        action_name: click
+        kwargs: {}
+
+  - "VERIFY: The order confirmation page is displayed"

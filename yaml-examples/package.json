@@ -1,0 +1,15 @@
+{
+  "name": "shiplightai-yaml-examples",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "test": "npx playwright test",
+    "test:demo": "npx playwright test --project demo"
+  },
+  "dependencies": {
+    "@playwright/test": "1.55.0",
+    "@shiplightai/sdk-pro": "file:../../../../../tmp/shiplight-packs/shiplightai-sdk-pro-0.2.1.tgz",
+    "shiplightai": "file:../../../../../tmp/shiplight-packs/shiplightai-0.1.3.tgz"
+  }
+}

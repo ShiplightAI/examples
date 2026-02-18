@@ -8,7 +8,7 @@
  * Test site: https://the-internet.herokuapp.com/upload
  *
  * Prerequisites:
- * - Set GOOGLE_API_KEY in .env file or environment variable
+ * - Set ANTHROPIC_API_KEY in .env file or environment variable
  */
 
 import { config } from 'dotenv';
@@ -19,20 +19,20 @@ import { writeFileSync, mkdirSync, existsSync } from 'fs';
 // Load .env BEFORE importing playwright (PWDEBUG must be set before playwright loads)
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-config({ path: resolve(__dirname, '..', '.env') });
+config({ path: resolve(__dirname, '.env') });
 
 // Dynamic import to ensure PWDEBUG is set before playwright initializes
 const { chromium } = await import('playwright');
 const { createAgent, configureSdk } = await import('@shiplightai/sdk');
 
 // Configure SDK with API key
-const apiKey = process.env.GOOGLE_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY;
+const apiKey = process.env.ANTHROPIC_API_KEY;
 if (!apiKey) {
-  console.error('❌ Error: GOOGLE_API_KEY not set');
-  console.log('   Add to .env file or get your key from: https://aistudio.google.com/app/apikey');
+  console.error('Error: ANTHROPIC_API_KEY not set');
+  console.log('   Add to .env file or get your key from: https://console.anthropic.com/settings/keys');
   process.exit(1);
 }
-configureSdk({ env: { GOOGLE_API_KEY: apiKey } });
+configureSdk({ env: { ANTHROPIC_API_KEY: apiKey } });
 
 async function fileUploadExample() {
   // Create a test file for upload
@@ -51,13 +51,13 @@ async function fileUploadExample() {
 
   // Create agent with testDataDir - files referenced in instructions are resolved from here
   const agent = createAgent({
-    model: 'gemini-2.5-pro',
+    model: 'claude-haiku-4-5',
     testDataDir: testDir,
   });
 
   try {
     console.log('=== File Upload Example ===');
-    console.log('Model: gemini-2.5-pro\n');
+    console.log('Model: claude-haiku-4-5\n');
 
     console.log('1. Navigating to upload test page...');
     await page.goto('https://the-internet.herokuapp.com/upload');
@@ -86,9 +86,9 @@ async function fileUploadExample() {
 
     console.log('=== File Upload Example Complete ===');
     console.log('\nKey points:');
-    console.log('  • Set testDataDir in createAgent() to specify where files are located');
-    console.log('  • Use agent.act() with natural language: "Upload the file <filename>"');
-    console.log('  • The agent automatically finds file inputs and handles the upload');
+    console.log('  - Set testDataDir in createAgent() to specify where files are located');
+    console.log('  - Use agent.act() with natural language: "Upload the file <filename>"');
+    console.log('  - The agent automatically finds file inputs and handles the upload');
 
   } catch (error) {
     console.error('File upload example failed:', error);

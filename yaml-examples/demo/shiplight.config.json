@@ -1,0 +1,9 @@
+{
+  "url": "https://www.saucedemo.com/",
+  "username": "standard_user",
+  "password": "secret_sauce",
+  "variables": {
+    "SAUCE_USER": "standard_user",
+    "SAUCE_PASS": { "value": "secret_sauce", "sensitive": true }
+  }
+}
