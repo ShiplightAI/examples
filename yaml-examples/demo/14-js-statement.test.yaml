@@ -1,0 +1,37 @@
+# 14 — JS Statement
+# Demonstrates: JS shorthand for inline JavaScript
+# Use JS: for network mocking, localStorage manipulation,
+# and other page-level scripting without verbose action_entity nesting.
+
+goal: Verify dashboard renders correctly with mocked API data
+url: https://www.saucedemo.com/inventory.html
+
+statements:
+  # Mock an API endpoint — multiline block scalar
+  - JS: |
+      await page.route('**/api/users', (route) => route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([
+          { id: 1, name: 'Alice', role: 'Admin' },
+          { id: 2, name: 'Bob', role: 'Editor' },
+        ]),
+      }));
+
+  # Seed localStorage — single-line
+  - JS: "await page.evaluate(() => localStorage.setItem('feature_beta', 'true'))"
+
+  # Reload to pick up mocked data and localStorage values
+  - description: Reload the page
+    action_entity:
+      action_data:
+        action_name: go_to_url
+        kwargs:
+          url: https://www.saucedemo.com/inventory.html
+
+  - "VERIFY: The inventory page is displayed"
+
+  # Inline JS for quick assertions
+  - JS: |
+      const title = await page.title();
+      expect(title).toContain('Swag Labs');
