@@ -1,0 +1,76 @@
+pipeline {
+    agent any
+
+    environment {
+        CI = 'true'
+        SHIPLIGHT_API_KEY = credentials('SHIPLIGHT_API_KEY')
+        ANTHROPIC_API_KEY = credentials('ANTHROPIC_API_KEY')
+        GOOGLE_API_KEY = credentials('GOOGLE_API_KEY')
+    }
+
+    tools {
+        nodejs '20'
+    }
+
+    stages {
+        stage('Install pnpm') {
+            steps {
+                sh 'npm install -g pnpm'
+            }
+        }
+
+        stage('Install dependencies') {
+            steps {
+                dir('cicd-example') {
+                    sh 'pnpm install'
+                }
+            }
+        }
+
+        stage('Install Playwright browsers') {
+            steps {
+                dir('cicd-example') {
+                    sh 'pnpm exec playwright install chromium --with-deps'
+                }
+            }
+        }
+
+        stage('Build') {
+            steps {
+                dir('cicd-example') {
+                    sh 'pnpm build'
+                }
+            }
+        }
+
+        stage('Run Playwright tests') {
+            steps {
+                dir('cicd-example') {
+                    sh '''
+                        pnpm start &
+                        npx wait-on http://localhost:3000 --timeout 30000
+                        pnpm test
+                    '''
+                }
+            }
+            post {
+                always {
+                    publishHTML(target: [
+                        allowMissing         : true,
+                        alwaysLinkToLastBuild: true,
+                        keepAll              : true,
+                        reportDir            : 'cicd-example/playwright-report',
+                        reportFiles          : 'index.html',
+                        reportName           : 'Playwright Report'
+                    ])
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            archiveArtifacts artifacts: 'cicd-example/playwright-report/**', allowEmptyArchive: true
+        }
+    }
+}
