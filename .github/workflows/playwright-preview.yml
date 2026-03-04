@@ -3,6 +3,9 @@ name: Playwright Tests (Vercel Preview)
 on:
   deployment_status:
 
+permissions:
+  pull-requests: write
+
 jobs:
   playwright-preview:
     if: |

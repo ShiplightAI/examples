@@ -10,6 +10,9 @@ on:
     paths:
       - "cicd-example/**"
 
+permissions:
+  pull-requests: write
+
 jobs:
   playwright-ci:
     runs-on: ubuntu-latest
