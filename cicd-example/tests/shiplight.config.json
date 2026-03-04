@@ -1,5 +1,5 @@
 {
-  "url": "http://localhost:3000/login",
+  "url": "/login",
   "variables": {
     "DEMO_EMAIL": "demo@example.com",
     "DEMO_PASSWORD": { "value": "password123", "sensitive": true },

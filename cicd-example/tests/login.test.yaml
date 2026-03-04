@@ -3,7 +3,7 @@
 # Credentials and base URL are defined in shiplight.config.json
 
 goal: Verify login page authentication flow
-url: http://localhost:3000/login
+url: /login
 
 statements:
   - STEP: Verify login form renders

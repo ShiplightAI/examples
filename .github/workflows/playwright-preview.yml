@@ -1,0 +1,50 @@
+name: Playwright Tests (Vercel Preview)
+
+on:
+  deployment_status:
+
+jobs:
+  test:
+    if: |
+      github.event.deployment_status.state == 'success' &&
+      github.event.deployment.environment == 'Preview'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cicd-example
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.deployment.sha }}
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: cicd-example/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install chromium --with-deps
+
+      - name: Run Playwright tests
+        run: pnpm test
+        env:
+          CI: true
+          SHIPLIGHT_API_KEY: ${{ secrets.SHIPLIGHT_API_KEY }}
+          BASE_URL: ${{ github.event.deployment_status.environment_url }}
+
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report-preview
+          path: cicd-example/playwright-report/
+          retention-days: 30
