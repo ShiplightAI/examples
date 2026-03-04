@@ -1,0 +1,30 @@
+name: Add product to cart
+tags: [e2e, parameterized]
+url: https://www.saucedemo.com/inventory.html
+
+parameters:
+  - name: backpack
+    values:
+      product_selector: "[data-test=\"add-to-cart-sauce-labs-backpack\"]"
+      product_name: Sauce Labs Backpack
+  - name: bike light
+    values:
+      product_selector: "[data-test=\"add-to-cart-sauce-labs-bike-light\"]"
+      product_name: Sauce Labs Bike Light
+
+statements:
+  - description: Add product to cart
+    action_entity:
+      locator: "locator('{{product_selector}}')"
+      action_data:
+        action_name: click
+        kwargs: {}
+
+  - description: Click cart icon
+    action_entity:
+      locator: "locator('[data-test=\"shopping-cart-link\"]')"
+      action_data:
+        action_name: click
+        kwargs: {}
+
+  - "VERIFY: {{product_name}} is in the cart"

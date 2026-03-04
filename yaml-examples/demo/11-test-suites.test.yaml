@@ -1,0 +1,28 @@
+name: Inventory Browsing Suite
+tags: [smoke, suite]
+
+suite:
+  serial: true
+  url: https://www.saucedemo.com/inventory.html
+
+  tests:
+    - name: Sort products by price
+      statements:
+        - description: Sort by price low to high
+          action_entity:
+            locator: "getByRole('combobox')"
+            action_data:
+              action_name: select_dropdown_option
+              kwargs:
+                text: "Price (low to high)"
+        - "VERIFY: Products are sorted by price ascending"
+
+    - name: View product details
+      statements:
+        - description: Click the first product name
+          action_entity:
+            locator: "locator('.inventory_item_name').first()"
+            action_data:
+              action_name: click
+              kwargs: {}
+        - "VERIFY: The product detail page is displayed"
