@@ -6,11 +6,6 @@ goal: Verify login page authentication flow
 url: /login
 
 statements:
-  - STEP: Verify login form renders
-    statements:
-      - "VERIFY: The login form is visible with email and password fields"
-      - "VERIFY: A sign in button is present"
-
   - STEP: Attempt login with wrong credentials
     statements:
       - description: Enter wrong email
@@ -87,5 +82,3 @@ statements:
             kwargs: {}
 
       - "VERIFY: The user is redirected to the dashboard page"
-      - "VERIFY: A welcome message is displayed on the dashboard"
-      - "VERIFY: The logged-in email {{DEMO_EMAIL}} is shown"

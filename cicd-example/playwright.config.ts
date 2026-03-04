@@ -23,4 +23,5 @@ export default defineConfig({
     trace: "on",
     screenshot: "on",
   },
+  reporter: [["list"], ["html", { open: "never" }]],
 });
