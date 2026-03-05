@@ -4,9 +4,10 @@
 # and other page-level scripting without verbose action_entity nesting.
 
 goal: Verify dashboard renders correctly with mocked API data
-url: https://www.saucedemo.com/inventory.html
 
 statements:
+  - URL: /inventory.html
+
   # Mock an API endpoint — multiline block scalar
   - JS: |
       await page.route('**/api/users', (route) => route.fulfill({
@@ -22,14 +23,9 @@ statements:
   - JS: "await page.evaluate(() => localStorage.setItem('feature_beta', 'true'))"
 
   # Reload to pick up mocked data and localStorage values
-  - description: Reload the page
-    action_entity:
-      action_data:
-        action_name: go_to_url
-        kwargs:
-          url: https://www.saucedemo.com/inventory.html
+  - URL: /inventory.html
 
-  - "VERIFY: The inventory page is displayed"
+  - VERIFY: The inventory page is displayed
 
   # Inline JS for quick assertions
   - JS: |

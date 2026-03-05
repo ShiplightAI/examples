@@ -1,2 +1,2 @@
-overrides:
-  shiplightai: link:../../monots-harmony/apps/cli
+onlyBuiltDependencies:
+  - sharp

@@ -1,18 +1,15 @@
 # 01 — Basic Test
-# Demonstrates: goal, url, draft statements, inline VERIFY
+# Demonstrates: goal, URL shorthand, draft statements, VERIFY shorthand
 
 goal: Verify the inventory page displays products
-url: https://www.saucedemo.com/inventory.html
 
 statements:
-  - "VERIFY: The inventory page is displayed with product listings"
+  - URL: /inventory.html
 
-  - description: Click the first product name
-    action_entity:
-      action_description: Click the first product name
-      locator: "locator('.inventory_item_name').first()"
-      action_data:
-        action_name: click
-        kwargs: {}
+  - VERIFY: The inventory page is displayed with product listings
 
-  - "VERIFY: The product detail page is displayed"
+  - action: click
+    description: Click the first product name
+    locator: "locator('.inventory_item_name').first()"
+
+  - VERIFY: The product detail page is displayed

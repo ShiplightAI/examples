@@ -1,80 +1,49 @@
 # 03 — ACTION Statements
-# Demonstrates: action_entity with locator/xpath, various action types
+# Demonstrates: flat action syntax with locator/xpath, various action types
 # Actions replay deterministically (~1s each) without AI interpretation.
 
 goal: Add items to cart and verify using action entities
-url: https://www.saucedemo.com/inventory.html
 
 statements:
+  - URL: /inventory.html
+
   # select_dropdown_option
-  - description: Sort products by price low to high
-    action_entity:
-      action_description: Sort products by price low to high
-      locator: "getByRole('combobox')"
-      action_data:
-        action_name: select_dropdown_option
-        kwargs:
-          text: "Price (low to high)"
+  - action: select_dropdown_option
+    description: Sort products by price low to high
+    locator: "getByRole('combobox')"
+    text: "Price (low to high)"
 
   # verify action (AI-based)
-  - description: Verify products are sorted by price
-    action_entity:
-      action_data:
-        action_name: verify
-        kwargs:
-          statement: "The first product has the lowest price"
+  - VERIFY: The first product has the lowest price
 
   # click with locator
-  - description: Add Sauce Labs Backpack to cart
-    action_entity:
-      action_description: Add Sauce Labs Backpack to cart
-      locator: "locator('[data-test=\"add-to-cart-sauce-labs-backpack\"]')"
-      action_data:
-        action_name: click
-        kwargs: {}
+  - action: click
+    description: Add Sauce Labs Backpack to cart
+    locator: "locator('[data-test=\"add-to-cart-sauce-labs-backpack\"]')"
 
   # click with xpath
-  - description: Add Sauce Labs Bike Light to cart
-    action_entity:
-      action_description: Add Sauce Labs Bike Light to cart
-      xpath: "//button[@id='add-to-cart-sauce-labs-bike-light']"
-      action_data:
-        action_name: click
-        kwargs: {}
+  - action: click
+    description: Add Sauce Labs Bike Light to cart
+    xpath: "//button[@id='add-to-cart-sauce-labs-bike-light']"
 
   # scroll
-  - description: Scroll down to see more products
-    action_entity:
-      action_data:
-        action_name: scroll
-        kwargs:
-          down: true
-          num_pages: 1
+  - action: scroll
+    description: Scroll down to see more products
+    down: true
+    num_pages: 1
 
   # scroll back up so cart badge is visible
-  - description: Scroll back up to top
-    action_entity:
-      action_data:
-        action_name: scroll
-        kwargs:
-          down: false
-          num_pages: 1
+  - action: scroll
+    description: Scroll back up to top
+    down: false
+    num_pages: 1
 
   # verify action (AI-based)
-  - description: Verify cart badge shows 2
-    action_entity:
-      action_data:
-        action_name: verify
-        kwargs:
-          statement: "The shopping cart badge shows the number 2"
+  - VERIFY: The shopping cart badge shows the number 2
 
   # click — navigate to cart
-  - description: Click the shopping cart icon
-    action_entity:
-      action_description: Click the shopping cart icon
-      locator: "locator('[data-test=\"shopping-cart-link\"]')"
-      action_data:
-        action_name: click
-        kwargs: {}
+  - action: click
+    description: Click the shopping cart icon
+    locator: "locator('[data-test=\"shopping-cart-link\"]')"
 
-  - "VERIFY: Sauce Labs Backpack and Sauce Labs Bike Light are in the cart"
+  - VERIFY: Sauce Labs Backpack and Sauce Labs Bike Light are in the cart

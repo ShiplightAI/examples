@@ -1,47 +1,35 @@
+# 12 — Lifecycle Hooks
+# Demonstrates: beforeAll, beforeEach, afterEach, afterAll hooks
+# beforeAll/afterAll run WITHOUT an agent — only deterministic ACTIONs work.
+
 name: Cart Management Suite
 tags: [e2e, hooks]
 
 suite:
   serial: true
-  url: https://www.saucedemo.com/inventory.html
 
   beforeAll:
-    - description: Verify site is accessible
-      action_entity:
-        action_data:
-          action_name: go_to_url
-          kwargs:
-            url: https://www.saucedemo.com/inventory.html
+    - URL: /inventory.html
 
   beforeEach:
-    - description: Add Sauce Labs Backpack to cart
-      action_entity:
-        locator: "locator('[data-test=\"add-to-cart-sauce-labs-backpack\"]')"
-        action_data:
-          action_name: click
-          kwargs: {}
+    - URL: /inventory.html
+    - action: click
+      description: Add Sauce Labs Backpack to cart
+      locator: "locator('[data-test=\"add-to-cart-sauce-labs-backpack\"]')"
 
   afterEach:
-    - description: Remove Backpack from cart if present
-      action_entity:
-        locator: "locator('[data-test=\"remove-sauce-labs-backpack\"]')"
-        action_data:
-          action_name: click
-          kwargs: {}
+    - action: click
+      description: Remove Backpack from cart if present
+      locator: "locator('[data-test=\"remove-sauce-labs-backpack\"]')"
 
   afterAll:
-    - description: Verify we're back on inventory
-      action_entity:
-        action_data:
-          action_name: go_to_url
-          kwargs:
-            url: https://www.saucedemo.com/inventory.html
+    - URL: /inventory.html
 
   tests:
     - name: Verify cart badge shows item count
       statements:
-        - "VERIFY: The shopping cart badge shows 1 item"
+        - VERIFY: The shopping cart badge shows 1 item
 
     - name: Verify remove button appears after adding to cart
       statements:
-        - "VERIFY: A Remove button is visible for Sauce Labs Backpack"
+        - VERIFY: A Remove button is visible for Sauce Labs Backpack

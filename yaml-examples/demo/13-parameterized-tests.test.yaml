@@ -1,6 +1,9 @@
+# 13 — Parameterized Tests
+# Demonstrates: parameters with <<key>> substitution
+# Each parameter set generates a separate test run.
+
 name: Add product to cart
 tags: [e2e, parameterized]
-url: https://www.saucedemo.com/inventory.html
 
 parameters:
   - name: backpack
@@ -13,18 +16,14 @@ parameters:
       product_name: Sauce Labs Bike Light
 
 statements:
-  - description: Add product to cart
-    action_entity:
-      locator: "locator('{{product_selector}}')"
-      action_data:
-        action_name: click
-        kwargs: {}
+  - URL: /inventory.html
 
-  - description: Click cart icon
-    action_entity:
-      locator: "locator('[data-test=\"shopping-cart-link\"]')"
-      action_data:
-        action_name: click
-        kwargs: {}
+  - action: click
+    description: Add product to cart
+    locator: "locator('<<product_selector>>')"
 
-  - "VERIFY: {{product_name}} is in the cart"
+  - action: click
+    description: Click cart icon
+    locator: "locator('[data-test=\"shopping-cart-link\"]')"
+
+  - VERIFY: "<<product_name>> is in the cart"

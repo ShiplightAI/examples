@@ -7,37 +7,21 @@ params:
   - zip_code
 
 statements:
-  - description: Enter first name
-    action_entity:
-      action_description: Enter first name
-      locator: "getByPlaceholder('First Name')"
-      action_data:
-        action_name: input_text
-        kwargs:
-          text: "{{first_name}}"
+  - action: input_text
+    description: Enter first name
+    locator: "getByPlaceholder('First Name')"
+    text: "<<first_name>>"
 
-  - description: Enter last name
-    action_entity:
-      action_description: Enter last name
-      locator: "getByPlaceholder('Last Name')"
-      action_data:
-        action_name: input_text
-        kwargs:
-          text: "{{last_name}}"
+  - action: input_text
+    description: Enter last name
+    locator: "getByPlaceholder('Last Name')"
+    text: "<<last_name>>"
 
-  - description: Enter zip code
-    action_entity:
-      action_description: Enter zip code
-      locator: "getByPlaceholder('Zip/Postal Code')"
-      action_data:
-        action_name: input_text
-        kwargs:
-          text: "{{zip_code}}"
+  - action: input_text
+    description: Enter zip code
+    locator: "getByPlaceholder('Zip/Postal Code')"
+    text: "<<zip_code>>"
 
-  - description: Click Continue
-    action_entity:
-      action_description: Click Continue
-      locator: "getByRole('button', { name: 'Continue' })"
-      action_data:
-        action_name: click
-        kwargs: {}
+  - action: click
+    description: Click Continue
+    locator: "getByRole('button', { name: 'Continue' })"

@@ -1,35 +1,24 @@
 # 09 — Templates
 # Demonstrates: template: with params
 # Templates extract reusable flows into separate files.
-# Params ({{first_name}}) are substituted at transpile time.
+# Params (<<first_name>>) are substituted at transpile time.
 
 goal: Complete checkout using a reusable template
-url: https://www.saucedemo.com/inventory.html
 
 statements:
-  - description: Add Sauce Labs Backpack to cart
-    action_entity:
-      action_description: Add Sauce Labs Backpack to cart
-      locator: "getByRole('button', { name: 'Add to cart' }).first()"
-      action_data:
-        action_name: click
-        kwargs: {}
+  - URL: /inventory.html
 
-  - description: Click the shopping cart icon
-    action_entity:
-      action_description: Click the shopping cart icon
-      locator: "locator('[data-test=\"shopping-cart-link\"]')"
-      action_data:
-        action_name: click
-        kwargs: {}
+  - action: click
+    description: Add Sauce Labs Backpack to cart
+    locator: "getByRole('button', { name: 'Add to cart' }).first()"
 
-  - description: Click the Checkout button
-    action_entity:
-      action_description: Click the Checkout button
-      locator: "getByRole('button', { name: 'Checkout' })"
-      action_data:
-        action_name: click
-        kwargs: {}
+  - action: click
+    description: Click the shopping cart icon
+    locator: "locator('[data-test=\"shopping-cart-link\"]')"
+
+  - action: click
+    description: Click the Checkout button
+    locator: "getByRole('button', { name: 'Checkout' })"
 
   - template: ../templates/checkout.yaml
     params:
@@ -37,14 +26,10 @@ statements:
       last_name: "User"
       zip_code: "90210"
 
-  - "VERIFY: The checkout overview page is displayed"
+  - VERIFY: The checkout overview page is displayed
 
-  - description: Click the Finish button
-    action_entity:
-      action_description: Click the Finish button
-      locator: "getByRole('button', { name: 'Finish' })"
-      action_data:
-        action_name: click
-        kwargs: {}
+  - action: click
+    description: Click the Finish button
+    locator: "getByRole('button', { name: 'Finish' })"
 
-  - "VERIFY: The order confirmation page is displayed"
+  - VERIFY: The order confirmation page is displayed
