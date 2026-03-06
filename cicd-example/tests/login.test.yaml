@@ -1,0 +1,84 @@
+# Login E2E Test
+# Verifies the login flow for the demo login page.
+# Credentials and base URL are defined in shiplight.config.json
+
+goal: Verify login page authentication flow
+url: /login
+
+statements:
+  - STEP: Attempt login with wrong credentials
+    statements:
+      - description: Enter wrong email
+        action_entity:
+          action_description: Type an incorrect email address
+          locator: "locator('#email')"
+          action_data:
+            action_name: input_text
+            kwargs:
+              text: "{{WRONG_EMAIL}}"
+
+      - description: Enter wrong password
+        action_entity:
+          action_description: Type an incorrect password
+          locator: "locator('#password')"
+          action_data:
+            action_name: input_text
+            kwargs:
+              text: "{{WRONG_PASSWORD}}"
+
+      - description: Submit the login form
+        action_entity:
+          action_description: Click the Sign in button
+          locator: "getByRole('button', { name: 'Sign in' })"
+          action_data:
+            action_name: click
+            kwargs: {}
+
+      - "VERIFY: An error message is displayed indicating invalid credentials"
+      - "VERIFY: The user remains on the login page"
+
+  - STEP: Login with correct credentials
+    statements:
+      - description: Clear email field
+        action_entity:
+          action_description: Clear the email input field
+          locator: "locator('#email')"
+          action_data:
+            action_name: clear_input
+            kwargs: {}
+
+      - description: Enter correct email
+        action_entity:
+          action_description: Type the demo email address
+          locator: "locator('#email')"
+          action_data:
+            action_name: input_text
+            kwargs:
+              text: "{{DEMO_EMAIL}}"
+
+      - description: Clear password field
+        action_entity:
+          action_description: Clear the password input field
+          locator: "locator('#password')"
+          action_data:
+            action_name: clear_input
+            kwargs: {}
+
+      - description: Enter correct password
+        action_entity:
+          action_description: Type the demo password
+          locator: "locator('#password')"
+          action_data:
+            action_name: input_text
+            kwargs:
+              text: "{{DEMO_PASSWORD}}"
+
+      - description: Submit the login form
+        action_entity:
+          action_description: Click the Sign in button
+          locator: "getByRole('button', { name: 'Sign in' })"
+          action_data:
+            action_name: click
+            kwargs: {}
+
+      - "VERIFY: The user is redirected to the dashboard page"

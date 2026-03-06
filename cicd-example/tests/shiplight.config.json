@@ -1,0 +1,9 @@
+{
+  "url": "/login",
+  "variables": {
+    "DEMO_EMAIL": "demo@example.com",
+    "DEMO_PASSWORD": { "value": "password123", "sensitive": true },
+    "WRONG_EMAIL": "wrong@example.com",
+    "WRONG_PASSWORD": "wrongpassword"
+  }
+}

@@ -1,0 +1,49 @@
+version: 2.1
+
+orbs:
+  node: circleci/node@5
+
+jobs:
+  playwright:
+    docker:
+      - image: cimg/node:20.18
+    working_directory: ~/project/cicd-example
+    steps:
+      - checkout:
+          path: ~/project
+
+      - node/install-packages:
+          pkg-manager: pnpm
+          app-dir: ~/project/cicd-example
+
+      - run:
+          name: Install Playwright browsers
+          command: pnpm exec playwright install chromium --with-deps
+
+      - run:
+          name: Build
+          command: pnpm build
+
+      - run:
+          name: Start server
+          command: pnpm start
+          background: true
+
+      - run:
+          name: Wait for server
+          command: npx wait-on http://localhost:3000 --timeout 30000
+
+      - run:
+          name: Run Playwright tests
+          command: pnpm test
+          environment:
+            CI: "true"
+
+      - store_artifacts:
+          path: playwright-report
+          destination: playwright-report
+
+workflows:
+  test:
+    jobs:
+      - playwright

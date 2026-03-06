@@ -4,3 +4,4 @@ test-results/
 auth.setup.ts
 .auth/
 .env
+.shiplight_cache/
