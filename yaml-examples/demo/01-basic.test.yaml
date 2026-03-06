@@ -1,15 +1,8 @@
-# 01 — Basic Test
-# Demonstrates: goal, URL shorthand, draft statements, VERIFY shorthand
-
 goal: Verify the inventory page displays products
-
 statements:
   - URL: /inventory.html
-
   - VERIFY: The inventory page is displayed with product listings
-
   - action: click
     description: Click the first product name
-    locator: "locator('.inventory_item_name').first()"
-
+    locator: locator('.inventory_item_name').first()
   - VERIFY: The product detail page is displayed

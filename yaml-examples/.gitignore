@@ -5,3 +5,4 @@ auth.setup.ts
 .auth/
 .env
 .shiplight_cache/
+pnpm-workspace.yaml
