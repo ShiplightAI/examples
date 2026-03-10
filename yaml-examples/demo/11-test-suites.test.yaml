@@ -1,28 +1,38 @@
 # 11 — Test Suites
-# Demonstrates: suite with serial execution, beforeEach hook, multiple tests
+# Demonstrates: suite with sequential execution, beforeEach hook, multiple tests,
+# and per-test teardown for cleanup that runs even if the test fails.
 # Navigation is explicit via URL shorthand in beforeEach.
 
 name: Inventory Browsing Suite
 tags: [smoke, suite]
 
 suite:
-  serial: true
-
   beforeEach:
     - URL: /inventory.html
 
   tests:
     - name: Sort products by price
       statements:
-        - action: select_dropdown_option
-          description: Sort by price low to high
+        # select_dropdown_option — structured action (no js: shorthand)
+        - desc: Sort by price low to high
+          action: select_dropdown_option
           locator: "getByRole('combobox')"
           text: "Price (low to high)"
         - VERIFY: Products are sorted by price ascending
 
     - name: View product details
       statements:
-        - action: click
-          description: Click the first product name
-          locator: "locator('.inventory_item_name').first()"
+        - desc: Click the first product name
+          js: "await page.locator('.inventory_item_name').first().click()"
         - VERIFY: The product detail page is displayed
+          js: "await expect(page.locator('.inventory_details_name')).toBeVisible()"
+
+    - name: Add product to cart
+      statements:
+        - desc: Click Add to cart on the first product
+          js: "await page.locator('[data-testid=\"add-to-cart-sauce-labs-backpack\"]').click()"
+        - VERIFY: Cart badge shows 1 item
+      # teardown runs in a finally block — even if the test fails, the cart is cleaned up.
+      teardown:
+        - desc: Remove the product from the cart
+          js: "await page.locator('[data-testid=\"remove-sauce-labs-backpack\"]').click()"

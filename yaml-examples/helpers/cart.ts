@@ -25,3 +25,26 @@ export async function clearCart(page: Page): Promise<void> {
     await removeButtons.nth(i).click();
   }
 }
+
+/**
+ * Verify the cart badge shows the expected item count.
+ * Pass expectedCount as a number and optionally a custom message.
+ */
+export async function verifyCartCount(
+  page: Page,
+  expectedCount: number,
+  message: string,
+): Promise<void> {
+  const badge = page.locator('.shopping_cart_badge');
+  if (expectedCount === 0) {
+    if (await badge.isVisible()) {
+      throw new Error(message || 'Expected cart to be empty');
+    }
+    return;
+  }
+  const text = await badge.textContent();
+  const actual = parseInt(text ?? '0', 10);
+  if (actual !== expectedCount) {
+    throw new Error(message || `Expected ${expectedCount} items, got ${actual}`);
+  }
+}

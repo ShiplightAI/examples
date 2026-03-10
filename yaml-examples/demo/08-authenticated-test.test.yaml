@@ -9,14 +9,16 @@ statements:
   - URL: /inventory.html
 
   - VERIFY: The inventory page is displayed without needing to log in
+    js: "await expect(page.getByText('Products')).toBeVisible()"
+
   - VERIFY: The text 'Products' is visible on the page
+    js: "await expect(page.getByText('Products')).toBeVisible()"
 
-  - action: click
-    description: Add Sauce Labs Backpack to cart
-    locator: "getByRole('button', { name: 'Add to cart' }).first()"
+  - desc: Add Sauce Labs Backpack to cart
+    js: "await page.getByRole('button', { name: 'Add to cart' }).first().click()"
 
-  - action: click
-    description: Click the shopping cart icon
-    locator: "locator('[data-test=\"shopping-cart-link\"]')"
+  - desc: Click the shopping cart icon
+    js: "await page.locator('[data-test=\"shopping-cart-link\"]').click()"
 
   - VERIFY: The cart contains the selected product
+    js: "await expect(page.locator('.cart_item')).toHaveCount(1)"

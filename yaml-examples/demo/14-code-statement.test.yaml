@@ -1,15 +1,15 @@
-# 14 — JS Statement
-# Demonstrates: JS shorthand for inline JavaScript
-# Use JS: for network mocking, localStorage manipulation,
-# and other page-level scripting without verbose action_entity nesting.
+# 14 — CODE Statement
+# Demonstrates: CODE shorthand for inline JavaScript
+# Use CODE: for network mocking, localStorage manipulation,
+# and other page-level scripting.
 
-goal: Verify dashboard renders correctly with mocked API data
+goal: Verify page renders correctly with mocked data and localStorage
 
 statements:
   - URL: /inventory.html
 
   # Mock an API endpoint — multiline block scalar
-  - JS: |
+  - CODE: |
       await page.route('**/api/users', (route) => route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -20,14 +20,15 @@ statements:
       }));
 
   # Seed localStorage — single-line
-  - JS: "await page.evaluate(() => localStorage.setItem('feature_beta', 'true'))"
+  - CODE: "await page.evaluate(() => localStorage.setItem('feature_beta', 'true'))"
 
   # Reload to pick up mocked data and localStorage values
   - URL: /inventory.html
 
   - VERIFY: The inventory page is displayed
+    js: "await expect(page.getByText('Products')).toBeVisible()"
 
   # Inline JS for quick assertions
-  - JS: |
+  - CODE: |
       const title = await page.title();
       expect(title).toContain('Swag Labs');

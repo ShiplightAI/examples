@@ -1,0 +1,28 @@
+# 15 — VERIFY with JS Code Cache
+# Demonstrates: enriched VERIFY with fast JS code + AI fallback
+# Draft VERIFYs use AI only (~5-10s). Enriched VERIFYs try JS first (<1s),
+# falling back to AI if the JS assertion fails (self-healing).
+
+goal: Verify inventory page with JS code cache
+
+statements:
+  - URL: /inventory.html
+
+  # Draft VERIFY — AI-only (no code cache yet)
+  - VERIFY: The page has a heading
+
+  # Enriched VERIFY — JS code runs first, AI fallback if it fails
+  # Quote code values containing special YAML characters ({ } : etc.)
+  - VERIFY: The Products heading is visible
+    js: "await expect(page.getByText('Products')).toBeVisible()"
+
+  - VERIFY: There are 6 inventory items
+    js: "await expect(page.locator('.inventory_item')).toHaveCount(6)"
+
+  # Add an item to cart using js: shorthand
+  - desc: Add Sauce Labs Backpack to cart
+    js: "await page.locator('[data-test=\"add-to-cart-sauce-labs-backpack\"]').click()"
+
+  # Enriched VERIFY — checks the cart badge
+  - VERIFY: The shopping cart badge shows 1
+    js: "await expect(page.locator('[data-test=\"shopping-cart-badge\"]')).toHaveText('1')"

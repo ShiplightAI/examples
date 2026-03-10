@@ -1,13 +1,25 @@
 # 02 — VERIFY Assertions
-# Demonstrates: multiple VERIFY statements to check page state
+# Demonstrates: enriched VERIFY (js: code) and draft VERIFY (AI-only)
+# Enriched VERIFYs run JS first (<1s), falling back to AI if it fails.
+# Draft VERIFYs use AI only (~5-10s) — useful when you don't know the selector yet.
 
 goal: Verify inventory page elements
 
 statements:
   - URL: /inventory.html
 
+  # Enriched VERIFYs — fast, deterministic
   - VERIFY: The text 'Products' is visible as a heading on the page
+    js: "await expect(page.getByText('Products')).toBeVisible()"
+
   - VERIFY: There are 6 product items displayed
+    js: "await expect(page.locator('.inventory_item')).toHaveCount(6)"
+
   - VERIFY: The shopping cart icon is visible in the top right
+    js: "await expect(page.locator('[data-test=\"shopping-cart-link\"]')).toBeVisible()"
+
+  # Draft VERIFY — AI resolves this at runtime (no js: code yet)
   - VERIFY: The sidebar menu button is visible
+
+  # Draft VERIFY — complex assertion better suited for AI
   - VERIFY: Each product has a name, description, price, and Add to cart button

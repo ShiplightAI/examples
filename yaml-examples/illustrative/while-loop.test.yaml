@@ -7,8 +7,8 @@ url: https://example.com/items
 statements:
   - WHILE: There is a "Next" button visible on the page
     DO:
-      - Click the Next button
-      - "VERIFY: The next page of items is loaded"
+      - desc: Click the Next button
+      - VERIFY: The next page of items is loaded
     timeout_ms: 30000
 
-  - "VERIFY: All pages have been visited"
+  - VERIFY: All pages have been visited

@@ -8,18 +8,18 @@ statements:
 
   - STEP: Add a product to the cart
     statements:
-      - action: click
-        description: Add Sauce Labs Backpack to cart
-        locator: "getByRole('button', { name: 'Add to cart' }).first()"
+      - desc: Add Sauce Labs Backpack to cart
+        js: "await page.getByRole('button', { name: 'Add to cart' }).first().click()"
       - VERIFY: The shopping cart badge shows 1
+        js: "await expect(page.locator('[data-test=\"shopping-cart-badge\"]')).toHaveText('1')"
 
   # IF with AI condition
   - IF: The shopping cart badge shows a number greater than 0
     THEN:
-      - action: click
-        description: Click the shopping cart icon
-        locator: "locator('[data-test=\"shopping-cart-link\"]')"
+      - desc: Click the shopping cart icon
+        js: "await page.locator('[data-test=\"shopping-cart-link\"]').click()"
       - VERIFY: The cart page is displayed with items
+        js: "await expect(page.locator('.cart_item')).toHaveCount(1)"
     ELSE:
       - VERIFY: This branch should not execute
 
@@ -28,11 +28,11 @@ statements:
     THEN:
       - STEP: Proceed to checkout
         statements:
-          - action: click
-            description: Click the Checkout button
-            locator: "getByRole('button', { name: 'Checkout' })"
+          - desc: Click the Checkout button
+            js: "await page.getByRole('button', { name: 'Checkout' }).click()"
           - VERIFY: The checkout information page is displayed
-          - action: click
-            description: Click the Cancel button
-            locator: "getByRole('button', { name: 'Cancel' })"
+            js: "await expect(page.getByText('Checkout: Your Information')).toBeVisible()"
+          - desc: Click the Cancel button
+            js: "await page.getByRole('button', { name: 'Cancel' }).click()"
           - VERIFY: The cart page is displayed
+            js: "await expect(page.getByText('Your Cart')).toBeVisible()"

@@ -3,6 +3,7 @@
 # Each parameter set generates a separate test run.
 
 name: Add product to cart
+goal: Add various products to cart using parameters
 tags: [e2e, parameterized]
 
 parameters:
@@ -18,12 +19,10 @@ parameters:
 statements:
   - URL: /inventory.html
 
-  - action: click
-    description: Add product to cart
-    locator: "locator('<<product_selector>>')"
+  - desc: Add product to cart
+    js: "await page.locator('<<product_selector>>').click()"
 
-  - action: click
-    description: Click cart icon
-    locator: "locator('[data-test=\"shopping-cart-link\"]')"
+  - desc: Click cart icon
+    js: "await page.locator('[data-test=\"shopping-cart-link\"]').click()"
 
   - VERIFY: "<<product_name>> is in the cart"

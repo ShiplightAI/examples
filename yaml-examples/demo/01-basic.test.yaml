@@ -1,8 +1,12 @@
 goal: Verify the inventory page displays products
 statements:
   - URL: /inventory.html
+
   - VERIFY: The inventory page is displayed with product listings
-  - action: click
-    description: Click the first product name
-    locator: locator('.inventory_item_name').first()
+    js: "await expect(page.getByText('Products')).toBeVisible()"
+
+  - desc: Click the first product name
+    js: "await page.locator('.inventory_item_name').first().click()"
+
   - VERIFY: The product detail page is displayed
+    js: "await expect(page.locator('.inventory_details_name')).toBeVisible()"

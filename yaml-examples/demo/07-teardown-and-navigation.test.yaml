@@ -7,44 +7,45 @@ statements:
   - URL: /inventory.html
 
   # save_variable — capture current URL
-  - action: save_variable
-    description: Save the inventory URL
+  - desc: Save the inventory URL
+    action: save_variable
     name: inventory_url
     value: "js: page.url()"
 
   # Navigate to a product
-  - action: click
-    description: Click the first product name
-    locator: "locator('.inventory_item_name').first()"
+  - desc: Click the first product name
+    js: "await page.locator('.inventory_item_name').first().click()"
 
   - VERIFY: The product detail page is displayed
+    js: "await expect(page.locator('.inventory_details_name')).toBeVisible()"
 
   # go_back
-  - action: go_back
-    description: Go back to inventory
+  - desc: Go back to inventory
+    action: go_back
 
   - VERIFY: The inventory page is displayed
+    js: "await expect(page.getByText('Products')).toBeVisible()"
 
   # go_to_url
   - URL: /cart.html
 
   - VERIFY: The cart page is displayed
+    js: "await expect(page.getByText('Your Cart')).toBeVisible()"
 
-  # reload_page
-  - action: reload_page
-    description: Reload the page
+  # reload via js: shorthand
+  - desc: Reload the page
+    js: "await page.reload({ waitUntil: 'domcontentloaded' })"
 
   - VERIFY: The cart page is still displayed after reload
+    js: "await expect(page.getByText('Your Cart')).toBeVisible()"
 
   # verify — the AI agent has access to saved variables at runtime
   - VERIFY: The current page URL is different from the saved inventory_url
 
 teardown:
   # Teardown runs even if the test fails — use it for cleanup
-  - action: click
-    description: Open the sidebar menu
-    locator: "getByRole('button', { name: 'Open Menu' })"
+  - desc: Open the sidebar menu
+    js: "await page.getByRole('button', { name: 'Open Menu' }).click()"
 
-  - action: click
-    description: Click Reset App State
-    locator: "getByText('Reset App State')"
+  - desc: Click Reset App State
+    js: "await page.getByText('Reset App State').click()"

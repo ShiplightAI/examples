@@ -5,6 +5,9 @@ export default defineConfig({
   ...shiplightConfig(),
 
   timeout: 120_000,
+  expect: { timeout: 10_000 },
+  retries: 0,
+  reporter: [['html', { open: 'never', outputFolder: 'shiplight-report' }]],
 
   projects: [
     {
@@ -26,5 +29,9 @@ export default defineConfig({
   use: {
     headless: true,
     viewport: { width: 1280, height: 720 },
+    actionTimeout: 15_000,
+    video: 'on',
+    screenshot: 'on',
+    trace: 'on',
   },
 });

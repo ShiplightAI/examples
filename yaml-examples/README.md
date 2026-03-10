@@ -41,8 +41,13 @@ npx playwright test
 | [`06-variables.test.yaml`](./saucedemo/06-variables.test.yaml) | `{{VAR_NAME}}` in action_entity kwargs |
 | [`07-teardown-and-navigation.test.yaml`](./saucedemo/07-teardown-and-navigation.test.yaml) | `teardown`, `go_back`, `go_to_url`, `reload_page`, `save_variable` |
 | [`08-authenticated-test.test.yaml`](./saucedemo-auth/08-authenticated-test.test.yaml) | `storageState` via globalSetup, `shiplight.config.json` |
-| [`09-templates.test.yaml`](./09-templates.test.yaml) | `template:` with params, env var pass-through |
-| [`10-custom-functions.test.yaml`](./10-custom-functions.test.yaml) | `function` action with `file#export` |
+| [`09-templates.test.yaml`](./demo/09-templates.test.yaml) | `template:` with params, env var pass-through |
+| [`10-custom-functions.test.yaml`](./demo/10-custom-functions.test.yaml) | `call:` with `file#export` syntax, `args` |
+| [`11-test-suites.test.yaml`](./demo/11-test-suites.test.yaml) | `suite` with multiple tests, sequential execution |
+| [`12-lifecycle-hooks.test.yaml`](./demo/12-lifecycle-hooks.test.yaml) | `beforeAll`, `beforeEach`, `afterEach`, `afterAll` hooks |
+| [`13-parameterized-tests.test.yaml`](./demo/13-parameterized-tests.test.yaml) | `parameters` with `<<variable>>` substitution |
+| [`14-code-statement.test.yaml`](./demo/14-code-statement.test.yaml) | `JS:` shorthand for inline JavaScript |
+| [`15-verify-code-cache.test.yaml`](./demo/15-verify-code-cache.test.yaml) | `VERIFY` with `js:` cache, try/catch AI fallback |
 
 ### Supporting files
 

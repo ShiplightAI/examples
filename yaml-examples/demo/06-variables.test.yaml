@@ -7,35 +7,33 @@ goal: Use variables to fill checkout information
 statements:
   - URL: /inventory.html
 
-  - action: click
-    description: Add Sauce Labs Backpack to cart
-    locator: "getByRole('button', { name: 'Add to cart' }).first()"
+  - desc: Add Sauce Labs Backpack to cart
+    js: "await page.getByRole('button', { name: 'Add to cart' }).first().click()"
 
-  - action: click
-    description: Click the shopping cart icon
-    locator: "locator('[data-test=\"shopping-cart-link\"]')"
+  - desc: Click the shopping cart icon
+    js: "await page.locator('[data-test=\"shopping-cart-link\"]').click()"
 
-  - action: click
-    description: Click the Checkout button
-    locator: "getByRole('button', { name: 'Checkout' })"
+  - desc: Click the Checkout button
+    js: "await page.getByRole('button', { name: 'Checkout' }).click()"
 
-  - action: input_text
-    description: Enter first name from variable
+  # input_text — structured action with variable substitution
+  - desc: Enter first name from variable
+    action: input_text
     locator: "getByPlaceholder('First Name')"
     text: "{{SAUCE_USER}}"
 
-  - action: input_text
-    description: Enter last name
+  - desc: Enter last name
+    action: input_text
     locator: "getByPlaceholder('Last Name')"
     text: "Tester"
 
-  - action: input_text
-    description: Enter zip code
+  - desc: Enter zip code
+    action: input_text
     locator: "getByPlaceholder('Zip/Postal Code')"
     text: "12345"
 
-  - action: click
-    description: Click Continue
-    locator: "getByRole('button', { name: 'Continue' })"
+  - desc: Click Continue
+    js: "await page.getByRole('button', { name: 'Continue' }).click()"
 
   - VERIFY: The checkout overview page is displayed
+    js: "await expect(page.getByText('Checkout: Overview')).toBeVisible()"

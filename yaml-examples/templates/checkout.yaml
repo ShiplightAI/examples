@@ -7,21 +7,20 @@ params:
   - zip_code
 
 statements:
-  - action: input_text
-    description: Enter first name
+  - desc: Enter first name
+    action: input_text
     locator: "getByPlaceholder('First Name')"
     text: "<<first_name>>"
 
-  - action: input_text
-    description: Enter last name
+  - desc: Enter last name
+    action: input_text
     locator: "getByPlaceholder('Last Name')"
     text: "<<last_name>>"
 
-  - action: input_text
-    description: Enter zip code
+  - desc: Enter zip code
+    action: input_text
     locator: "getByPlaceholder('Zip/Postal Code')"
     text: "<<zip_code>>"
 
-  - action: click
-    description: Click Continue
-    locator: "getByRole('button', { name: 'Continue' })"
+  - desc: Click Continue
+    js: "await page.getByRole('button', { name: 'Continue' }).click()"

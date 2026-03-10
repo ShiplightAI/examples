@@ -13,13 +13,13 @@ suite:
 
   beforeEach:
     - URL: /inventory.html
-    - action: click
-      description: Add Sauce Labs Backpack to cart
+    - desc: Add Sauce Labs Backpack to cart
+      action: click
       locator: "locator('[data-test=\"add-to-cart-sauce-labs-backpack\"]')"
 
   afterEach:
-    - action: click
-      description: Remove Backpack from cart if present
+    - desc: Remove Backpack from cart if present
+      action: click
       locator: "locator('[data-test=\"remove-sauce-labs-backpack\"]')"
 
   afterAll:

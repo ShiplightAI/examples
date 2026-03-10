@@ -5,7 +5,7 @@ goal: Type text inside an iframe editor
 url: https://the-internet.herokuapp.com/iframe
 
 statements:
-  - description: Type inside the TinyMCE iframe editor
+  - desc: Type inside the TinyMCE iframe editor
     action_entity:
       action_description: Type in the editor body
       frame_path:
@@ -16,4 +16,4 @@ statements:
         kwargs:
           text: "Hello from Shiplight!"
 
-  - "VERIFY: The editor contains 'Hello from Shiplight!'"
+  - VERIFY: The editor contains 'Hello from Shiplight!'

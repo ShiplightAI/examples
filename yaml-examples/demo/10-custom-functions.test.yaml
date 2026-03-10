@@ -1,41 +1,44 @@
 # 10 — Custom Functions
-# Demonstrates: function action with file#export syntax
-# Call TypeScript functions from YAML. The function receives
-# `page` as a parameter so it can interact with the browser.
+# Demonstrates: call syntax for invoking TypeScript functions from YAML.
+# Each value in args maps directly to a parameter in the function signature.
 
-goal: Use a custom function to check and clear the cart
+goal: Use custom functions to manage and verify the cart
 
 statements:
   - URL: /inventory.html
 
-  - action: click
-    description: Add Sauce Labs Backpack to cart
-    locator: "getByRole('button', { name: 'Add to cart' }).first()"
+  - desc: Add Sauce Labs Backpack to cart
+    js: "await page.locator('[data-test=\"add-to-cart-sauce-labs-backpack\"]').click()"
 
-  - action: click
-    description: Add Sauce Labs Bike Light to cart
-    locator: "locator('[data-test=\"add-to-cart-sauce-labs-bike-light\"]')"
+  - desc: Add Sauce Labs Bike Light to cart
+    js: "await page.locator('[data-test=\"add-to-cart-sauce-labs-bike-light\"]').click()"
 
-  # Call getCartCount — a custom TypeScript function
-  - action: function
-    description: Check the cart count with a custom function
-    functionName: "../helpers/cart.ts#getCartCount"
-    parameterNames:
-      - page
-    parameterValues:
-      - page
+  # System object: page is passed as the Playwright Page object
+  - desc: Check the cart count with a custom function
+    call: "../helpers/cart.ts#getCartCount"
+    args: [page]
+
+  # Multiple arg types: system object, number literal, quoted string
+  - desc: Verify cart has 2 items
+    call: "../helpers/cart.ts#verifyCartCount"
+    args: [page, 2, "Expected 2 items after adding backpack and bike light"]
 
   # Call clearCart to remove all items
-  - action: function
-    description: Clear the cart using a custom function
-    functionName: "../helpers/cart.ts#clearCart"
-    parameterNames:
-      - page
-    parameterValues:
-      - page
+  - desc: Clear the cart using a custom function
+    call: "../helpers/cart.ts#clearCart"
+    args: [page]
 
-  - action: click
-    description: Click the shopping cart icon
-    locator: "locator('[data-test=\"shopping-cart-link\"]')"
+  # No args: functions that take no parameters
+  # - desc: Run cleanup
+  #   call: "../helpers/utils.ts#cleanup"
+
+  # $variable: reads from the runtime variable store
+  # - desc: Create user with saved email
+  #   call: "../helpers/users.ts#createUser"
+  #   args: [page, $savedEmail]
+
+  - desc: Click the shopping cart icon
+    js: "await page.locator('[data-test=\"shopping-cart-link\"]').click()"
 
   - VERIFY: The cart is empty
+    js: "await expect(page.locator('.cart_item')).toHaveCount(0)"

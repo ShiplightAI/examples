@@ -1,49 +1,47 @@
 # 03 — ACTION Statements
-# Demonstrates: flat action syntax with locator/xpath, various action types
+# Demonstrates: structured action syntax with locator/xpath, various action types
 # Actions replay deterministically (~1s each) without AI interpretation.
+# For simple click/hover/press, prefer the js: shorthand (see 01-basic).
 
 goal: Add items to cart and verify using action entities
 
 statements:
   - URL: /inventory.html
 
-  # select_dropdown_option
-  - action: select_dropdown_option
-    description: Sort products by price low to high
+  # select_dropdown_option — structured action (no js: shorthand for this)
+  - desc: Sort products by price low to high
+    action: select_dropdown_option
     locator: "getByRole('combobox')"
     text: "Price (low to high)"
 
-  # verify action (AI-based)
   - VERIFY: The first product has the lowest price
 
-  # click with locator
-  - action: click
-    description: Add Sauce Labs Backpack to cart
+  # click with locator — structured syntax
+  - desc: Add Sauce Labs Backpack to cart
+    action: click
     locator: "locator('[data-test=\"add-to-cart-sauce-labs-backpack\"]')"
 
-  # click with xpath
-  - action: click
-    description: Add Sauce Labs Bike Light to cart
+  # click with xpath — when no locator is available
+  - desc: Add Sauce Labs Bike Light to cart
+    action: click
     xpath: "//button[@id='add-to-cart-sauce-labs-bike-light']"
 
   # scroll
-  - action: scroll
-    description: Scroll down to see more products
+  - desc: Scroll down to see more products
+    action: scroll
     down: true
     num_pages: 1
 
-  # scroll back up so cart badge is visible
-  - action: scroll
-    description: Scroll back up to top
+  - desc: Scroll back up to top
+    action: scroll
     down: false
     num_pages: 1
 
-  # verify action (AI-based)
   - VERIFY: The shopping cart badge shows the number 2
+    js: "await expect(page.locator('[data-test=\"shopping-cart-badge\"]')).toHaveText('2')"
 
-  # click — navigate to cart
-  - action: click
-    description: Click the shopping cart icon
-    locator: "locator('[data-test=\"shopping-cart-link\"]')"
+  # click — navigate to cart (js: shorthand for comparison)
+  - desc: Click the shopping cart icon
+    js: "await page.locator('[data-test=\"shopping-cart-link\"]').click()"
 
   - VERIFY: Sauce Labs Backpack and Sauce Labs Bike Light are in the cart
