@@ -1,7 +1,7 @@
 # YAML Test Language Specification
 
 **Version:** 1.3.0
-**Status:** Living document — ground truth for the Shiplight YAML test format
+**Status:** Living document — source of truth for the Shiplight YAML test format
 
 > **Design principle:** This YAML format is designed for **coding agents to read and write**. The syntax is for humans to **read and understand**, not intended for humans to write directly.
 
@@ -40,7 +40,7 @@ A Shiplight YAML test file (`.test.yaml`) defines one or more end-to-end tests. 
 
 **Key concepts:**
 - **DRAFT** statements are natural language instructions resolved by AI at runtime (~5-10s each).
-- **ACTION** statements are enriched DRAFTs with a `desc` (ground truth) and a cache (`action:`/`locator:` or `js:`) for deterministic replay (<1s each). When the cache fails, the agent auto-heals using the description.
+- **ACTION** statements are enriched DRAFTs with a `desc` (intent) and a cache (`action:`/`locator:` or `js:`) for deterministic replay (<1s each). When the cache fails, the agent auto-heals using the description.
 - **Suites** group multiple tests in one file with shared hooks and sequential execution.
 - **Lifecycle hooks** (`beforeAll`, `afterAll`, `beforeEach`, `afterEach`) handle setup and cleanup.
 - **Parameterized tests** generate multiple test instances from data sets using `<<variable>>` substitution.
@@ -147,7 +147,7 @@ statements:
 
 ### 4.2 ACTION
 
-An enriched browser action that replays deterministically (<1s). Every ACTION has a `desc` that serves as the **ground truth** — it defines _what_ the action does. The `action`/`locator` or `js` fields are **caches** of _how_ to do it. When a cache fails (stale locator, changed DOM), the agent self-heals by using the description to re-inspect the page and regenerate the action.
+An enriched browser action that replays deterministically (<1s). Every ACTION has a `desc` that serves as the **intent** — it defines _what_ the action does. The `action`/`locator` or `js` fields are **caches** of _how_ to do it. When a cache fails (stale locator, changed DOM), the agent self-heals by using the description to re-inspect the page and regenerate the action.
 
 Two syntax forms. In YAML, the presence of `action` or `js` key distinguishes an ACTION from a DRAFT — a `desc`-only object is parsed as a DRAFT.
 
@@ -181,7 +181,7 @@ statements:
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| `desc` | `string` | Yes | Human-readable description (ground truth for self-healing). |
+| `desc` | `string` | Yes | Human-readable description (intent for self-healing). |
 | `js` | `string` | `js:` form | Complete, executable Playwright statement. |
 | `action` | `string` | Structured form | Action name. See `shiplight://schemas/action-entity` for available actions. |
 | `locator` | `string` | No | Playwright locator string. |
@@ -436,7 +436,7 @@ The `call` field is all that's needed — no `action: function` required. The tr
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| `desc` | `string` | Yes | Human-readable description (ground truth for self-healing). |
+| `desc` | `string` | Yes | Human-readable description (intent for self-healing). |
 | `call` | `string` | Yes | `filePath#exportName` reference. Path is relative to the test file. |
 | `args` | `string[]` | No | Arguments to pass to the function. Reads like the function's call signature. |
 
