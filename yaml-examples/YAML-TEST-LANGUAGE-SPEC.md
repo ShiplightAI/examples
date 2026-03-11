@@ -30,8 +30,6 @@
 11. [Parameterized Tests](#11-parameterized-tests)
 12. [Complete Examples](#12-complete-examples)
 
-> **Note:** For document structure quick reference, transpilation details, step ID hierarchy, caching, and template expansion algorithm, see [YAML-TEST-LANGUAGE-SPEC-APPENDIX.md](./YAML-TEST-LANGUAGE-SPEC-APPENDIX.md).
-
 ---
 
 ## 1. Overview
@@ -62,7 +60,7 @@ A Shiplight YAML test file (`.test.yaml`) defines one or more end-to-end tests. 
 
 ## 3. Top-Level Keys
 
-A file must be either a **single-test file** (with `goal`/`statements`) or a **suite file** (with `suite`). Having both is an error. The `goal` field is auto-derived from `name` if not explicitly provided. For full document structure examples, see [Appendix B](./YAML-TEST-LANGUAGE-SPEC-APPENDIX.md#b-document-structure-quick-reference).
+A file must be either a **single-test file** (with `goal`/`statements`) or a **suite file** (with `suite`). Having both is an error. The `goal` field is auto-derived from `name` if not explicitly provided.
 
 ### Required Keys (Single-Test Files)
 
@@ -413,8 +411,6 @@ statements:
 | Inlining | Template statements are inlined — the `template:` reference itself is not a statement type |
 | Cache invalidation | Changes to template files trigger re-transpilation of importing test files |
 
-For the detailed template expansion algorithm, see [Appendix A](./YAML-TEST-LANGUAGE-SPEC-APPENDIX.md#a4-template-expansion-algorithm).
-
 ---
 
 ## 6. Functions
@@ -601,8 +597,6 @@ suite:
 - Tags go on the describe block name, not individual tests
 - `test.use()` is placed outside the describe block
 - Each test gets its own `test()` function with `{ page, agent }` fixtures
-
-For the full transpiled code example, see [Appendix A](./YAML-TEST-LANGUAGE-SPEC-APPENDIX.md#a5-transpiled-code-examples).
 
 ### 9.5 Validation Rules
 
