@@ -79,6 +79,7 @@ A file must be either a **single-test file** (with `goal`/`statements`) or a **s
 
 | Key | Type | Default | Description |
 |---|---|---|---|
+| `base_url` | `string` | — | Base URL for relative `URL:` statements. Maps to Playwright `test.use({ baseURL })`. Does **not** auto-navigate — use `URL: /` to navigate. |
 | `test_case_id` | `number` | — | Links to a cloud test case for sync. |
 | `name` | `string` | — | Test title override (single-test) or suite name (suite). If set on a single-test file without `goal`, `goal` is auto-derived from `name`. |
 | `tags` | `string[]` | — | Playwright tags for `--grep` filtering. Each tag is prefixed with `@` in the test name. |
