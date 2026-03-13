@@ -38,7 +38,7 @@ A Shiplight YAML test file (`.test.yaml`) defines one or more end-to-end tests. 
 
 **Key concepts:**
 - **DRAFT** statements are natural language instructions resolved by AI at runtime (~5-10s each).
-- **ACTION** statements are enriched DRAFTs with a `desc` (intent) and a cache (`action:`/`locator:` or `js:`) for deterministic replay (<1s each). When the cache fails, the agent auto-heals using the description.
+- **ACTION** statements are enriched DRAFTs with an `intent` and a cache (`action:`/`locator:` or `js:`) for deterministic replay (<1s each). When the cache fails, the agent auto-heals using the intent.
 - **Suites** group multiple tests in one file with shared hooks and sequential execution.
 - **Lifecycle hooks** (`beforeAll`, `afterAll`, `beforeEach`, `afterEach`) handle setup and cleanup.
 - **Parameterized tests** generate multiple test instances from data sets using `<<variable>>` substitution.
@@ -117,8 +117,8 @@ A DRAFT is not yet enriched. When the AI agent executes a DRAFT, it enriches int
 |---|---|---|
 | `VERIFY: ...` | `ACTION` | Assertion shorthand |
 | `URL: ...` | `ACTION` (go_to_url) | Navigation shorthand (auto-generates `action_entity`) |
-| `desc` only | `DRAFT` | Natural language instruction in object form |
-| Object with `desc` + `js` | `ACTION` | Deterministic action with Playwright code cache. Self-heals via `desc` when `js` fails. |
+| `intent` only | `DRAFT` | Natural language instruction in object form |
+| Object with `intent` + `js` | `ACTION` | Deterministic action with Playwright code cache. Self-heals via `intent` when `js` fails. |
 | Object with `action` key | `ACTION` | Deterministic browser action |
 | `STEP: ...` + `statements:` | `STEP` | Group of related statements |
 | `IF: ...` + `THEN: ...` | `IF_ELSE` | Conditional execution |
@@ -137,7 +137,7 @@ A natural language instruction that requires AI agent execution at runtime. The 
 
 ```yaml
 statements:
-  - desc: Click the login button
+  - intent: Click the login button
 ```
 
 **Performance:** ~5-10 seconds per DRAFT (AI resolution).
@@ -146,41 +146,45 @@ statements:
 
 ### 4.2 ACTION
 
-An enriched browser action that replays deterministically (<1s). Every ACTION has a `desc` that serves as the **intent** — it defines _what_ the action does. The `action`/`locator` or `js` fields are **caches** of _how_ to do it. When a cache fails (stale locator, changed DOM), the agent self-heals by using the description to re-inspect the page and regenerate the action.
+An enriched browser action that replays deterministically (<1s). Every ACTION has an `intent` that defines _what_ the action does. The `action`/`locator` or `js` fields are **caches** of _how_ to do it. When a cache fails (stale locator, changed DOM), the agent self-heals by using the intent to re-inspect the page and regenerate the action.
 
-Two syntax forms. In YAML, the presence of `action` or `js` key distinguishes an ACTION from a DRAFT — a `desc`-only object is parsed as a DRAFT.
+Two syntax forms. In YAML, the presence of `action` or `js` key distinguishes an ACTION from a DRAFT — an `intent`-only object is parsed as a DRAFT.
 
-**`js:` shorthand** — a complete, executable Playwright statement. `page`, `agent`, and `expect` are available in scope.
-
-```yaml
-statements:
-  - desc: Click the login button
-    js: "await page.getByRole('button', { name: 'Login' }).first().click({ timeout: 5000 })"
-
-  - desc: Press Escape to close dialog
-    js: "await page.keyboard.press('Escape')"
-```
-
-**Structured format** — named action with parameters. All fields other than `desc`, `action`, `locator`, `xpath` are passed as arguments to the action. See `shiplight://schemas/action-entity` for available actions and their parameters.
+**Structured format** (preferred) — named action with parameters. All fields other than `intent`, `action`, `locator`, `xpath` are passed as arguments to the action. See `shiplight://schemas/action-entity` for available actions and their parameters.
 
 ```yaml
 statements:
-  - desc: Enter email address
+  - intent: Click the login button
+    action: click
+    locator: "getByRole('button', { name: 'Login' })"
+
+  - intent: Enter email address
     action: input_text
     locator: "getByPlaceholder('Email')"
     text: "user@example.com"
 
-  - desc: Select country
+  - intent: Select country
     action: select_dropdown_option
     locator: "getByRole('combobox')"
     text: "United States"
+```
+
+**`js:` shorthand** — a complete, executable Playwright statement for operations that don't map to a supported action. `page`, `agent`, and `expect` are available in scope.
+
+```yaml
+statements:
+  - intent: Drag slider to 50% position
+    js: "await page.getByRole('slider').first().fill('50')"
+
+  - intent: Wait for network idle after form submit
+    js: "await page.waitForLoadState('networkidle')"
 ```
 
 **Fields:**
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| `desc` | `string` | Yes | Human-readable description (intent for self-healing). |
+| `intent` | `string` | Yes | Human-readable intent (used for self-healing). |
 | `js` | `string` | `js:` form | Complete, executable Playwright statement. |
 | `action` | `string` | Structured form | Action name. See `shiplight://schemas/action-entity` for available actions. |
 | `locator` | `string` | No | Playwright locator string. |
@@ -377,16 +381,17 @@ params:
   - username
   - password
 statements:
-  - desc: Enter username
+  - intent: Enter username
     action: input_text
     locator: "getByPlaceholder('Username')"
     text: "<<username>>"
-  - desc: Enter password
+  - intent: Enter password
     action: input_text
     locator: "getByPlaceholder('Password')"
     text: "<<password>>"
-  - desc: Click login
-    js: "await page.getByRole('button', { name: 'Log in' }).first().click({ timeout: 5000 })"
+  - intent: Click login
+    action: click
+    locator: "getByRole('button', { name: 'Log in' })"
 ```
 
 ### 5.2 Using Templates
@@ -422,7 +427,7 @@ Functions let you call custom TypeScript/JavaScript code from YAML tests. Like t
 
 ```yaml
 statements:
-  - desc: Greet the user
+  - intent: Greet the user
     call: "../helpers/utils.ts#greet"
     args: [page, "hello"]
 ```
@@ -433,7 +438,7 @@ The `call` field is all that's needed — no `action: function` required. The tr
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| `desc` | `string` | Yes | Human-readable description (intent for self-healing). |
+| `intent` | `string` | Yes | Human-readable intent (used for self-healing). |
 | `call` | `string` | Yes | `filePath#exportName` reference. Path is relative to the test file. |
 | `args` | `string[]` | No | Arguments to pass to the function. Reads like the function's call signature. |
 
@@ -503,7 +508,7 @@ The `{{variableName}}` syntax references a variable. In YAML, the `{{VAR}}` plac
 
 ```yaml
 statements:
-  - desc: Enter email
+  - intent: Enter email
     action: input_text
     locator: "getByPlaceholder('Email')"
     text: "{{userEmail}}"
@@ -555,7 +560,7 @@ suite:
   tests:
     - name: Sort products by price
       statements:
-        - desc: Sort by price low to high
+        - intent: Sort by price low to high
           action: select_dropdown_option
           locator: "getByRole('combobox')"
           text: "Price (low to high)"
@@ -563,8 +568,9 @@ suite:
 
     - name: View product details
       statements:
-        - desc: Click the first product name
-          js: "await page.locator('.inventory_item_name').first().click({ timeout: 5000 })"
+        - intent: Click the first product name
+          action: click
+          locator: "locator('.inventory_item_name').first()"
         - VERIFY: The product detail page is displayed
 ```
 
@@ -628,7 +634,7 @@ afterEach:
   - URL: https://app.example.com/logout
 
 statements:
-  - desc: Enter credentials and submit
+  - intent: Enter credentials and submit
   - VERIFY: dashboard is visible
 ```
 
@@ -646,12 +652,14 @@ suite:
 
   beforeEach:
     - URL: /inventory.html
-    - desc: Add item to cart
-      js: "await page.locator('[data-test=\"add-to-cart-sauce-labs-backpack\"]').first().click({ timeout: 5000 })"
+    - intent: Add item to cart
+      action: click
+      locator: "locator('[data-test=\"add-to-cart-sauce-labs-backpack\"]')"
 
   afterEach:
-    - desc: Remove item from cart
-      js: "await page.locator('[data-test=\"remove-sauce-labs-backpack\"]').first().click({ timeout: 5000 })"
+    - intent: Remove item from cart
+      action: click
+      locator: "locator('[data-test=\"remove-sauce-labs-backpack\"]')"
 
   afterAll:
     - URL: /inventory.html
@@ -707,8 +715,9 @@ parameters:
       product_name: Sauce Labs Bike Light
 
 statements:
-  - desc: Add product to cart
-    js: "await page.locator('<<product_selector>>').first().click({ timeout: 5000 })"
+  - intent: Add product to cart
+    action: click
+    locator: "locator('<<product_selector>>')"
   - VERIFY: <<product_name>> is in the cart
 ```
 
@@ -778,14 +787,15 @@ statements:
   - VERIFY: Product catalog is visible
 
   # DRAFT: AI resolves at runtime
-  - desc: Click on the first product
-
-  # ACTION: js: shorthand
-  - desc: Click Add to Cart
-    js: "await page.getByRole('button', { name: 'Add to Cart' }).first().click({ timeout: 5000 })"
+  - intent: Click on the first product
 
   # ACTION: structured format
-  - desc: Enter address
+  - intent: Click Add to Cart
+    action: click
+    locator: "getByRole('button', { name: 'Add to Cart' })"
+
+  # ACTION: structured format with extra params
+  - intent: Enter address
     action: input_text
     locator: "getByPlaceholder('Address')"
     text: 123 Main St
@@ -793,11 +803,11 @@ statements:
   # STEP: grouped actions
   - STEP: Fill shipping info
     statements:
-      - desc: Enter address
+      - intent: Enter address
         action: input_text
         locator: "getByPlaceholder('Address')"
         text: 123 Main St
-      - desc: Select shipping method
+      - intent: Select shipping method
         action: select_dropdown_option
         locator: "getByRole('combobox', { name: 'Shipping' })"
         option: Standard Shipping
@@ -805,7 +815,7 @@ statements:
   # Conditional
   - IF: promo code field is visible
     THEN:
-      - desc: Enter promo code
+      - intent: Enter promo code
         action: input_text
         locator: "getByPlaceholder('Promo Code')"
         text: SAVE10
@@ -816,18 +826,18 @@ statements:
   # Loop
   - WHILE: there are more items to review
     DO:
-      - desc: Scroll down
+      - intent: Scroll down
       - VERIFY: next item is visible
     timeout_ms: 60000
 
-  - desc: Click Place Order
+  - intent: Click Place Order
   - VERIFY: Order confirmation page is displayed
 
 teardown:
   - IF: Cancel Order button is visible
     THEN:
-      - desc: Click Cancel Order
-      - desc: Click Confirm
+      - intent: Click Cancel Order
+      - intent: Click Confirm
 ```
 
 ### 12.2 Suite with Hooks
@@ -842,12 +852,14 @@ suite:
 
   beforeEach:
     - URL: /inventory.html
-    - desc: Add Sauce Labs Backpack to cart
-      js: "await page.locator('[data-test=\"add-to-cart-sauce-labs-backpack\"]').first().click({ timeout: 5000 })"
+    - intent: Add Sauce Labs Backpack to cart
+      action: click
+      locator: "locator('[data-test=\"add-to-cart-sauce-labs-backpack\"]')"
 
   afterEach:
-    - desc: Remove Backpack from cart if present
-      js: "await page.locator('[data-test=\"remove-sauce-labs-backpack\"]').first().click({ timeout: 5000 })"
+    - intent: Remove Backpack from cart if present
+      action: click
+      locator: "locator('[data-test=\"remove-sauce-labs-backpack\"]')"
 
   afterAll:
     - URL: /inventory.html
@@ -879,11 +891,13 @@ parameters:
       product_name: Sauce Labs Bike Light
 
 statements:
-  - desc: Add product to cart
-    js: "await page.locator('<<product_selector>>').first().click({ timeout: 5000 })"
+  - intent: Add product to cart
+    action: click
+    locator: "locator('<<product_selector>>')"
 
-  - desc: Click cart icon
-    js: "await page.locator('[data-test=\"shopping-cart-link\"]').first().click({ timeout: 5000 })"
+  - intent: Click cart icon
+    action: click
+    locator: "locator('[data-test=\"shopping-cart-link\"]')"
 
   - VERIFY: <<product_name>> is in the cart
 ```
