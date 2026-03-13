@@ -21,6 +21,8 @@
    - [IF_ELSE](#46-if_else)
    - [WHILE_LOOP](#47-while_loop)
    - [CODE](#48-code-shorthand)
+   - [WAIT_UNTIL](#49-wait_until-shorthand)
+   - [WAIT](#410-wait-shorthand)
 5. [Templates](#5-templates)
 6. [Functions](#6-functions)
 7. [Variables](#7-variables)
@@ -124,6 +126,8 @@ A DRAFT is not yet enriched. When the AI agent executes a DRAFT, it enriches int
 | `IF: ...` + `THEN: ...` | `IF_ELSE` | Conditional execution |
 | `WHILE: ...` + `DO: ...` | `WHILE_LOOP` | Loop with timeout |
 | `CODE: ...` | `ACTION` | Inline JavaScript/code block |
+| `WAIT_UNTIL: ...` | `ACTION` (ai_wait_until) | AI-powered condition wait with timeout |
+| `WAIT: ...` | `ACTION` (wait) | Fixed duration wait (use sparingly) |
 | `template: ...` | *(inlined)* | Expanded before parsing — not a statement type |
 | `call: "file#export"` | `ACTION` | Calls a custom function — see [Functions](#6-functions) |
 
@@ -367,6 +371,45 @@ statements:
 **Notes:**
 - The code runs in the Playwright test context (Node.js), not in the browser. Use `page.evaluate()` for browser-context code.
 - `page`, `agent`, and `expect` are available in scope.
+
+### 4.9 WAIT_UNTIL (Shorthand)
+
+AI-powered smart wait — repeatedly checks a natural language condition until it's met or the timeout expires.
+
+**Syntax:**
+
+```yaml
+statements:
+  - WAIT_UNTIL: Dashboard data has finished loading
+    timeout_seconds: 10
+
+  - WAIT_UNTIL: Spinner has disappeared
+```
+
+| Key | Type | Default | Description |
+|---|---|---|---|
+| `WAIT_UNTIL` | `string` | *(required)* | Natural language condition to wait for |
+| `timeout_seconds` | `number` | `60` | Maximum seconds to wait before failing |
+
+**Notes:**
+- Each condition check can take 5-15 seconds. For short waits, use `WAIT:` instead.
+
+### 4.10 WAIT (Shorthand)
+
+Fixed duration wait, use for short durations.
+
+**Syntax:**
+
+```yaml
+statements:
+  - WAIT: Wait for animation to complete
+    seconds: 3
+```
+
+| Key | Type | Default | Description |
+|---|---|---|---|
+| `WAIT` | `string` | — | Optional intent describing why the wait is needed |
+| `seconds` | `number` | `3` | Number of seconds to wait |
 
 ---
 
