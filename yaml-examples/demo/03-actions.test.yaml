@@ -9,7 +9,7 @@ statements:
   - URL: /inventory.html
 
   # select_dropdown_option — structured action (no js: shorthand for this)
-  - desc: Sort products by price low to high
+  - intent: Sort products by price low to high
     action: select_dropdown_option
     locator: "getByRole('combobox')"
     text: "Price (low to high)"
@@ -17,22 +17,22 @@ statements:
   - VERIFY: The first product has the lowest price
 
   # click with locator — structured syntax
-  - desc: Add Sauce Labs Backpack to cart
+  - intent: Add Sauce Labs Backpack to cart
     action: click
     locator: "locator('[data-test=\"add-to-cart-sauce-labs-backpack\"]')"
 
   # click with xpath — when no locator is available
-  - desc: Add Sauce Labs Bike Light to cart
+  - intent: Add Sauce Labs Bike Light to cart
     action: click
     xpath: "//button[@id='add-to-cart-sauce-labs-bike-light']"
 
   # scroll
-  - desc: Scroll down to see more products
+  - intent: Scroll down to see more products
     action: scroll
     down: true
     num_pages: 1
 
-  - desc: Scroll back up to top
+  - intent: Scroll back up to top
     action: scroll
     down: false
     num_pages: 1
@@ -41,7 +41,7 @@ statements:
     js: "await expect(page.locator('[data-test=\"shopping-cart-badge\"]')).toHaveText('2')"
 
   # click — navigate to cart (js: shorthand for comparison)
-  - desc: Click the shopping cart icon
+  - intent: Click the shopping cart icon
     js: "await page.locator('[data-test=\"shopping-cart-link\"]').click()"
 
   - VERIFY: Sauce Labs Backpack and Sauce Labs Bike Light are in the cart

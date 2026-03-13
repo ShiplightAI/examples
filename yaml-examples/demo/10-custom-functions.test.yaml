@@ -7,37 +7,37 @@ goal: Use custom functions to manage and verify the cart
 statements:
   - URL: /inventory.html
 
-  - desc: Add Sauce Labs Backpack to cart
+  - intent: Add Sauce Labs Backpack to cart
     js: "await page.locator('[data-test=\"add-to-cart-sauce-labs-backpack\"]').click()"
 
-  - desc: Add Sauce Labs Bike Light to cart
+  - intent: Add Sauce Labs Bike Light to cart
     js: "await page.locator('[data-test=\"add-to-cart-sauce-labs-bike-light\"]').click()"
 
   # System object: page is passed as the Playwright Page object
-  - desc: Check the cart count with a custom function
+  - intent: Check the cart count with a custom function
     call: "../helpers/cart.ts#getCartCount"
     args: [page]
 
   # Multiple arg types: system object, number literal, quoted string
-  - desc: Verify cart has 2 items
+  - intent: Verify cart has 2 items
     call: "../helpers/cart.ts#verifyCartCount"
     args: [page, 2, "Expected 2 items after adding backpack and bike light"]
 
   # Call clearCart to remove all items
-  - desc: Clear the cart using a custom function
+  - intent: Clear the cart using a custom function
     call: "../helpers/cart.ts#clearCart"
     args: [page]
 
   # No args: functions that take no parameters
-  # - desc: Run cleanup
+  # - intent: Run cleanup
   #   call: "../helpers/utils.ts#cleanup"
 
   # $variable: reads from the runtime variable store
-  # - desc: Create user with saved email
+  # - intent: Create user with saved email
   #   call: "../helpers/users.ts#createUser"
   #   args: [page, $savedEmail]
 
-  - desc: Click the shopping cart icon
+  - intent: Click the shopping cart icon
     js: "await page.locator('[data-test=\"shopping-cart-link\"]').click()"
 
   - VERIFY: The cart is empty

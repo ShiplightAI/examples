@@ -2,10 +2,10 @@
 # Target: https://the-internet.herokuapp.com/iframe
 
 goal: Type text inside an iframe editor
-url: https://the-internet.herokuapp.com/iframe
+base_url: https://the-internet.herokuapp.com/iframe
 
 statements:
-  - desc: Type inside the TinyMCE iframe editor
+  - intent: Type inside the TinyMCE iframe editor
     action_entity:
       action_description: Type in the editor body
       frame_path:

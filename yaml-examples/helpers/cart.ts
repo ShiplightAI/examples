@@ -3,6 +3,7 @@ import type { Page } from '@playwright/test';
 /**
  * Get the number of items currently in the shopping cart.
  * Returns 0 if the cart badge is not visible.
+ * @function_id 26
  */
 export async function getCartCount(page: Page): Promise<number> {
   const badge = page.locator('.shopping_cart_badge');
@@ -16,6 +17,7 @@ export async function getCartCount(page: Page): Promise<number> {
 /**
  * Remove all items from the cart by visiting the cart page
  * and clicking each "Remove" button.
+ * @function_id 27
  */
 export async function clearCart(page: Page): Promise<void> {
   await page.goto('/cart.html');
@@ -29,6 +31,7 @@ export async function clearCart(page: Page): Promise<void> {
 /**
  * Verify the cart badge shows the expected item count.
  * Pass expectedCount as a number and optionally a custom message.
+ * @function_id 28
  */
 export async function verifyCartCount(
   page: Page,

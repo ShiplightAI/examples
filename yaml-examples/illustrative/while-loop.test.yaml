@@ -2,12 +2,12 @@
 # This is a syntax reference. Adapt the URL and selectors for your app.
 
 goal: Process all items in a paginated list
-url: https://example.com/items
+base_url: https://example.com/items
 
 statements:
   - WHILE: There is a "Next" button visible on the page
     DO:
-      - desc: Click the Next button
+      - intent: Click the Next button
       - VERIFY: The next page of items is loaded
     timeout_ms: 30000
 

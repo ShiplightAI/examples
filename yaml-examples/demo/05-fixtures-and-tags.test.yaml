@@ -22,10 +22,10 @@ statements:
 
   - VERIFY: The page layout is usable on mobile
 
-  - desc: Add Sauce Labs Backpack to cart
+  - intent: Add Sauce Labs Backpack to cart
     js: "await page.getByRole('button', { name: 'Add to cart' }).first().click()"
 
-  - desc: Click the shopping cart icon
+  - intent: Click the shopping cart icon
     js: "await page.locator('[data-test=\"shopping-cart-link\"]').click()"
 
   - VERIFY: The cart contains the selected product

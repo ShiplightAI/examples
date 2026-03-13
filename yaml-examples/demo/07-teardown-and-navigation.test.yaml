@@ -7,20 +7,20 @@ statements:
   - URL: /inventory.html
 
   # save_variable — capture current URL
-  - desc: Save the inventory URL
+  - intent: Save the inventory URL
     action: save_variable
     name: inventory_url
     value: "js: page.url()"
 
   # Navigate to a product
-  - desc: Click the first product name
+  - intent: Click the first product name
     js: "await page.locator('.inventory_item_name').first().click()"
 
   - VERIFY: The product detail page is displayed
     js: "await expect(page.locator('.inventory_details_name')).toBeVisible()"
 
   # go_back
-  - desc: Go back to inventory
+  - intent: Go back to inventory
     action: go_back
 
   - VERIFY: The inventory page is displayed
@@ -33,7 +33,7 @@ statements:
     js: "await expect(page.getByText('Your Cart')).toBeVisible()"
 
   # reload via js: shorthand
-  - desc: Reload the page
+  - intent: Reload the page
     js: "await page.reload({ waitUntil: 'domcontentloaded' })"
 
   - VERIFY: The cart page is still displayed after reload
@@ -44,8 +44,8 @@ statements:
 
 teardown:
   # Teardown runs even if the test fails — use it for cleanup
-  - desc: Open the sidebar menu
+  - intent: Open the sidebar menu
     js: "await page.getByRole('button', { name: 'Open Menu' }).click()"
 
-  - desc: Click Reset App State
+  - intent: Click Reset App State
     js: "await page.getByText('Reset App State').click()"

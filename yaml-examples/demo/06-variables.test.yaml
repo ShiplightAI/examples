@@ -7,32 +7,32 @@ goal: Use variables to fill checkout information
 statements:
   - URL: /inventory.html
 
-  - desc: Add Sauce Labs Backpack to cart
+  - intent: Add Sauce Labs Backpack to cart
     js: "await page.getByRole('button', { name: 'Add to cart' }).first().click()"
 
-  - desc: Click the shopping cart icon
+  - intent: Click the shopping cart icon
     js: "await page.locator('[data-test=\"shopping-cart-link\"]').click()"
 
-  - desc: Click the Checkout button
+  - intent: Click the Checkout button
     js: "await page.getByRole('button', { name: 'Checkout' }).click()"
 
   # input_text — structured action with variable substitution
-  - desc: Enter first name from variable
+  - intent: Enter first name from variable
     action: input_text
     locator: "getByPlaceholder('First Name')"
     text: "{{SAUCE_USER}}"
 
-  - desc: Enter last name
+  - intent: Enter last name
     action: input_text
     locator: "getByPlaceholder('Last Name')"
     text: "Tester"
 
-  - desc: Enter zip code
+  - intent: Enter zip code
     action: input_text
     locator: "getByPlaceholder('Zip/Postal Code')"
     text: "12345"
 
-  - desc: Click Continue
+  - intent: Click Continue
     js: "await page.getByRole('button', { name: 'Continue' }).click()"
 
   - VERIFY: The checkout overview page is displayed

@@ -8,7 +8,7 @@ statements:
 
   - STEP: Add a product to the cart
     statements:
-      - desc: Add Sauce Labs Backpack to cart
+      - intent: Add Sauce Labs Backpack to cart
         js: "await page.getByRole('button', { name: 'Add to cart' }).first().click()"
       - VERIFY: The shopping cart badge shows 1
         js: "await expect(page.locator('[data-test=\"shopping-cart-badge\"]')).toHaveText('1')"
@@ -16,7 +16,7 @@ statements:
   # IF with AI condition
   - IF: The shopping cart badge shows a number greater than 0
     THEN:
-      - desc: Click the shopping cart icon
+      - intent: Click the shopping cart icon
         js: "await page.locator('[data-test=\"shopping-cart-link\"]').click()"
       - VERIFY: The cart page is displayed with items
         js: "await expect(page.locator('.cart_item')).toHaveCount(1)"
@@ -28,11 +28,11 @@ statements:
     THEN:
       - STEP: Proceed to checkout
         statements:
-          - desc: Click the Checkout button
+          - intent: Click the Checkout button
             js: "await page.getByRole('button', { name: 'Checkout' }).click()"
           - VERIFY: The checkout information page is displayed
             js: "await expect(page.getByText('Checkout: Your Information')).toBeVisible()"
-          - desc: Click the Cancel button
+          - intent: Click the Cancel button
             js: "await page.getByRole('button', { name: 'Cancel' }).click()"
           - VERIFY: The cart page is displayed
             js: "await expect(page.getByText('Your Cart')).toBeVisible()"

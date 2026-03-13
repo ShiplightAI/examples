@@ -5,7 +5,7 @@ statements:
   - VERIFY: The inventory page is displayed with product listings
     js: "await expect(page.getByText('Products')).toBeVisible()"
 
-  - desc: Click the first product name
+  - intent: Click the first product name
     js: "await page.locator('.inventory_item_name').first().click()"
 
   - VERIFY: The product detail page is displayed

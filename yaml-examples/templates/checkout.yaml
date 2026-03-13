@@ -1,3 +1,4 @@
+template_id: 146
 # Reusable checkout template
 # Params: first_name, last_name, zip_code
 
@@ -7,20 +8,20 @@ params:
   - zip_code
 
 statements:
-  - desc: Enter first name
+  - intent: Enter first name
     action: input_text
     locator: "getByPlaceholder('First Name')"
     text: "<<first_name>>"
 
-  - desc: Enter last name
+  - intent: Enter last name
     action: input_text
     locator: "getByPlaceholder('Last Name')"
     text: "<<last_name>>"
 
-  - desc: Enter zip code
+  - intent: Enter zip code
     action: input_text
     locator: "getByPlaceholder('Zip/Postal Code')"
     text: "<<zip_code>>"
 
-  - desc: Click Continue
+  - intent: Click Continue
     js: "await page.getByRole('button', { name: 'Continue' }).click()"

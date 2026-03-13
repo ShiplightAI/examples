@@ -11,6 +11,6 @@
     "@playwright/test": "^1.58.2"
   },
   "dependencies": {
-    "shiplightai": "file:../../monots/apps/cli/shiplightai-0.1.20.tgz"
+    "shiplightai": "file:../../monots/apps/cli/shiplightai-0.1.21.tgz"
   }
 }

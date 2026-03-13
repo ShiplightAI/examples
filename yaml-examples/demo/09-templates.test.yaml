@@ -8,13 +8,13 @@ goal: Complete checkout using a reusable template
 statements:
   - URL: /inventory.html
 
-  - desc: Add Sauce Labs Backpack to cart
+  - intent: Add Sauce Labs Backpack to cart
     js: "await page.getByRole('button', { name: 'Add to cart' }).first().click()"
 
-  - desc: Click the shopping cart icon
+  - intent: Click the shopping cart icon
     js: "await page.locator('[data-test=\"shopping-cart-link\"]').click()"
 
-  - desc: Click the Checkout button
+  - intent: Click the Checkout button
     js: "await page.getByRole('button', { name: 'Checkout' }).click()"
 
   - template: ../templates/checkout.yaml
@@ -26,7 +26,7 @@ statements:
   - VERIFY: The checkout overview page is displayed
     js: "await expect(page.getByText('Checkout: Overview')).toBeVisible()"
 
-  - desc: Click the Finish button
+  - intent: Click the Finish button
     js: "await page.getByRole('button', { name: 'Finish' }).click()"
 
   - VERIFY: The order confirmation page is displayed

@@ -14,7 +14,7 @@ suite:
     - name: Sort products by price
       statements:
         # select_dropdown_option — structured action (no js: shorthand)
-        - desc: Sort by price low to high
+        - intent: Sort by price low to high
           action: select_dropdown_option
           locator: "getByRole('combobox')"
           text: "Price (low to high)"
@@ -22,17 +22,17 @@ suite:
 
     - name: View product details
       statements:
-        - desc: Click the first product name
+        - intent: Click the first product name
           js: "await page.locator('.inventory_item_name').first().click()"
         - VERIFY: The product detail page is displayed
           js: "await expect(page.locator('.inventory_details_name')).toBeVisible()"
 
     - name: Add product to cart
       statements:
-        - desc: Click Add to cart on the first product
-          js: "await page.locator('[data-testid=\"add-to-cart-sauce-labs-backpack\"]').click()"
+        - intent: Click Add to cart on the first product
+          js: "await page.locator('[name=\"add-to-cart-sauce-labs-backpack\"]').click()"
         - VERIFY: Cart badge shows 1 item
       # teardown runs in a finally block — even if the test fails, the cart is cleaned up.
       teardown:
-        - desc: Remove the product from the cart
-          js: "await page.locator('[data-testid=\"remove-sauce-labs-backpack\"]').click()"
+        - intent: Remove the product from the cart
+          js: "await page.locator('[name=\"remove-sauce-labs-backpack\"]').click()"

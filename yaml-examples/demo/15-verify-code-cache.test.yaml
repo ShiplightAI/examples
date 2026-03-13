@@ -20,7 +20,7 @@ statements:
     js: "await expect(page.locator('.inventory_item')).toHaveCount(6)"
 
   # Add an item to cart using js: shorthand
-  - desc: Add Sauce Labs Backpack to cart
+  - intent: Add Sauce Labs Backpack to cart
     js: "await page.locator('[data-test=\"add-to-cart-sauce-labs-backpack\"]').click()"
 
   # Enriched VERIFY — checks the cart badge
