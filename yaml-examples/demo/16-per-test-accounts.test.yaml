@@ -1,0 +1,23 @@
+# 16 — Per-Test Account
+# Demonstrates: running a test with its own account (Case 3)
+#
+# Most tests use the shared account from the setup project (Case 1/2).
+# When a test needs a different identity, it carries its own credentials
+# and auth_login path. The fixture handles login and caches storageState.
+
+use:
+  account:
+    username: problem_user
+    password: secret_sauce
+    auth_login: ./demo/auth.login.ts
+
+goal: Verify problem_user can access inventory
+
+statements:
+  - URL: /inventory.html
+
+  - VERIFY: The inventory page shows products
+    js: "await expect(page.getByText('Products')).toBeVisible()"
+
+  - VERIFY: There are 6 products listed on the page
+    js: "await expect(page.locator('.inventory_item')).toHaveCount(6)"
