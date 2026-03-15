@@ -1,5 +1,5 @@
 # 04 — Steps and Control Flow
-# Demonstrates: STEP grouping, IF/ELSE with AI and js: conditions
+# Demonstrates: STEP grouping, IF/ELSE with AI and js: conditions, WHILE loop
 
 goal: Browse products with conditional logic
 
@@ -36,3 +36,15 @@ statements:
             js: "await page.getByRole('button', { name: 'Cancel' }).click()"
           - VERIFY: The cart page is displayed
             js: "await expect(page.getByText('Your Cart')).toBeVisible()"
+
+  # WHILE loop — add all remaining products to cart
+  - URL: /inventory.html
+
+  - WHILE: "js: (await page.locator('button:has-text(\"Add to cart\")').count()) > 0"
+    DO:
+      - intent: Click the first Add to cart button
+        js: "await page.locator('button:has-text(\"Add to cart\")').first().click()"
+    timeout_ms: 30000
+
+  - VERIFY: All 6 products are in the cart
+    js: "await expect(page.locator('[data-test=\"shopping-cart-badge\"]')).toHaveText('6')"
