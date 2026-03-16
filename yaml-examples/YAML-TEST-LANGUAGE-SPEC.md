@@ -471,7 +471,7 @@ Functions let you call custom TypeScript/JavaScript code from YAML tests. Like t
 ```yaml
 statements:
   - intent: Greet the user
-    call: "../helpers/utils.ts#greet"
+    call: "../helpers/utils.ts#greet_user"
     args: [page, "hello"]
 ```
 
@@ -487,11 +487,13 @@ The `call` field is all that's needed — no `action: function` required. The tr
 
 ### 6.3 Function File Format
 
+Function names must be **snake_case** (e.g. `clear_cart`, not `clearCart`).
+
 ```typescript
 // helpers/cart.ts
 import { Page } from '@playwright/test';
 
-export async function clearCart(page: Page): Promise<void> {
+export async function clear_cart(page: Page): Promise<void> {
   // actual code here
 }
 ```
