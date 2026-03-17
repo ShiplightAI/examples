@@ -3,7 +3,8 @@
 #
 # Most tests use the shared account from the setup project (Case 1/2).
 # When a test needs a different identity, it declares its own auth script
-# and args. The fixture handles login and caches storageState.
+# and args. The fixture calls the script's login(args) function, which
+# returns a storageState file path. Caching is the script's responsibility.
 
 use:
   auth: ./demo/auth.login.ts
