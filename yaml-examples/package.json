@@ -1,16 +1,14 @@
 {
-  "name": "shiplightai-yaml-examples",
-  "version": "1.0.0",
+  "name": "my-shiplight-tests",
   "type": "module",
-  "private": true,
   "scripts": {
-    "test": "npx shiplight test",
-    "test:demo": "npx shiplight test --project demo"
-  },
-  "devDependencies": {
-    "@playwright/test": "^1.58.2"
+    "test": "shiplight test",
+    "test:headed": "shiplight test --headed"
   },
   "dependencies": {
-    "shiplightai": "file:../../monots/apps/cli/shiplightai-0.1.21.tgz"
+    "@playwright/test": "^1.50.0",
+    "dotenv": "^16.4.7",
+    "playwright": "^1.50.0",
+    "shiplightai": "^0.1.28"
   }
 }

@@ -1,8 +1,6 @@
 node_modules/
 test-results/
-*.yaml.spec.ts
-auth.setup.ts
-.auth/
+shiplight-report/
+.shiplight/
 .env
-.shiplight_cache/
-pnpm-workspace.yaml
+.auth/
