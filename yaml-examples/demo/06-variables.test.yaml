@@ -36,4 +36,4 @@ statements:
     js: "await page.getByRole('button', { name: 'Continue' }).click()"
 
   - VERIFY: The checkout overview page is displayed
-    js: "await expect(page.getByText('Checkout: Overview')).toBeVisible()"
+    js: "await expect(page.getByText('Checkout: Overview')).toBeVisible({ timeout: 2000 })"

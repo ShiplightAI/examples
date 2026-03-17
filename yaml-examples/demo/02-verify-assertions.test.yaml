@@ -10,13 +10,13 @@ statements:
 
   # Enriched VERIFYs — fast, deterministic
   - VERIFY: The text 'Products' is visible as a heading on the page
-    js: "await expect(page.getByText('Products')).toBeVisible()"
+    js: "await expect(page.getByText('Products')).toBeVisible({ timeout: 2000 })"
 
   - VERIFY: There are 6 product items displayed
-    js: "await expect(page.locator('.inventory_item')).toHaveCount(6)"
+    js: "await expect(page.locator('.inventory_item')).toHaveCount(6, { timeout: 2000 })"
 
   - VERIFY: The shopping cart icon is visible in the top right
-    js: "await expect(page.locator('[data-test=\"shopping-cart-link\"]')).toBeVisible()"
+    js: "await expect(page.locator('[data-test=\"shopping-cart-link\"]')).toBeVisible({ timeout: 2000 })"
 
   # Draft VERIFY — AI resolves this at runtime (no js: code yet)
   - VERIFY: The sidebar menu button is visible

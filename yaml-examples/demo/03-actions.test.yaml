@@ -38,7 +38,7 @@ statements:
     num_pages: 1
 
   - VERIFY: The shopping cart badge shows the number 2
-    js: "await expect(page.locator('[data-test=\"shopping-cart-badge\"]')).toHaveText('2')"
+    js: "await expect(page.locator('[data-test=\"shopping-cart-badge\"]')).toHaveText('2', { timeout: 2000 })"
 
   # click — navigate to cart (js: shorthand for comparison)
   - intent: Click the shopping cart icon

@@ -26,7 +26,7 @@ statements:
   - URL: /inventory.html
 
   - VERIFY: The inventory page is displayed
-    js: "await expect(page.getByText('Products')).toBeVisible()"
+    js: "await expect(page.getByText('Products')).toBeVisible({ timeout: 2000 })"
 
   # Inline JS for quick assertions
   - CODE: |

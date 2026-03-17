@@ -15,10 +15,7 @@ import * as path from 'path';
 export async function login(account: Record<string, unknown>): Promise<string> {
   const stateFile = path.join('.auth', `${account.username}.json`);
 
-  // Return cached state if it exists
-  if (fs.existsSync(stateFile)) return stateFile;
-
-  // Perform login
+  // Perform login (always fresh — no caching)
   const browser = await chromium.launch();
   const context = await browser.newContext();
   const page = await context.newPage();

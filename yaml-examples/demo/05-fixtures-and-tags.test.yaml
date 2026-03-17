@@ -18,9 +18,10 @@ statements:
   - URL: /inventory.html
 
   - VERIFY: The inventory page is displayed
-    js: "await expect(page.getByText('Products')).toBeVisible()"
+    js: "await expect(page.getByText('Products')).toBeVisible({ timeout: 2000 })"
 
-  - VERIFY: The page layout is usable on mobile
+  - VERIFY: The product listings are visible on the page
+    js: "await expect(page.locator('.inventory_item').first()).toBeVisible({ timeout: 2000 })"
 
   - intent: Add Sauce Labs Backpack to cart
     js: "await page.getByRole('button', { name: 'Add to cart' }).first().click()"
@@ -29,4 +30,4 @@ statements:
     js: "await page.locator('[data-test=\"shopping-cart-link\"]').click()"
 
   - VERIFY: The cart contains the selected product
-    js: "await expect(page.locator('.cart_item')).toHaveCount(1)"
+    js: "await expect(page.locator('.cart_item')).toHaveCount(1, { timeout: 2000 })"

@@ -17,27 +17,27 @@ statements:
     js: "await page.locator('.inventory_item_name').first().click()"
 
   - VERIFY: The product detail page is displayed
-    js: "await expect(page.locator('.inventory_details_name')).toBeVisible()"
+    js: "await expect(page.locator('.inventory_details_name')).toBeVisible({ timeout: 2000 })"
 
   # go_back
   - intent: Go back to inventory
     action: go_back
 
   - VERIFY: The inventory page is displayed
-    js: "await expect(page.getByText('Products')).toBeVisible()"
+    js: "await expect(page.getByText('Products')).toBeVisible({ timeout: 2000 })"
 
   # go_to_url
   - URL: /cart.html
 
   - VERIFY: The cart page is displayed
-    js: "await expect(page.getByText('Your Cart')).toBeVisible()"
+    js: "await expect(page.getByText('Your Cart')).toBeVisible({ timeout: 2000 })"
 
   # reload via js: shorthand
   - intent: Reload the page
     js: "await page.reload({ waitUntil: 'domcontentloaded' })"
 
   - VERIFY: The cart page is still displayed after reload
-    js: "await expect(page.getByText('Your Cart')).toBeVisible()"
+    js: "await expect(page.getByText('Your Cart')).toBeVisible({ timeout: 2000 })"
 
   # verify — the AI agent has access to saved variables at runtime
   - VERIFY: The current page URL is different from the saved inventory_url

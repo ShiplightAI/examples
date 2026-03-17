@@ -14,10 +14,10 @@ statements:
   # Enriched VERIFY — JS code runs first, AI fallback if it fails
   # Quote code values containing special YAML characters ({ } : etc.)
   - VERIFY: The Products heading is visible
-    js: "await expect(page.getByText('Products')).toBeVisible()"
+    js: "await expect(page.getByText('Products')).toBeVisible({ timeout: 2000 })"
 
   - VERIFY: There are 6 inventory items
-    js: "await expect(page.locator('.inventory_item')).toHaveCount(6)"
+    js: "await expect(page.locator('.inventory_item')).toHaveCount(6, { timeout: 2000 })"
 
   # Add an item to cart using js: shorthand
   - intent: Add Sauce Labs Backpack to cart
@@ -25,4 +25,4 @@ statements:
 
   # Enriched VERIFY — checks the cart badge
   - VERIFY: The shopping cart badge shows 1
-    js: "await expect(page.locator('[data-test=\"shopping-cart-badge\"]')).toHaveText('1')"
+    js: "await expect(page.locator('[data-test=\"shopping-cart-badge\"]')).toHaveText('1', { timeout: 2000 })"

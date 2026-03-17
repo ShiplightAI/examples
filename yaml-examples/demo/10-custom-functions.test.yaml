@@ -15,17 +15,17 @@ statements:
 
   # System object: page is passed as the Playwright Page object
   - intent: Check the cart count with a custom function
-    call: "../helpers/cart.ts#getCartCount"
+    call: "../helpers/cart.ts#get_cart_count"
     args: [page]
 
   # Multiple arg types: system object, number literal, quoted string
   - intent: Verify cart has 2 items
-    call: "../helpers/cart.ts#verifyCartCount"
+    call: "../helpers/cart.ts#verify_cart_count"
     args: [page, 2, "Expected 2 items after adding backpack and bike light"]
 
-  # Call clearCart to remove all items
+  # Call clear_cart to remove all items
   - intent: Clear the cart using a custom function
-    call: "../helpers/cart.ts#clearCart"
+    call: "../helpers/cart.ts#clear_cart"
     args: [page]
 
   # No args: functions that take no parameters
@@ -41,4 +41,4 @@ statements:
     js: "await page.locator('[data-test=\"shopping-cart-link\"]').click()"
 
   - VERIFY: The cart is empty
-    js: "await expect(page.locator('.cart_item')).toHaveCount(0)"
+    js: "await expect(page.locator('.cart_item')).toHaveCount(0, { timeout: 2000 })"

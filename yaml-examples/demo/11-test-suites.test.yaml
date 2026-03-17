@@ -25,14 +25,16 @@ suite:
         - intent: Click the first product name
           js: "await page.locator('.inventory_item_name').first().click()"
         - VERIFY: The product detail page is displayed
-          js: "await expect(page.locator('.inventory_details_name')).toBeVisible()"
+          js: "await expect(page.locator('.inventory_details_name')).toBeVisible({ timeout: 2000 })"
 
     - name: Add product to cart
       statements:
-        - intent: Click Add to cart on the first product
-          js: "await page.locator('[name=\"add-to-cart-sauce-labs-backpack\"]').click()"
+        - intent: Click Add to cart on Sauce Labs Backpack
+          action: click
+          locator: "locator('[data-test=\"add-to-cart-sauce-labs-backpack\"]')"
         - VERIFY: Cart badge shows 1 item
       # teardown runs in a finally block — even if the test fails, the cart is cleaned up.
       teardown:
-        - intent: Remove the product from the cart
-          js: "await page.locator('[name=\"remove-sauce-labs-backpack\"]').click()"
+        - intent: Remove Sauce Labs Backpack from cart
+          action: click
+          locator: "locator('[data-test=\"remove-sauce-labs-backpack\"]')"

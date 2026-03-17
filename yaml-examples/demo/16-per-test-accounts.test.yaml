@@ -17,7 +17,7 @@ statements:
   - URL: /inventory.html
 
   - VERIFY: The inventory page shows products
-    js: "await expect(page.getByText('Products')).toBeVisible()"
+    js: "await expect(page.getByText('Products')).toBeVisible({ timeout: 2000 })"
 
   - VERIFY: There are 6 products listed on the page
-    js: "await expect(page.locator('.inventory_item')).toHaveCount(6)"
+    js: "await expect(page.locator('.inventory_item')).toHaveCount(6, { timeout: 2000 })"

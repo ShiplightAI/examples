@@ -11,7 +11,7 @@ statements:
       - intent: Add Sauce Labs Backpack to cart
         js: "await page.getByRole('button', { name: 'Add to cart' }).first().click()"
       - VERIFY: The shopping cart badge shows 1
-        js: "await expect(page.locator('[data-test=\"shopping-cart-badge\"]')).toHaveText('1')"
+        js: "await expect(page.locator('[data-test=\"shopping-cart-badge\"]')).toHaveText('1', { timeout: 2000 })"
 
   # IF with AI condition
   - IF: The shopping cart badge shows a number greater than 0
@@ -19,7 +19,7 @@ statements:
       - intent: Click the shopping cart icon
         js: "await page.locator('[data-test=\"shopping-cart-link\"]').click()"
       - VERIFY: The cart page is displayed with items
-        js: "await expect(page.locator('.cart_item')).toHaveCount(1)"
+        js: "await expect(page.locator('.cart_item')).toHaveCount(1, { timeout: 2000 })"
     ELSE:
       - VERIFY: This branch should not execute
 
@@ -31,14 +31,20 @@ statements:
           - intent: Click the Checkout button
             js: "await page.getByRole('button', { name: 'Checkout' }).click()"
           - VERIFY: The checkout information page is displayed
-            js: "await expect(page.getByText('Checkout: Your Information')).toBeVisible()"
+            js: "await expect(page.getByText('Checkout: Your Information')).toBeVisible({ timeout: 2000 })"
           - intent: Click the Cancel button
             js: "await page.getByRole('button', { name: 'Cancel' }).click()"
           - VERIFY: The cart page is displayed
-            js: "await expect(page.getByText('Your Cart')).toBeVisible()"
+            js: "await expect(page.getByText('Your Cart')).toBeVisible({ timeout: 2000 })"
 
-  # WHILE loop — add all remaining products to cart
+  # WHILE loop with js: condition — best for counter/iteration logic where
+  # fast evaluation matters. AI conditions (~5-10s each) would make this loop
+  # too slow for 6 iterations. Reset cart first so all buttons are available.
   - URL: /inventory.html
+
+  - intent: Remove Sauce Labs Backpack from cart
+    action: click
+    locator: "locator('[data-test=\"remove-sauce-labs-backpack\"]')"
 
   - WHILE: "js: (await page.locator('button:has-text(\"Add to cart\")').count()) > 0"
     DO:
@@ -47,4 +53,4 @@ statements:
     timeout_ms: 30000
 
   - VERIFY: All 6 products are in the cart
-    js: "await expect(page.locator('[data-test=\"shopping-cart-badge\"]')).toHaveText('6')"
+    js: "await expect(page.locator('[data-test=\"shopping-cart-badge\"]')).toHaveText('6', { timeout: 2000 })"

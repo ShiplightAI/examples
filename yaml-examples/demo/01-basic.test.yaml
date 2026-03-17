@@ -3,10 +3,10 @@ statements:
   - URL: /inventory.html
 
   - VERIFY: The inventory page is displayed with product listings
-    js: "await expect(page.getByText('Products')).toBeVisible()"
+    js: "await expect(page.getByText('Products')).toBeVisible({ timeout: 2000 })"
 
   - intent: Click the first product name
     js: "await page.locator('.inventory_item_name').first().click()"
 
   - VERIFY: The product detail page is displayed
-    js: "await expect(page.locator('.inventory_details_name')).toBeVisible()"
+    js: "await expect(page.locator('.inventory_details_name')).toBeVisible({ timeout: 2000 })"

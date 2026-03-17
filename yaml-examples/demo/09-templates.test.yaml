@@ -24,10 +24,10 @@ statements:
       zip_code: "90210"
 
   - VERIFY: The checkout overview page is displayed
-    js: "await expect(page.getByText('Checkout: Overview')).toBeVisible()"
+    js: "await expect(page.getByText('Checkout: Overview')).toBeVisible({ timeout: 2000 })"
 
   - intent: Click the Finish button
     js: "await page.getByRole('button', { name: 'Finish' }).click()"
 
   - VERIFY: The order confirmation page is displayed
-    js: "await expect(page.getByText('Thank you for your order')).toBeVisible()"
+    js: "await expect(page.getByText('Thank you for your order')).toBeVisible({ timeout: 2000 })"

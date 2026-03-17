@@ -20,9 +20,11 @@ statements:
   - URL: /inventory.html
 
   - intent: Add product to cart
-    js: "await page.locator('<<product_selector>>').click()"
+    action: click
+    locator: "locator('<<product_selector>>')"
 
   - intent: Click cart icon
-    js: "await page.locator('[data-test=\"shopping-cart-link\"]').click()"
+    action: click
+    locator: "locator('[data-test=\"shopping-cart-link\"]')"
 
   - VERIFY: "<<product_name>> is in the cart"

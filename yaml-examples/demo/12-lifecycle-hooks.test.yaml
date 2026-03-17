@@ -6,8 +6,6 @@ name: Cart Management Suite
 tags: [e2e, hooks]
 
 suite:
-  serial: true
-
   beforeAll:
     - URL: /inventory.html
 
