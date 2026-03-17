@@ -1,15 +1,15 @@
-# 16 — Per-Test Account
-# Demonstrates: running a test with its own account (Case 3)
+# 16 — Per-Test Auth
+# Demonstrates: running a test with its own auth script (Case 3)
 #
 # Most tests use the shared account from the setup project (Case 1/2).
-# When a test needs a different identity, it carries its own credentials
-# and auth_login path. The fixture handles login and caches storageState.
+# When a test needs a different identity, it declares its own auth script
+# and args. The fixture handles login and caches storageState.
 
 use:
-  account:
+  auth: ./demo/auth.login.ts
+  args:
     username: problem_user
     password: secret_sauce
-    auth_login: ./demo/auth.login.ts
 
 goal: Verify problem_user can access inventory
 
