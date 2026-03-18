@@ -529,23 +529,30 @@ Variables store and reuse dynamic values throughout test execution. They come fr
 
 | Type | Scope | Description |
 |---|---|---|
-| Pre-defined | Per-project | Configured in `shiplight.config.json` under the `variables` key. Loaded into the agent's `VariableStore` at test start. |
+| Pre-defined | Per-project | Configured in `playwright.config.ts` under `use: { variables: { ... } }`. Loaded into the agent's `VariableStore` at test start. |
 | Dynamic | Single test run | Created during execution (Extract action, natural language like "Save the order number to orderId"). Reset each run. |
 
 ### 7.2 Configuring Variables
 
-Variables are defined in `shiplight.config.json` (searched upward from the test file directory):
+Variables are defined in `playwright.config.ts` in the project's `use` block:
 
-```json
-{
-  "variables": {
-    "SAUCE_USER": "standard_user",
-    "SAUCE_PASS": { "value": "secret_sauce", "sensitive": true }
-  }
-}
+```ts
+// playwright.config.ts
+export default defineConfig({
+  ...shiplightConfig(),
+  projects: [{
+    name: 'default',
+    use: {
+      variables: {
+        SAUCE_USER: 'standard_user',
+        SAUCE_PASS: { value: 'secret_sauce', sensitive: true },
+      },
+    },
+  }],
+});
 ```
 
-Sensitive variables are masked in logs and screenshots.
+Sensitive variables (using `{ value, sensitive: true }`) are masked in logs and screenshots.
 
 ### 7.3 Using Variables in YAML
 
