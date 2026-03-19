@@ -507,7 +507,7 @@ Each value in `args` is transpiled based on what it looks like:
 | `page`, `request`, `testContext` | Passed as the Playwright/system object (unquoted) | `page` |
 | `null`, `undefined`, `true`, `false` | Passed as JavaScript literals | `null` |
 | Numeric strings | Passed as numbers | `42` |
-| `$variableName` | Resolved from the variable store | `agent.agentServices.readVariable('variableName')` |
+| `$variableName` | Resolved from runtime variables | `agent.agentServices.readVariable('variableName')` |
 | Anything else | Passed as a quoted string | `"hello"` |
 
 ### 6.5 Rules
@@ -529,8 +529,8 @@ Variables store and reuse dynamic values throughout test execution. They come fr
 
 | Type | Scope | Description |
 |---|---|---|
-| Pre-defined | Per-project | Configured in `playwright.config.ts` under `use: { variables: { ... } }`. Loaded into the agent's `VariableStore` at test start. |
-| Dynamic | Single test run | Created during execution (Extract action, natural language like "Save the order number to orderId"). Reset each run. |
+| Pre-defined | Per-project | Configured in `playwright.config.ts` under `use: { variables: { ... } }`. Loaded at test start. |
+| Dynamic | Single test run | Created during execution (e.g., Extract action, `save_variable`, or natural language like "Save the order number to orderId"). Reset each run. |
 
 ### 7.2 Configuring Variables
 
@@ -556,7 +556,7 @@ Sensitive variables (using `{ value, sensitive: true }`) are masked in logs and 
 
 ### 7.3 Using Variables in YAML
 
-The `{{variableName}}` syntax references a variable. In YAML, the `{{VAR}}` placeholder is preserved as a literal string in the transpiled code. At action execution time, the agent resolves it from the `VariableStore` via `replaceVariables()`.
+The `{{variableName}}` syntax references a variable. Variables are resolved at runtime — either from the project's pre-defined variables or from values saved during the test run.
 
 ```yaml
 statements:
@@ -566,12 +566,12 @@ statements:
     text: "{{userEmail}}"
 ```
 
-The transpiled code keeps `"{{userEmail}}"` as-is. When the `input_text` action executes, the agent substitutes `{{userEmail}}` with the value from the `VariableStore`.
+At runtime, `{{userEmail}}` is replaced with the actual value before the action executes.
 
 ### 7.4 Template Params vs Runtime Variables
 
 - **Template params** use `<<paramName>>` syntax and are substituted at compile time (template expansion / parameterized tests).
-- **Runtime variables** use `{{VAR}}` syntax and are resolved by the agent at runtime from the `VariableStore`.
+- **Runtime variables** use `{{VAR}}` syntax and are resolved at runtime from the project's variables or values saved during the test.
 - The two syntaxes are distinct — `<<param>>` is always resolved before parsing, `{{VAR}}` always passes through to runtime.
 - Param values can contain `{{RUNTIME_VAR}}` — these pass through template expansion unchanged and get resolved at runtime.
 
@@ -803,7 +803,7 @@ suite:
 - Substitution happens at transpile time, before code generation
 - The entire TestFlow is serialized → `<<key>>` replaced with the value → deserialized back
 - Each parameter set produces a completely independent test instance
-- `{{VAR}}` placeholders are unaffected by parameter substitution — they are resolved at runtime by the agent's `VariableStore` (see [Variables](#7-variables))
+- `{{VAR}}` placeholders are unaffected by parameter substitution — they are resolved at runtime (see [Variables](#7-variables))
 
 ### 11.5 Validation Rules
 
