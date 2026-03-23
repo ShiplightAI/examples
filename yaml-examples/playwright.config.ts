@@ -18,7 +18,7 @@ export default defineConfig({
       testMatch: 'auth.setup.ts',
     },
     {
-      name: 'default',
+      name: 'demo',
       dependencies: ['setup'],
       use: {
         storageState: STORAGE_STATE_PATH,
