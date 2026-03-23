@@ -4,3 +4,4 @@ shiplight-report/
 .shiplight/
 .env
 .auth/
+*.yaml.spec.ts
