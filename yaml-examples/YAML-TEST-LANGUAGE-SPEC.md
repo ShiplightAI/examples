@@ -266,9 +266,9 @@ A multi-action container that groups related child statements. A STEP is the enr
 statements:
   - STEP: Complete checkout
     statements:
-      - Enter shipping address
-      - Select payment method
-      - Click Place Order
+      - intent: Enter shipping address
+      - intent: Select payment method
+      - intent: Click Place Order
 ```
 
 **Rules:**
@@ -287,7 +287,7 @@ Conditional execution with an optional ELSE branch.
 statements:
   - IF: cookie consent dialog is visible
     THEN:
-      - Click Accept All
+      - intent: Click Accept All
     ELSE:
       - VERIFY: no cookie dialog blocking
 ```
@@ -298,7 +298,7 @@ statements:
 statements:
   - IF: "js: document.querySelector('.modal') !== null"
     THEN:
-      - Close the modal
+      - intent: Close the modal
 ```
 
 **Condition types:**
@@ -325,7 +325,7 @@ Repeats statements until the condition is false or timeout is exceeded.
 statements:
   - WHILE: there are more pages of results
     DO:
-      - Click the Next button
+      - intent: Click the Next button
       - VERIFY: new results loaded
     timeout_ms: 60000
 ```
@@ -336,7 +336,7 @@ statements:
 statements:
   - WHILE: "js: document.querySelectorAll('.item').length < 10"
     DO:
-      - Scroll down
+      - intent: Scroll down
 ```
 
 **Rules:**
@@ -787,7 +787,7 @@ suite:
         - name: editor
           values: { username: editor@test.com }
       statements:
-        - "Enter <<username>>"
+        - intent: "Enter <<username>>"
         - VERIFY: logged in successfully
 ```
 
@@ -871,7 +871,7 @@ statements:
         action: input_text
         locator: "getByPlaceholder('Promo Code')"
         text: SAVE10
-      - Click Apply
+      - intent: Click Apply
     ELSE:
       - VERIFY: no promo code field displayed
 
