@@ -86,5 +86,5 @@ See step-by-step screenshots, video, trace, and more for each test run.
 
 ## Documentation
 
-- [shiplightai CLI README](https://github.com/ShiplightAI/monots/tree/main/apps/cli) — full YAML format reference
+- [YAML Test Language Spec](./YAML-TEST-LANGUAGE-SPEC.md) — full YAML format reference
 - [Shiplight Docs](https://docs.shiplight.ai) — platform documentation
