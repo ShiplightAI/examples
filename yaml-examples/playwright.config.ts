@@ -19,14 +19,22 @@ export default defineConfig({
     },
     {
       name: 'demo',
+      testDir: './demo',
       dependencies: ['setup'],
       use: {
+        baseURL: 'https://www.saucedemo.com',
         storageState: STORAGE_STATE_PATH,
+      },
+    },
+    {
+      name: 'showcase',
+      testDir: './showcase',
+      use: {
+        baseURL: 'http://localhost:3000',
       },
     },
   ],
   use: {
-    baseURL: 'https://www.saucedemo.com',
     headless: true,
     viewport: { width: 1280, height: 720 },
     actionTimeout: 15_000,

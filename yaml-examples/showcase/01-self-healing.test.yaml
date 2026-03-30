@@ -1,0 +1,59 @@
+# 01 — Self-Healing Locators
+#
+# Demonstrates how Shiplight auto-heals when cached locators break.
+#
+# Every ACTION has two parts:
+#   1. `intent`  — WHAT the action does (source of truth)
+#   2. `action:`/`locator:` or `js:` — HOW to do it (cache, for speed)
+#
+# When the cache works → deterministic replay in <1s.
+# When the cache fails (stale selector, DOM change) → the agent
+# re-reads the page, uses the `intent` to find the right element,
+# and updates the cache automatically. No manual fix needed.
+#
+# The test page has a "Click Me" button whose data-testid changes
+# to a random value on every click (simulating a UI that regenerates
+# IDs after deploys). A hardcoded data-testid selector breaks after
+# the first click — but Shiplight heals it using the intent.
+
+goal: Demonstrate self-healing with a dynamic data-testid button
+
+statements:
+  - URL: /testing/dynamic/dynamic-elements.html
+
+  # ── Verify the page loaded ────────────────────────────────────
+  - VERIFY: The heading "Dynamic Data Test ID Test" is visible
+    js: "await expect(page.getByText('Dynamic Data Test ID Test')).toBeVisible({ timeout: 2000 })"
+
+  # ── First click — cache works ─────────────────────────────────
+  # The initial data-testid is "dynamic-button-init", so this
+  # locator is correct on the first attempt. Fast replay (<1s).
+  - intent: Click the "Click Me" button to increment the counter
+    action: click
+    locator: "getByTestId('dynamic-button-init')"
+
+  - VERIFY: The click counter displays 1
+    js: "await expect(page.locator('#click-count')).toHaveText('Clicks: 1', { timeout: 2000 })"
+
+  # ── Second click — cache BREAKS, self-heals ───────────────────
+  # After the first click the button's data-testid changed to a
+  # random value. The same cached locator now points to nothing.
+  # Shiplight detects the failure, falls back to the intent,
+  # inspects the page, and clicks the button anyway.
+  - intent: Click the "Click Me" button to increment the counter
+    action: click
+    locator: "getByTestId('dynamic-button-init')"
+
+  - VERIFY: The click counter displays 2
+    js: "await expect(page.locator('#click-count')).toHaveText('Clicks: 2', { timeout: 2000 })"
+
+  # ── Third click — cache BREAKS again, heals again ─────────────
+  # The data-testid changed once more. Same stale cache, same
+  # automatic recovery. Self-healing is not a one-time trick —
+  # it works every time the DOM drifts from the cached selector.
+  - intent: Click the "Click Me" button to increment the counter
+    action: click
+    locator: "getByTestId('dynamic-button-init')"
+
+  - VERIFY: The click counter displays 3
+    js: "await expect(page.locator('#click-count')).toHaveText('Clicks: 3', { timeout: 2000 })"

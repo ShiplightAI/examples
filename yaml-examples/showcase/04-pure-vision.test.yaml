@@ -1,0 +1,20 @@
+# 04 — Pure Vision Mode
+#
+# Demonstrates Shiplight's pure-vision capability where the agent
+# uses only screenshots (no DOM) to interact with the page.
+#
+# This is useful for:
+# - Canvas-based applications (games, drawing tools)
+# - PDF viewers or image editors
+# - Custom-rendered UI with no accessible DOM elements
+# - Visual regression checks (colors, layout, styling)
+
+goal: "[placeholder] Demonstrate pure-vision mode for visual interaction"
+skip: "Not yet implemented"
+
+statements:
+  - URL: /testing/dynamic/dynamic-elements.html
+
+  # TODO: Find or create a canvas/visual test page
+  # TODO: Use vision-only mode to interact with elements
+  # TODO: Verify visual outcomes using screenshot analysis

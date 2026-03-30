@@ -1,0 +1,23 @@
+# 02 — Context-Aware Verification
+#
+# Demonstrates how Shiplight maintains context across steps.
+#
+# Traditional assertions are stateless — each VERIFY checks a
+# hardcoded value. Shiplight's AI agent remembers what happened
+# in previous steps, so assertions can reference prior context
+# without repeating values.
+#
+# For example: "Verify the success message shows the name we entered"
+# works without hardcoding the name — the agent knows what was typed.
+
+goal: "[placeholder] Demonstrate context-aware verification across steps"
+skip: "Not yet implemented"
+
+statements:
+  - URL: /testing/forms/basic-form.html
+
+  # TODO: Fill in a form with dynamic data
+  # TODO: Submit the form
+  # TODO: Use context-aware VERIFY that references prior steps
+  #        e.g. "Verify the confirmation shows the name we just entered"
+  #        without hardcoding the value

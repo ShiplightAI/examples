@@ -1,0 +1,19 @@
+# 03 — Auto-Dismiss Modal
+#
+# Demonstrates how Shiplight automatically dismisses intrusive
+# popups (cookie banners, newsletter signups, etc.) that appear
+# unexpectedly during test execution.
+#
+# When an action fails, the agent first checks if an intrusive
+# modal is blocking the page. If found, it dismisses the modal
+# and retries the original action — no manual handling needed.
+
+goal: "[placeholder] Demonstrate automatic modal/popup dismissal"
+skip: "Not yet implemented"
+
+statements:
+  - URL: /testing/dynamic/dynamic-elements.html
+
+  # TODO: Find or create a test page with intrusive popups
+  # TODO: Attempt an action that is blocked by a popup
+  # TODO: Show the agent auto-dismissing the popup and retrying
