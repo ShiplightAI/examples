@@ -11,19 +11,15 @@
  * - Set ANTHROPIC_API_KEY in .env file or environment variable
  */
 
-import { config } from 'dotenv';
+import 'dotenv/config';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { writeFileSync, mkdirSync, existsSync } from 'fs';
+import { chromium } from 'playwright';
+import { createAgent, configureSdk } from '@shiplightai/sdk';
 
-// Load .env BEFORE importing playwright (PWDEBUG must be set before playwright loads)
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-config({ path: resolve(__dirname, '.env') });
-
-// Dynamic import to ensure PWDEBUG is set before playwright initializes
-const { chromium } = await import('playwright');
-const { createAgent, configureSdk } = await import('@shiplightai/sdk');
 
 // Configure SDK with API key
 const apiKey = process.env.ANTHROPIC_API_KEY;

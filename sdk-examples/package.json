@@ -15,10 +15,9 @@
     "extraction": "tsx extractionExample.ts"
   },
   "dependencies": {
-    "@shiplightai/sdk": "^0.1.0",
-    "@shiplightai/sdk-pro": "^0.2.1",
+    "@shiplightai/sdk": "^0.1.6",
     "dotenv": "^16.4.5",
-    "playwright": "^1.52.0"
+    "playwright": "^1.58.0"
   },
   "devDependencies": {
     "tsx": "^4.19.0",
