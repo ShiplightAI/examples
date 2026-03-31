@@ -1,0 +1,59 @@
+# 17 — Programmatic Variable Access
+#
+# Demonstrates using agent.agentServices in js: expressions to read
+# and write variables programmatically — in actions, IF/WHILE conditions,
+# and VERIFY assertions.
+#
+# This is useful when you need to:
+# - Branch test logic based on captured runtime values
+# - Loop until a variable reaches a target state
+# - Assert on variable values directly in JS
+#
+# Compare with 06-variables.test.yaml ({{VAR}} template syntax) and
+# 07-teardown-and-navigation.test.yaml (save_variable action).
+
+goal: Use agent.agentServices to read/write variables in control flow
+
+statements:
+  - URL: /inventory.html
+
+  # ── Save a variable using js: ─────────────────────────────────
+  - intent: Save the product count to a variable
+    js: |
+      const count = await page.locator('.inventory_item').count();
+      agent.agentServices.saveVariable('product_count', String(count));
+
+  # ── IF with js: condition reading a variable ──────────────────
+  # Use agent.agentServices.readVariable() inside js: conditions
+  # to branch based on previously captured values.
+  - IF: "js: agent.agentServices.readVariable('product_count') === '6'"
+    THEN:
+      - intent: Add Sauce Labs Backpack to cart
+        js: "await page.getByRole('button', { name: 'Add to cart' }).first().click()"
+      - VERIFY: Cart badge shows 1
+        js: "await expect(page.locator('[data-test=\"shopping-cart-badge\"]')).toHaveText('1', { timeout: 2000 })"
+
+  # ── Save cart count for loop ──────────────────────────────────
+  - intent: Save how many items are in the cart
+    js: "agent.agentServices.saveVariable('items_added', '1');"
+
+  # ── WHILE with js: condition reading a variable ───────────────
+  # Loop until we've added 3 items to the cart.
+  - WHILE: "js: Number(agent.agentServices.readVariable('items_added')) < 3"
+    DO:
+      - intent: Add the next product to the cart
+        js: "await page.locator('button:has-text(\"Add to cart\")').first().click()"
+      - intent: Increment items_added
+        js: |
+          const current = Number(agent.agentServices.readVariable('items_added'));
+          agent.agentServices.saveVariable('items_added', String(current + 1));
+    timeout_ms: 15000
+
+  - VERIFY: Cart badge shows 3 items
+    js: "await expect(page.locator('[data-test=\"shopping-cart-badge\"]')).toHaveText('3', { timeout: 2000 })"
+
+  # ── VERIFY with js: reading a variable ────────────────────────
+  - VERIFY: The items_added variable equals 3
+    js: |
+      const val = agent.agentServices.readVariable('items_added');
+      if (val !== '3') throw new Error(`Expected items_added to be '3', got '${val}'`);
