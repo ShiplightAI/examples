@@ -1,0 +1,34 @@
+# 08 — Control Flow (IF / WHILE)
+#
+# Demonstrates conditional and loop constructs with AI conditions.
+#
+# - IF: checks if the sidebar color is Light, then switches to Dark
+# - WHILE: scrolls down until the Wikipedia languages section is visible
+#
+# AI conditions self-heal against DOM changes — no brittle js checks.
+# Cloud test case ID: 259
+
+test_case_id: 259
+goal: Demonstrate control flow with AI-powered conditions
+base_url: https://www.wikipedia.org
+
+statements:
+  # Navigate to English Wikipedia
+  - intent: Click on the "English" language link
+    action: click
+    locator: "getByRole('link', { name: 'English 7,121,000+ articles' })"
+
+  # IF with AI condition — checks visual state, not DOM
+  - IF: The color in the side bar is Light
+    THEN:
+      - intent: Select the Dark radio button
+        action: click
+        locator: "getByRole('radio', { name: 'Dark' })"
+
+  # WHILE loop with AI condition — scrolls until a section is visible
+  - WHILE: Wikipedia languages section is not visible, and reach the page bottom
+    DO:
+      - intent: Scroll down the page
+        action: scroll
+        down: true
+        num_pages: 1

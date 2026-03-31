@@ -3,18 +3,33 @@
 # Demonstrates Shiplight's pure-vision capability where the agent
 # uses only screenshots (no DOM) to interact with the page.
 #
-# This is useful for:
-# - Canvas-based applications (games, drawing tools)
-# - PDF viewers or image editors
+# This is essential for:
+# - Drag-and-drop interactions (coordinate-based)
+# - Canvas-based applications
 # - Custom-rendered UI with no accessible DOM elements
-# - Visual regression checks (colors, layout, styling)
+#
+# The test drags items on a drag-and-drop page using vision only.
+# Cloud test case ID: 284
 
-goal: "[placeholder] Demonstrate pure-vision mode for visual interaction"
-skip: "Not yet implemented"
+test_case_id: 284
+goal: Demonstrate pure-vision mode for drag-and-drop interaction
+base_url: https://app.shiplight.ai
 
 statements:
-  - URL: /testing/dynamic/dynamic-elements.html
+  - URL: /testing/editor/drag_drop_test.html
 
-  # TODO: Find or create a canvas/visual test page
-  # TODO: Use vision-only mode to interact with elements
-  # TODO: Verify visual outcomes using screenshot analysis
+  # Pure vision: the agent uses screenshot coordinates, not DOM
+  - intent: Select the title "Drag to Drop Zone"
+    action: drag_drop
+    locator: "getByRole('heading', { name: 'Drag to Drop Zone' })"
+    pure_vision: true
+    delta_x: 213
+    delta_y: 0
+
+  # Drag an item using vision-based coordinate detection
+  - intent: Drag the red item to the drop zone
+    action: drag_drop
+    locator: "getByText('🔴')"
+    pure_vision: true
+    delta_x: 473
+    delta_y: 241

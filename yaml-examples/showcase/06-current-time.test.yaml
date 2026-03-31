@@ -1,0 +1,25 @@
+# 06 — AI Action (Current Time)
+#
+# Demonstrates how the AI agent can perform actions that require
+# real-world context — like filling in the current date and time.
+#
+# Traditional automation can't do this without code. The AI agent
+# knows the current time and fills it in naturally.
+# Cloud test case ID: 260
+
+test_case_id: 260
+goal: Demonstrate AI action with real-world context
+base_url: https://www.wikipedia.org
+
+statements:
+  # Use CODE to get the current date/time, then type it
+  - CODE: |
+      const now = new Date().toLocaleString();
+      save_variable('currentDateTime', now);
+
+  - intent: Type the current date and time into the search field
+    action: input_text
+    locator: "getByRole('searchbox', { name: 'Search Wikipedia' })"
+    text: "{{currentDateTime}}"
+
+  - VERIFY: The search field contains today's date

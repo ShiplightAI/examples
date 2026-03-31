@@ -1,0 +1,42 @@
+# 07 — Save Variable
+#
+# Demonstrates runtime variables: save values, use them in actions
+# via {{variable}} syntax, and update them mid-test.
+#
+# Cloud test case ID: 272
+
+test_case_id: 272
+goal: Demonstrate runtime variables with save and reuse
+base_url: https://www.wikipedia.org
+
+statements:
+  # Save a variable
+  - intent: Save "light" to the variable searchTerm
+    action: save_variable
+    name: searchTerm
+    value: "light"
+
+  # Verify the variable value
+  - VERIFY: "{{ searchTerm }} is \"light\""
+
+  # Use the variable in an input action
+  - intent: Type the searchTerm variable into the search bar
+    action: input_text
+    locator: "getByRole('searchbox', { name: 'Search Wikipedia' })"
+    text: "{{searchTerm}}"
+
+  # Update the variable
+  - intent: Change searchTerm value to "dark"
+    action: save_variable
+    name: searchTerm
+    value: "dark"
+
+  # Clear and re-type with updated value
+  - intent: Clear the search bar
+    action: clear_input
+    locator: "getByRole('searchbox', { name: 'Search Wikipedia' })"
+
+  - intent: Type the updated searchTerm into the search bar
+    action: input_text
+    locator: "getByRole('searchbox', { name: 'Search Wikipedia' })"
+    text: "{{searchTerm}}"

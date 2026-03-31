@@ -1,0 +1,21 @@
+# 14 — Switch Tab
+#
+# Demonstrates multi-tab handling: open a new tab, navigate,
+# and switch between tabs.
+# Cloud test case ID: 528
+
+test_case_id: 528
+goal: Demonstrate multi-tab handling
+base_url: https://www.wikipedia.org
+
+statements:
+  # Open a new tab and navigate to Google
+  - intent: Open a new tab and navigate to Google
+    action: go_to_url
+    url: "https://google.com"
+    new_tab: true
+
+  # Switch back to the original tab
+  - intent: Switch back to the Wikipedia tab
+    action: switch_tab
+    tab_index: 0

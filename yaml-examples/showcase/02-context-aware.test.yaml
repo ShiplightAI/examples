@@ -1,23 +1,37 @@
-# 02 — Context-Aware Verification
+# 02 — Context-Aware Verification (Step Memory)
 #
-# Demonstrates how Shiplight maintains context across steps.
+# Demonstrates how Shiplight's AI agent remembers what happened in
+# previous steps, so assertions can reference prior context without
+# hardcoding values.
 #
-# Traditional assertions are stateless — each VERIFY checks a
-# hardcoded value. Shiplight's AI agent remembers what happened
-# in previous steps, so assertions can reference prior context
-# without repeating values.
+# In this test we search Wikipedia for "light", then verify the
+# result page matches "the entered keyword" — without repeating
+# the word "light". The agent knows what was typed because it
+# remembers the earlier step.
 #
-# For example: "Verify the success message shows the name we entered"
-# works without hardcoding the name — the agent knows what was typed.
+# Cloud test case ID: 257
 
-goal: "[placeholder] Demonstrate context-aware verification across steps"
-skip: "Not yet implemented"
+test_case_id: 257
+goal: Demonstrate context-aware verification across steps
 
 statements:
-  - URL: /testing/forms/basic-form.html
+  - URL: https://www.wikipedia.org/
 
-  # TODO: Fill in a form with dynamic data
-  # TODO: Submit the form
-  # TODO: Use context-aware VERIFY that references prior steps
-  #        e.g. "Verify the confirmation shows the name we just entered"
-  #        without hardcoding the value
+  # Type a search term — the agent remembers this value
+  - intent: Enter "light" into the search field
+    action: input_text
+    locator: "getByRole('searchbox', { name: 'Search Wikipedia' })"
+    text: "light"
+
+  # Click search
+  - intent: Click the search button to submit the query
+    action: click
+    locator: "getByRole('button', { name: 'Search' })"
+
+  # Context-aware assertion: references "the entered keyword"
+  # instead of hardcoding "light". The agent recalls step 1.
+  - VERIFY: The page matches the entered keyword
+
+  # Standard js assertion for the visual element
+  - VERIFY: A triangular prism image is visible on the Light article
+    js: "await expect(page.getByRole('figure', { name: 'A triangular prism dispersing' }).getByRole('link').first()).toBeVisible({ timeout: 5000 })"

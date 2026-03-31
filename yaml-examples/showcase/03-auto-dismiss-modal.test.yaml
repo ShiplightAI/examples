@@ -1,19 +1,28 @@
 # 03 — Auto-Dismiss Modal
 #
 # Demonstrates how Shiplight automatically dismisses intrusive
-# popups (cookie banners, newsletter signups, etc.) that appear
-# unexpectedly during test execution.
+# popups that block the target element.
 #
-# When an action fails, the agent first checks if an intrusive
-# modal is blocking the page. If found, it dismisses the modal
-# and retries the original action — no manual handling needed.
+# The test page shows a modal overlay on load. The test instructs
+# the agent to click a button behind the modal. The agent detects
+# the obstruction, dismisses the modal, and retries the click —
+# all without explicit handling in the test.
+#
+# Requires: auto_dismiss_modal setting (cloud feature)
+# Cloud test case ID: 497
 
-goal: "[placeholder] Demonstrate automatic modal/popup dismissal"
-skip: "Not yet implemented"
+test_case_id: 497
+goal: Demonstrate automatic modal dismissal
+base_url: ttps://app.shiplight.ai
+settings:
+  auto_dismiss_modal: true
 
 statements:
-  - URL: /testing/dynamic/dynamic-elements.html
+  - URL: /testing/modal/index.html
 
-  # TODO: Find or create a test page with intrusive popups
-  # TODO: Attempt an action that is blocked by a popup
-  # TODO: Show the agent auto-dismissing the popup and retrying
+  # The page shows a modal on load. This action targets the button
+  # behind it. The agent will auto-dismiss the modal first, then
+  # click the button.
+  - intent: Click the green button with text "Click Me After Modal Dismissed"
+    action: click
+    locator: "getByRole('button', { name: 'Click Me After Modal Dismissed' })"

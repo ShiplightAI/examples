@@ -1,0 +1,33 @@
+# 12 — While Loop
+#
+# Demonstrates WHILE loops with AI-powered conditions.
+#
+# The agent scrolls down repeatedly until the page footer becomes
+# visible. The AI condition is evaluated each iteration — no
+# brittle DOM checks needed.
+# Cloud test case ID: 419
+
+test_case_id: 419
+goal: Demonstrate while-loop with AI condition
+base_url: https://www.wikipedia.org
+
+statements:
+  # First, search for something to get a long article
+  - STEP: Search for "cat"
+    statements:
+      - intent: Type "cat" into the search input field
+        action: input_text
+        locator: "getByRole('searchbox', { name: 'Search Wikipedia' })"
+        text: "cat"
+
+      - intent: Click the search button
+        action: click
+        locator: "getByRole('button', { name: 'Search' })"
+
+  # Scroll until the footer is visible
+  - WHILE: The page footer is not visible
+    DO:
+      - intent: Scroll down 1 page
+        action: scroll
+        down: true
+        num_pages: 1

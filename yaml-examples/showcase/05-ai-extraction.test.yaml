@@ -1,0 +1,30 @@
+# 05 — AI Extraction
+#
+# Demonstrates how Shiplight can extract dynamic values from the
+# page using AI vision and save them as variables for later use.
+#
+# The agent reads the article count from the Wikipedia English page,
+# saves it to a variable, then verifies it matches the statistics page.
+# Cloud test case ID: 263
+
+test_case_id: 263
+goal: Demonstrate AI-powered data extraction from the page
+base_url: https://www.wikipedia.org
+
+statements:
+  # Navigate to English Wikipedia
+  - intent: Click on the "English" language link
+    action: click
+    locator: "getByRole('link', { name: 'English 7,121,000+ articles' })"
+
+  # AI extraction: the agent reads the page and saves a value
+  - intent: Extract the number left to "articles in English" and save to articleNumber
+    action: ai_extract
+    variable_name: articleNumber
+    element_description: the number left to "articles in English"
+
+  # AI action: click on a dynamic element identified by context
+  - intent: Click on the number of "articles in English"
+
+  # Context-aware assertion using the extracted variable
+  - VERIFY: The articleNumber roughly matches the value of Content pages

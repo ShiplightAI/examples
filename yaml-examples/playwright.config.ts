@@ -29,9 +29,6 @@ export default defineConfig({
     {
       name: 'showcase',
       testDir: './showcase',
-      use: {
-        baseURL: 'http://localhost:3000',
-      },
     },
   ],
   use: {

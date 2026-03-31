@@ -1,0 +1,23 @@
+# 10 — Teardown
+#
+# Demonstrates teardown steps that run even if the test fails.
+#
+# Teardown is useful for cleanup: navigating back, deleting test
+# data, logging out, etc. Steps in `teardown:` run in a finally
+# block — guaranteed execution regardless of test outcome.
+# Cloud test case ID: 262
+
+test_case_id: 262
+goal: Demonstrate teardown for guaranteed cleanup
+base_url: https://www.wikipedia.org
+
+statements:
+  # Click Japanese Wikipedia link
+  - intent: Click on the Japanese language link
+    action: click
+    locator: "getByRole('link', { name: /日本語 .* 記事/ })"
+
+teardown:
+  # Always runs — even if the test fails above
+  - intent: Go back to previous page
+    action: go_back

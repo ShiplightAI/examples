@@ -1,0 +1,29 @@
+# 09 — Step Groups
+#
+# Demonstrates grouping related actions into named STEPs.
+#
+# Steps make tests more readable and provide logical grouping
+# in reports. Each step is a named container for actions.
+# Cloud test case ID: 280
+
+test_case_id: 280
+goal: Demonstrate grouping actions into named steps
+base_url: https://www.wikipedia.org
+
+statements:
+  # First group: search for "cat"
+  - STEP: Search for "cat"
+    statements:
+      - intent: Type "cat" into the search input field
+        action: input_text
+        locator: "getByRole('searchbox', { name: 'Search Wikipedia' })"
+        text: "cat"
+
+      - intent: Click the search button
+        action: click
+        locator: "getByRole('button', { name: 'Search' })"
+
+  # Second group: search for "dog" (draft — agent handles navigation back)
+  - STEP: Search for "dog"
+    statements:
+      - intent: Search for "dog" on Wikipedia

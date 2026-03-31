@@ -1,0 +1,23 @@
+# 13 — File Upload
+#
+# Demonstrates file upload handling.
+#
+# The agent uploads a file to a file upload test page and verifies
+# it appears in the selected files section.
+# Cloud test case ID: 387
+
+test_case_id: 387
+goal: Demonstrate file upload action
+base_url: https://app.shiplight.ai
+
+statements:
+  - URL: /testing/files/upload.html
+
+  # Upload a test file
+  - intent: Upload fileUpload.txt to the drop zone
+    action: upload_file
+    locator: "getByText('📤 Drop files here or click')"
+    paths: "fileUpload.txt"
+
+  # Verify the file appears
+  - VERIFY: The fileUpload.txt displays in the selected files section

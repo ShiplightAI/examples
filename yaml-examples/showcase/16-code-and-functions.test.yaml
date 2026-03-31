@@ -1,0 +1,23 @@
+# 16 — Code and Functions
+#
+# Demonstrates inline JavaScript code execution in tests.
+#
+# CODE statements let you run arbitrary Playwright code for
+# operations that don't map to standard actions: navigation
+# with custom options, network manipulation, localStorage, etc.
+# Cloud test case ID: 258
+
+test_case_id: 258
+goal: Demonstrate inline code execution
+base_url: https://www.wikipedia.org
+
+statements:
+  # Use CODE to navigate with custom timeout options
+  - CODE: |
+      await page.goto('https://www.google.com', { timeout: 5000 });
+      await page.waitForLoadState('load', { timeout: 5000 });
+
+  # Use CODE to go back with custom options
+  - CODE: |
+      await page.goBack({ timeout: 5000 });
+      await page.waitForLoadState('load', { timeout: 5000 });
