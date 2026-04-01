@@ -13,6 +13,8 @@ goal: Demonstrate control flow with AI-powered conditions
 base_url: https://www.wikipedia.org
 
 statements:
+  - URL: /
+  
   # Navigate to English Wikipedia
   - intent: Click on the "English" language link
     action: click

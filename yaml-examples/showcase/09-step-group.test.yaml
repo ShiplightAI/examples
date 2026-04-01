@@ -11,6 +11,8 @@ goal: Demonstrate grouping actions into named steps
 base_url: https://www.wikipedia.org
 
 statements:
+  - URL: /
+
   # First group: search for "cat"
   - STEP: Search for "cat"
     statements:

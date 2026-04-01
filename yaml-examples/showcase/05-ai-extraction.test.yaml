@@ -12,6 +12,8 @@ goal: Demonstrate AI-powered data extraction from the page
 base_url: https://www.wikipedia.org
 
 statements:
+  - URL: /
+  
   # Navigate to English Wikipedia
   - intent: Click on the "English" language link
     action: click

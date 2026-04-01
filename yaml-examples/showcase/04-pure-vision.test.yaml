@@ -16,7 +16,7 @@ goal: Demonstrate pure-vision mode for drag-and-drop interaction
 base_url: https://app.shiplight.ai
 
 statements:
-  - URL: /testing/editor/drag_drop_test.html
+  - URL: /testing/interactions/drag-and-drop.html
 
   # Pure vision: the agent uses screenshot coordinates, not DOM
   - intent: Select the title "Drag to Drop Zone"

@@ -1,23 +1,25 @@
 # 16 — Code and Functions
 #
-# Demonstrates inline JavaScript code execution in tests.
+# Demonstrates calling custom TypeScript functions from YAML tests
+# and inline JavaScript code execution.
 #
-# CODE statements let you run arbitrary Playwright code for
-# operations that don't map to standard actions: navigation
-# with custom options, network manipulation, localStorage, etc.
+# The `call:` syntax invokes a function from a helper file.
+# The `CODE:` shorthand runs inline JavaScript directly.
 # Cloud test case ID: 258
 
 test_case_id: 258
-goal: Demonstrate inline code execution
+goal: Demonstrate custom functions and inline code
 base_url: https://www.wikipedia.org
 
 statements:
-  # Use CODE to navigate with custom timeout options
-  - CODE: |
-      await page.goto('https://www.google.com', { timeout: 5000 });
-      await page.waitForLoadState('load', { timeout: 5000 });
+  - URL: /
 
-  # Use CODE to go back with custom options
+  # Call a custom function to navigate
+  - intent: Navigate to Google using custom function
+    call: "../helpers/navigate_to.ts#navigate_to"
+    args: [page, "https://www.google.com"]
+
+  # Use inline CODE to go back
   - CODE: |
       await page.goBack({ timeout: 5000 });
       await page.waitForLoadState('load', { timeout: 5000 });

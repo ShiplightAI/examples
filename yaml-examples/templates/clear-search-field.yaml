@@ -1,0 +1,9 @@
+template_id: 42
+# Reusable template: clear the search field and verify it's empty
+
+statements:
+  - intent: Clear the text from the search input field
+    action: clear_input
+    locator: "getByRole('searchbox', { name: 'Search Wikipedia' })"
+
+  - VERIFY: The search input field is empty

@@ -10,8 +10,11 @@
 test_case_id: 419
 goal: Demonstrate while-loop with AI condition
 base_url: https://www.wikipedia.org
+timeout: 300000
 
 statements:
+  - URL: /
+
   # First, search for something to get a long article
   - STEP: Search for "cat"
     statements:
@@ -26,8 +29,9 @@ statements:
 
   # Scroll until the footer is visible
   - WHILE: The page footer is not visible
+    timeout_ms: 300000
     DO:
-      - intent: Scroll down 1 page
+      - intent: Scroll down 5 pages
         action: scroll
         down: true
-        num_pages: 1
+        num_pages: 5

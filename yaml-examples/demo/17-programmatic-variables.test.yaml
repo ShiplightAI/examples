@@ -26,7 +26,7 @@ statements:
   # ── IF with js: condition reading a variable ──────────────────
   # Use agent.agentServices.readVariable() inside js: conditions
   # to branch based on previously captured values.
-  - IF: "js: agent.agentServices.readVariable('product_count') === '6'"
+  - IF: "js: (await agent.agentServices.readVariable('product_count')) === '6'"
     THEN:
       - intent: Add Sauce Labs Backpack to cart
         js: "await page.getByRole('button', { name: 'Add to cart' }).first().click()"

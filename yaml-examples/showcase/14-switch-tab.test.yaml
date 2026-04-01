@@ -9,6 +9,8 @@ goal: Demonstrate multi-tab handling
 base_url: https://www.wikipedia.org
 
 statements:
+  - URL: /
+  
   # Open a new tab and navigate to Google
   - intent: Open a new tab and navigate to Google
     action: go_to_url

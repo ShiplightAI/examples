@@ -2,11 +2,10 @@
 #
 # Demonstrates reusable step templates that can be shared across
 # tests. Templates avoid duplicating common sequences like
-# "search and click".
+# "clear search field and verify".
 #
-# Note: This test references a cloud template (reference_id: 42).
-# For local usage, templates are defined in separate YAML files
-# and included via `template: path/to/template.yaml`.
+# The template `clear-search-field.yaml` is referenced via the
+# `template:` keyword — its statements are inlined at transpile time.
 # Cloud test case ID: 261
 
 test_case_id: 261
@@ -14,21 +13,18 @@ goal: Demonstrate reusable step templates
 base_url: https://www.wikipedia.org
 
 statements:
-  # Direct action
+  - URL: /
+
+  # Type "light" into search
   - intent: Enter "light" into the search field
     action: input_text
     locator: "getByRole('searchbox', { name: 'Search Wikipedia' })"
     text: "light"
 
-  # In the cloud version, this is a template reference (id: 42)
-  # For local, inline the template's steps: search and click
-  - STEP: Search (template placeholder)
-    statements:
-      - intent: Click the search button
-        action: click
-        locator: "getByRole('button', { name: 'Search' })"
+  # Use the reusable template to clear the search field
+  - template: ../templates/clear-search-field.yaml
 
-  # Another search with different keyword
+  # Type "ship" into the now-empty search field
   - intent: Enter "ship" into the search field
     action: input_text
     locator: "getByRole('searchbox', { name: 'Search Wikipedia' })"

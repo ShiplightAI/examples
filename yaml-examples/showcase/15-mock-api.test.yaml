@@ -1,27 +1,25 @@
 # 15 — Mock API Call
 #
-# Demonstrates network mocking with CODE statements.
+# Demonstrates calling a custom function to mock an API,
+# then navigating to a page that consumes the mocked data.
 #
-# The cloud version uses a cloud function (mock_api_call).
-# For local, we use CODE to set up the route mock directly,
-# then navigate to the API mocking demo page.
+# The function `mock_api_call` intercepts the fruits API and
+# returns custom data. Uses `call:` syntax to invoke it.
 # Cloud test case ID: 525
 
 test_case_id: 525
-goal: Demonstrate API mocking with network interception
+goal: Demonstrate API mocking with a custom function
 base_url: https://www.wikipedia.org
 
 statements:
-  # Mock the API — intercept fruit API and return custom data
-  - CODE: |
-      await page.route('*/**/api/v1/fruits', async (route) => {
-        const response = await route.fetch();
-        const json = await response.json();
-        json.push({ name: 'Playwright Fruit', id: 100 });
-        await route.fulfill({ response, json });
-      });
+  - URL: /
 
-  # Navigate to the demo page that calls the API
+  # Call the mock function to intercept the API
+  - intent: Set up API mock for fruits endpoint
+    call: "../helpers/mock_api_call.ts#mock_api_call"
+    args: [page]
+
+  # Navigate to the demo page that calls the mocked API
   - intent: Navigate to the API mocking demo page
     action: go_to_url
     url: "https://demo.playwright.dev/api-mocking"

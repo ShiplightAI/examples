@@ -12,6 +12,8 @@ goal: Demonstrate teardown for guaranteed cleanup
 base_url: https://www.wikipedia.org
 
 statements:
+  - URL: /
+  
   # Click Japanese Wikipedia link
   - intent: Click on the Japanese language link
     action: click

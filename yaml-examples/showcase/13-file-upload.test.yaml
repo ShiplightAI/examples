@@ -17,7 +17,7 @@ statements:
   - intent: Upload fileUpload.txt to the drop zone
     action: upload_file
     locator: "getByText('📤 Drop files here or click')"
-    paths: "fileUpload.txt"
+    paths: "files/fileUpload.txt"
 
   # Verify the file appears
   - VERIFY: The fileUpload.txt displays in the selected files section

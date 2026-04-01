@@ -13,7 +13,7 @@
 
 test_case_id: 497
 goal: Demonstrate automatic modal dismissal
-base_url: ttps://app.shiplight.ai
+base_url: https://app.shiplight.ai
 settings:
   auto_dismiss_modal: true
 

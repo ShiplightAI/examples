@@ -13,10 +13,10 @@
 
 test_case_id: 257
 goal: Demonstrate context-aware verification across steps
-
+base_url: https://www.wikipedia.org/
 statements:
-  - URL: https://www.wikipedia.org/
-
+  - URL: /
+  
   # Type a search term — the agent remembers this value
   - intent: Enter "light" into the search field
     action: input_text

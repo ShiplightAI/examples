@@ -10,6 +10,8 @@ goal: Demonstrate runtime variables with save and reuse
 base_url: https://www.wikipedia.org
 
 statements:
+  - URL: /
+
   # Save a variable
   - intent: Save "light" to the variable searchTerm
     action: save_variable
