@@ -1,5 +1,4 @@
-import { defineConfig } from '@playwright/test';
-import { shiplightConfig } from 'shiplightai';
+import { defineConfig, shiplightConfig } from 'shiplightai';
 import * as path from 'path';
 
 const STORAGE_STATE_PATH = path.join(import.meta.dirname, 'demo/.auth/storageState.json');
