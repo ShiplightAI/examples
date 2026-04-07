@@ -1,0 +1,22 @@
+# 18 — DRAFT Multi-Action Execution
+# Demonstrates: bare `intent:` statements that should execute via agent.run()
+# in the debugger because they require multiple browser actions to complete.
+
+goal: Verify draft statements execute as multi-action tasks in the debugger
+
+statements:
+  - URL: /inventory.html
+
+  # Intentionally left as a DRAFT:
+  # no `action:` and no `js:`. This should require multiple actions:
+  # add item -> open cart -> click checkout -> fill form -> continue.
+  - intent: Add Sauce Labs Backpack to the cart, open the cart, start checkout, enter first name Draft, last name Tester, zip code 12345, and continue to the checkout overview page
+
+  - VERIFY: The checkout overview page is displayed
+    js: "await expect(page.getByText('Checkout: Overview')).toBeVisible({ timeout: 5000 })"
+
+  # Another DRAFT that should require multiple actions from the overview page.
+  - intent: Finish checkout and confirm the order completion page is shown
+
+  - VERIFY: The checkout complete page is displayed
+    js: "await expect(page.getByText('Checkout: Complete!')).toBeVisible({ timeout: 5000 })"
