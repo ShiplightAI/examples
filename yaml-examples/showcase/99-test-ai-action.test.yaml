@@ -1,0 +1,8 @@
+goal: Test ai_action transpilation
+base_url: http://localhost:3000
+statements:
+  - URL: /testing/interactions/non-standard-clickable.html
+  - intent: Click on the user avatar icon showing Q
+    action: ai_action
+    statement: Click on the user avatar icon showing Q
+  - VERIFY: "The text 'Last clicked: avatar' is visible"

@@ -1,0 +1,51 @@
+# 17 — Non-Standard Clickable Elements
+#
+# Tests that the AI agent can find and click elements that aren't
+# standard <button> or <a> tags — divs with onclick, avatar icons,
+# span-based icon buttons, clickable cards, etc.
+#
+# These patterns are common in modern web apps (React, Vue) where
+# custom components render as div/span with click handlers.
+
+goal: Click non-standard interactive elements (divs, spans, avatar icons)
+base_url: http://localhost:3000
+
+statements:
+  - URL: /testing/interactions/non-standard-clickable.html
+
+  # ── Click the avatar icon (div with text "Q") ──────────────────
+  # This is the exact pattern that fails in HeyGen's enterprise tests.
+  # The avatar is a div, not a button, with cursor:pointer and onclick.
+  - intent: Click on the user avatar icon showing the letter Q
+    action: click
+    timeout_ms: 5000
+
+  - VERIFY: "The text 'Last clicked: avatar' is visible"
+
+  # ── Click a div-based navigation item ──────────────────────────
+  - intent: Click on the Projects navigation item in the sidebar
+    action: click
+    timeout_ms: 5000
+
+  - VERIFY: "The text 'Last clicked: projects' is visible"
+
+  # ── Click a span-based icon button ─────────────────────────────
+  - intent: Click the notifications bell icon
+    action: click
+    timeout_ms: 5000
+
+  - VERIFY: "The text 'Last clicked: notifications' is visible"
+
+  # ── Click a div-based card ──────────────────────────────────────
+  - intent: Click on the Project Alpha card
+    action: click
+    timeout_ms: 5000
+
+  - VERIFY: "The text 'Last clicked: card' is visible"
+
+  # ── Click a small badge element ────────────────────────────────
+  - intent: Click on the badge showing the number 3 next to Settings
+    action: click
+    timeout_ms: 5000
+
+  - VERIFY: "The text 'Last clicked: badge' is visible"
