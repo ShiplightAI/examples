@@ -29,10 +29,10 @@ cp .env.example .env
 Edit `.env` and add your API key:
 
 ```
-ANTHROPIC_API_KEY=your-anthropic-api-key
+GOOGLE_API_KEY=your-google-api-key
 ```
 
-Get your key from: https://console.anthropic.com/settings/keys
+Get your key from: https://aistudio.google.com/apikey
 
 ## Running Examples
 
@@ -74,9 +74,9 @@ Examples use the Sauce Labs demo site (public):
 import { createAgent, configureSdk } from '@shiplightai/sdk';
 
 configureSdk({
-  env: { ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY },
+  env: { GOOGLE_API_KEY: process.env.GOOGLE_API_KEY },
 });
-const agent = createAgent({ model: 'claude-haiku-4-5' });
+const agent = createAgent({ model: 'gemini-2.5-pro' });
 ```
 
 ### Core Methods

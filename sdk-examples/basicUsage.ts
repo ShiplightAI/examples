@@ -15,7 +15,7 @@
  * - agent.extract() - Extract data into a variable
  *
  * Prerequisites:
- * - Set ANTHROPIC_API_KEY in .env file or environment variable
+ * - Set GOOGLE_API_KEY in .env file or environment variable
  * - Install playwright: pnpm add playwright
  */
 
@@ -24,15 +24,15 @@ import { chromium } from 'playwright';
 import { createAgent, configureSdk, LogLevel } from '@shiplightai/sdk';
 
 // Configure SDK with API key
-const apiKey = process.env.ANTHROPIC_API_KEY;
+const apiKey = process.env.GOOGLE_API_KEY;
 if (!apiKey) {
-  console.error('Error: ANTHROPIC_API_KEY not set');
-  console.log('   Add to .env file or get your key from: https://console.anthropic.com/settings/keys');
+  console.error('Error: GOOGLE_API_KEY not set');
+  console.log('   Add to .env file or get your key from: https://aistudio.google.com/apikey');
   process.exit(1);
 }
 configureSdk({
   logLevel: LogLevel.INFO,
-  env: { ANTHROPIC_API_KEY: apiKey },
+  env: { GOOGLE_API_KEY: apiKey },
 });
 
 async function basicExample() {
@@ -43,7 +43,7 @@ async function basicExample() {
 
   // Create an agent with variables
   const agent = createAgent({
-    model: 'claude-haiku-4-5',
+    model: 'gemini-2.5-pro',
     variables: {
       username: 'testuser@example.com',
       password: 'secret123',
@@ -53,7 +53,7 @@ async function basicExample() {
 
   try {
     console.log('=== Basic Usage Example ===');
-    console.log('Model: claude-haiku-4-5\n');
+    console.log('Model: gemini-2.5-pro\n');
 
     // Navigate to a website
     await page.goto('https://example.com');

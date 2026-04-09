@@ -13,7 +13,7 @@
  * - File operations (upload, download validation)
  *
  * Prerequisites:
- * - Set ANTHROPIC_API_KEY in .env file or environment variable
+ * - Set GOOGLE_API_KEY in .env file or environment variable
  */
 
 import 'dotenv/config';
@@ -21,13 +21,13 @@ import { chromium } from 'playwright';
 import { createAgent, z, configureSdk } from '@shiplightai/sdk';
 
 // Configure SDK with API key
-const apiKey = process.env.ANTHROPIC_API_KEY;
+const apiKey = process.env.GOOGLE_API_KEY;
 if (!apiKey) {
-  console.error('Error: ANTHROPIC_API_KEY not set');
-  console.log('   Add to .env file or get your key from: https://console.anthropic.com/settings/keys');
+  console.error('Error: GOOGLE_API_KEY not set');
+  console.log('   Add to .env file or get your key from: https://aistudio.google.com/apikey');
   process.exit(1);
 }
-configureSdk({ env: { ANTHROPIC_API_KEY: apiKey } });
+configureSdk({ env: { GOOGLE_API_KEY: apiKey } });
 
 async function customActionsExample() {
   const browser = await chromium.launch({ headless: false });
@@ -35,7 +35,7 @@ async function customActionsExample() {
   const page = await context.newPage();
 
   const agent = createAgent({
-    model: 'claude-haiku-4-5',
+    model: 'gemini-2.5-pro',
     variables: {
       testEmail: 'user@example.com',
     },
@@ -111,7 +111,7 @@ async function customActionsExample() {
 
   try {
     console.log('=== Custom Actions Example ===');
-    console.log('Model: claude-haiku-4-5\n');
+    console.log('Model: gemini-2.5-pro\n');
 
     await page.goto('https://example.com');
 

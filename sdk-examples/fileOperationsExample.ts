@@ -8,7 +8,7 @@
  * Test site: https://the-internet.herokuapp.com/upload
  *
  * Prerequisites:
- * - Set ANTHROPIC_API_KEY in .env file or environment variable
+ * - Set GOOGLE_API_KEY in .env file or environment variable
  */
 
 import 'dotenv/config';
@@ -22,13 +22,13 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // Configure SDK with API key
-const apiKey = process.env.ANTHROPIC_API_KEY;
+const apiKey = process.env.GOOGLE_API_KEY;
 if (!apiKey) {
-  console.error('Error: ANTHROPIC_API_KEY not set');
-  console.log('   Add to .env file or get your key from: https://console.anthropic.com/settings/keys');
+  console.error('Error: GOOGLE_API_KEY not set');
+  console.log('   Add to .env file or get your key from: https://aistudio.google.com/apikey');
   process.exit(1);
 }
-configureSdk({ env: { ANTHROPIC_API_KEY: apiKey } });
+configureSdk({ env: { GOOGLE_API_KEY: apiKey } });
 
 async function fileUploadExample() {
   // Create a test file for upload
@@ -47,13 +47,13 @@ async function fileUploadExample() {
 
   // Create agent with testDataDir - files referenced in instructions are resolved from here
   const agent = createAgent({
-    model: 'claude-haiku-4-5',
+    model: 'gemini-2.5-pro',
     testDataDir: testDir,
   });
 
   try {
     console.log('=== File Upload Example ===');
-    console.log('Model: claude-haiku-4-5\n');
+    console.log('Model: gemini-2.5-pro\n');
 
     console.log('1. Navigating to upload test page...');
     await page.goto('https://the-internet.herokuapp.com/upload');
