@@ -369,6 +369,8 @@ statements:
 **Notes:**
 - The code runs in the Playwright test context (Node.js), not in the browser. Use `page.evaluate()` for browser-context code.
 - `page`, `agent`, and `expect` are available in scope.
+- `js:` is meaningful only as a code statement on its own (`description: + js:`) or as a `VERIFY:` assertion cache. On any other structured `action:`, the `js:` is ignored — the action runs as defined.
+- The debugger's flat statement box shows only the `js:` body (the `description:` is rendered separately in the UI). If you copy that snippet into a `.test.yaml` file, re-add a `description:` — otherwise the label defaults to `Code block`.
 
 ### 4.9 WAIT_UNTIL (Shorthand)
 
