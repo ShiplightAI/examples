@@ -23,7 +23,8 @@ suite:
     - name: View product details
       statements:
         - intent: Click the first product name
-          js: "await page.locator('.inventory_item_name').first().click()"
+          action: click
+          locator: "locator('.inventory_item_name').first()"
         - VERIFY: The product detail page is displayed
           js: "await expect(page.locator('.inventory_details_name')).toBeVisible({ timeout: 2000 })"
 

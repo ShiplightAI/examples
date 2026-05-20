@@ -19,9 +19,10 @@ statements:
   - VERIFY: There are 6 inventory items
     js: "await expect(page.locator('.inventory_item')).toHaveCount(6, { timeout: 2000 })"
 
-  # Add an item to cart using js: shorthand
+  # Add an item to cart with a structured click action
   - intent: Add Sauce Labs Backpack to cart
-    js: "await page.locator('[data-test=\"add-to-cart-sauce-labs-backpack\"]').click()"
+    action: click
+    locator: "locator('[data-test=\"add-to-cart-sauce-labs-backpack\"]')"
 
   # Enriched VERIFY — checks the cart badge
   - VERIFY: The shopping cart badge shows 1

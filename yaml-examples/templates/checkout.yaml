@@ -24,4 +24,5 @@ statements:
     text: "<<zip_code>>"
 
   - intent: Click Continue
-    js: "await page.getByRole('button', { name: 'Continue' }).click()"
+    action: click
+    locator: "getByRole('button', { name: 'Continue' })"

@@ -1,6 +1,6 @@
 # YAML Test Language Specification
 
-**Version:** 1.3.0
+**Version:** 1.4.0
 **Status:** Living document — source of truth for the Shiplight YAML test format
 
 > **Design principle:** This YAML format is designed for **coding agents to read and write**. The syntax is for humans to **read and understand**, not intended for humans to write directly.
@@ -20,7 +20,7 @@
    - [STEP](#45-step)
    - [IF_ELSE](#46-if_else)
    - [WHILE_LOOP](#47-while_loop)
-   - [CODE](#48-code-shorthand)
+   - [Code](#48-code)
    - [WAIT_UNTIL](#49-wait_until-shorthand)
    - [WAIT](#410-wait-shorthand)
 5. [Templates](#5-templates)
@@ -40,7 +40,7 @@ A Shiplight YAML test file (`.test.yaml`) defines one or more end-to-end tests. 
 
 **Key concepts:**
 - **DRAFT** statements are natural language instructions resolved by AI at runtime (~5-10s each).
-- **ACTION** statements are enriched DRAFTs with an `intent` and a cache (`action:`/`locator:` or `js:`) for deterministic replay (<1s each). When the cache fails, the agent auto-heals using the intent.
+- **ACTION** statements are enriched DRAFTs with an `intent` and a cache (`action:`/`locator:`) for deterministic replay (<1s each). When the cache fails, the agent auto-heals using the intent.
 - **Suites** group multiple tests in one file with shared hooks and sequential execution.
 - **Lifecycle hooks** (`beforeAll`, `afterAll`, `beforeEach`, `afterEach`) handle setup and cleanup.
 - **Parameterized tests** generate multiple test instances from data sets using `<<variable>>` substitution.
@@ -108,7 +108,7 @@ Statements are the building blocks of a test. Each statement has a `type` (infer
 | Type | Enriched? | Description |
 |---|---|---|
 | `DRAFT` | No | Natural language instruction. Requires AI agent execution at runtime. |
-| `ACTION` | Yes | Enriched with a cache (`action:`/`locator:` or `js:`) for deterministic replay. |
+| `ACTION` | Yes | Enriched with a cache (`action:`/`locator:`) for deterministic replay. |
 | `STEP` | Yes | A multi-action container — groups multiple child statements (ACTIONs, DRAFTs, etc.). |
 
 A DRAFT is not yet enriched. When the AI agent executes a DRAFT, it enriches into either an ACTION (single action produced) or a STEP (multiple actions produced). ACTIONs and STEPs are already enriched and replay deterministically.
@@ -120,12 +120,11 @@ A DRAFT is not yet enriched. When the AI agent executes a DRAFT, it enriches int
 | `VERIFY: ...` | `ACTION` | Assertion shorthand |
 | `URL: ...` | `ACTION` (go_to_url) | Navigation shorthand (auto-generates `action_entity`) |
 | `intent` only | `DRAFT` | Natural language instruction in object form |
-| Object with `intent` + `js` | `ACTION` | Deterministic action with Playwright code cache. Self-heals via `intent` when `js` fails. |
 | Object with `action` key | `ACTION` | Deterministic browser action |
 | `STEP: ...` + `statements:` | `STEP` | Group of related statements |
 | `IF: ...` + `THEN: ...` | `IF_ELSE` | Conditional execution |
 | `WHILE: ...` + `DO: ...` | `WHILE_LOOP` | Loop with timeout |
-| `CODE: ...` | `ACTION` | Inline JavaScript/code block |
+| `description:` + `js:` | `ACTION` | Inline JavaScript escape hatch (no self-healing) |
 | `WAIT_UNTIL: ...` | `ACTION` (ai_wait_until) | AI-powered condition wait with timeout |
 | `WAIT: ...` | `ACTION` (wait) | Fixed duration wait (use sparingly) |
 | `template: ...` | *(inlined)* | Expanded before parsing — not a statement type |
@@ -150,11 +149,11 @@ statements:
 
 ### 4.2 ACTION
 
-An enriched browser action that replays deterministically (<1s). Every ACTION has an `intent` that defines _what_ the action does. The `action`/`locator` or `js` fields are **caches** of _how_ to do it. When a cache fails (stale locator, changed DOM), the agent self-heals by using the intent to re-inspect the page and regenerate the action.
+An enriched browser action that replays deterministically (<1s). Every ACTION has an `intent` that defines _what_ the action does. The `action`/`locator` fields are **caches** of _how_ to do it. When a cache fails (stale locator, changed DOM), the agent self-heals by using the intent to re-inspect the page and regenerate the action.
 
-Two syntax forms. In YAML, the presence of `action` or `js` key distinguishes an ACTION from a DRAFT — an `intent`-only object is parsed as a DRAFT.
+In YAML, the presence of an `action` key distinguishes an ACTION from a DRAFT — an `intent`-only object is parsed as a DRAFT. (For one-off Playwright code that has no named action, use the [Code](#48-code) escape hatch — but note it does **not** self-heal.)
 
-**Structured format** (preferred) — named action with parameters. All fields other than `intent`, `action`, `locator`, `xpath` are passed as arguments to the action. See `shiplight://schemas/action-entity` for available actions and their parameters.
+**Structured format** — named action with parameters. All fields other than `intent`, `action`, `locator`, `xpath` are passed as arguments to the action. See `shiplight://schemas/action-entity` for available actions and their parameters.
 
 ```yaml
 statements:
@@ -173,26 +172,14 @@ statements:
     text: "United States"
 ```
 
-**`js:` shorthand** — a complete, executable Playwright statement for operations that don't map to a supported action. `page`, `agent`, and `expect` are available in scope.
-
-```yaml
-statements:
-  - intent: Drag slider to 50% position
-    js: "await page.getByRole('slider').first().fill('50')"
-
-  - intent: Wait for network idle after form submit
-    js: "await page.waitForLoadState('networkidle')"
-```
-
 **Fields:**
 
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `intent` | `string` | Yes | Human-readable intent (used for self-healing). |
-| `js` | `string` | `js:` form | Complete, executable Playwright statement. |
-| `action` | `string` | Structured form | Action name. See `shiplight://schemas/action-entity` for available actions. |
+| `action` | `string` | Yes | Action name. See `shiplight://schemas/action-entity` for available actions. |
 | `locator` | `string` | No | Playwright locator string. |
-| `xpath` | `string` | No | XPath selector. Only needed when an ACTION has neither `locator` nor `js`. |
+| `xpath` | `string` | No | XPath selector. Only needed when an ACTION has neither `locator` nor a named target. |
 
 **Performance:** ~1 second (deterministic replay).
 
@@ -222,7 +209,7 @@ When the optional `js` sibling key is present, it acts as a code cache for the a
 - **`js` only:** Runs the JS assertion directly (<1s). No AI fallback.
 - **Both `js` and `statement` (enriched):** Runs `js` first. If it fails, falls back to AI evaluation of `statement` (self-healing). The `js` cache is written by AI agents during enrichment, not by humans.
 
-**Quoting rules:** Same as `CODE:` and `IF:`/`WHILE:` — quote the value when it contains special YAML characters (`{`, `}`, `:`, `#`, etc.).
+**Quoting rules:** Same as `js:` and `IF:`/`WHILE:` — quote the value when it contains special YAML characters (`{`, `}`, `:`, `#`, etc.).
 
 ---
 
@@ -346,27 +333,38 @@ statements:
 
 ---
 
-### 4.8 CODE (Shorthand)
+### 4.8 Code
 
-An ergonomic shorthand for inline code execution. Useful for network mocking, localStorage manipulation, and other page-level scripting. No self-healing — if the code fails, it fails.
+The escape hatch for inline Playwright code that doesn't map to a named action — network mocking, localStorage manipulation, and other page-level scripting. A code statement is a `js:` body, optionally labeled with a `description:` (what the code does). Always write the `description:` — it's optional only so tools can round-trip code blocks, but it makes reports readable.
+
+**No self-healing.** Unlike an ACTION, a code statement runs its `js` verbatim; if it fails, it fails. The `description` is informational only — it is **not** a re-resolvable intent.
 
 **Syntax — single-line:**
 
 ```yaml
 statements:
-  - CODE: "await page.route('**/api', r => r.abort())"
+  - description: Abort all API requests
+    js: "await page.route('**/api', r => r.abort())"
 ```
 
 **Syntax — multiline (block scalar):**
 
 ```yaml
 statements:
-  - CODE: |
+  - description: Mock the users API to return a single user
+    js: |
       await page.route('**/api/users', (route) => route.fulfill({
         status: 200,
         body: JSON.stringify([{ name: 'John' }]),
       }));
 ```
+
+**Fields:**
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `description` | `string` | No | What the code does. Labels the step; informational only (no self-healing). Recommended for readable reports; defaults to a generic label if omitted. |
+| `js` | `string` | Yes | Complete, executable Playwright code (single line or block scalar). |
 
 **Notes:**
 - The code runs in the Playwright test context (Node.js), not in the browser. Use `page.evaluate()` for browser-context code.
@@ -592,7 +590,7 @@ teardown:
 ```
 
 **Rules:**
-- Teardown uses the same statement syntax as `statements` (DRAFT, ACTION, VERIFY, URL, STEP, IF_ELSE, WHILE_LOOP, CODE, js:, template).
+- Teardown uses the same statement syntax as `statements` (DRAFT, ACTION, VERIFY, URL, STEP, IF_ELSE, WHILE_LOOP, code (`description:` + `js:`), template).
 - Teardown always runs, regardless of test success or failure.
 - Teardown is separate from lifecycle hooks (see [Lifecycle Hooks](#10-lifecycle-hooks)).
 
@@ -742,7 +740,7 @@ Since `beforeAll` and `afterAll` use worker-scoped fixtures without an agent, th
 
 ### 10.5 Hook Statement Types
 
-Hook statement arrays use the same syntax as regular `statements`. Templates are expanded in hooks. All statement types (DRAFT, ACTION, VERIFY, URL, STEP, IF_ELSE, WHILE_LOOP, CODE, js:, template) are syntactically valid, though DRAFT and AI-based statements are skipped in `beforeAll`/`afterAll`.
+Hook statement arrays use the same syntax as regular `statements`. Templates are expanded in hooks. All statement types (DRAFT, ACTION, VERIFY, URL, STEP, IF_ELSE, WHILE_LOOP, code (`description:` + `js:`), template) are syntactically valid, though DRAFT and AI-based statements are skipped in `beforeAll`/`afterAll`.
 
 ---
 

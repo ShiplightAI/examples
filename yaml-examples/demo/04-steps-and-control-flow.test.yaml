@@ -9,7 +9,8 @@ statements:
   - STEP: Add a product to the cart
     statements:
       - intent: Add Sauce Labs Backpack to cart
-        js: "await page.getByRole('button', { name: 'Add to cart' }).first().click()"
+        action: click
+        locator: "getByRole('button', { name: 'Add to cart' }).first()"
       - VERIFY: The shopping cart badge shows 1
         js: "await expect(page.locator('[data-test=\"shopping-cart-badge\"]')).toHaveText('1', { timeout: 2000 })"
 
@@ -17,7 +18,8 @@ statements:
   - IF: The shopping cart badge shows a number greater than 0
     THEN:
       - intent: Click the shopping cart icon
-        js: "await page.locator('[data-test=\"shopping-cart-link\"]').click()"
+        action: click
+        locator: "locator('[data-test=\"shopping-cart-link\"]')"
       - VERIFY: The cart page is displayed with items
         js: "await expect(page.locator('.cart_item')).toHaveCount(1, { timeout: 2000 })"
     ELSE:
@@ -29,11 +31,13 @@ statements:
       - STEP: Proceed to checkout
         statements:
           - intent: Click the Checkout button
-            js: "await page.getByRole('button', { name: 'Checkout' }).click()"
+            action: click
+            locator: "getByRole('button', { name: 'Checkout' })"
           - VERIFY: The checkout information page is displayed
             js: "await expect(page.getByText('Checkout: Your Information')).toBeVisible({ timeout: 2000 })"
           - intent: Click the Cancel button
-            js: "await page.getByRole('button', { name: 'Cancel' }).click()"
+            action: click
+            locator: "getByRole('button', { name: 'Cancel' })"
           - VERIFY: The cart page is displayed
             js: "await expect(page.getByText('Your Cart')).toBeVisible({ timeout: 2000 })"
 
@@ -49,7 +53,8 @@ statements:
   - WHILE: "js: (await page.locator('button:has-text(\"Add to cart\")').count()) > 0"
     DO:
       - intent: Click the first Add to cart button
-        js: "await page.locator('button:has-text(\"Add to cart\")').first().click()"
+        action: click
+        locator: "locator('button:has-text(\"Add to cart\")').first()"
     timeout_ms: 30000
 
   - VERIFY: All 6 products are in the cart

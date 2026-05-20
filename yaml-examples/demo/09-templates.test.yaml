@@ -9,13 +9,16 @@ statements:
   - URL: /inventory.html
 
   - intent: Add Sauce Labs Backpack to cart
-    js: "await page.getByRole('button', { name: 'Add to cart' }).first().click()"
+    action: click
+    locator: "getByRole('button', { name: 'Add to cart' }).first()"
 
   - intent: Click the shopping cart icon
-    js: "await page.locator('[data-test=\"shopping-cart-link\"]').click()"
+    action: click
+    locator: "locator('[data-test=\"shopping-cart-link\"]')"
 
   - intent: Click the Checkout button
-    js: "await page.getByRole('button', { name: 'Checkout' }).click()"
+    action: click
+    locator: "getByRole('button', { name: 'Checkout' })"
 
   - template: ../templates/checkout.yaml
     params:
@@ -27,7 +30,8 @@ statements:
     js: "await expect(page.getByText('Checkout: Overview')).toBeVisible({ timeout: 2000 })"
 
   - intent: Click the Finish button
-    js: "await page.getByRole('button', { name: 'Finish' }).click()"
+    action: click
+    locator: "getByRole('button', { name: 'Finish' })"
 
   - VERIFY: The order confirmation page is displayed
     js: "await expect(page.getByText('Thank you for your order')).toBeVisible({ timeout: 2000 })"

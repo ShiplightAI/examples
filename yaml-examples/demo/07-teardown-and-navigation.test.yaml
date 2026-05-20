@@ -14,7 +14,8 @@ statements:
 
   # Navigate to a product
   - intent: Click the first product name
-    js: "await page.locator('.inventory_item_name').first().click()"
+    action: click
+    locator: "locator('.inventory_item_name').first()"
 
   - VERIFY: The product detail page is displayed
     js: "await expect(page.locator('.inventory_details_name')).toBeVisible({ timeout: 2000 })"
@@ -32,9 +33,9 @@ statements:
   - VERIFY: The cart page is displayed
     js: "await expect(page.getByText('Your Cart')).toBeVisible({ timeout: 2000 })"
 
-  # reload via js: shorthand
+  # reload via the reload_page action
   - intent: Reload the page
-    js: "await page.reload({ waitUntil: 'domcontentloaded' })"
+    action: reload_page
 
   - VERIFY: The cart page is still displayed after reload
     js: "await expect(page.getByText('Your Cart')).toBeVisible({ timeout: 2000 })"
@@ -45,7 +46,9 @@ statements:
 teardown:
   # Teardown runs even if the test fails — use it for cleanup
   - intent: Open the sidebar menu
-    js: "await page.getByRole('button', { name: 'Open Menu' }).click()"
+    action: click
+    locator: "getByRole('button', { name: 'Open Menu' })"
 
   - intent: Click Reset App State
-    js: "await page.getByText('Reset App State').click()"
+    action: click
+    locator: "getByText('Reset App State')"

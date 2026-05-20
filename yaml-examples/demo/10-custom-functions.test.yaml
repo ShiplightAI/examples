@@ -8,10 +8,12 @@ statements:
   - URL: /inventory.html
 
   - intent: Add Sauce Labs Backpack to cart
-    js: "await page.locator('[data-test=\"add-to-cart-sauce-labs-backpack\"]').click()"
+    action: click
+    locator: "locator('[data-test=\"add-to-cart-sauce-labs-backpack\"]')"
 
   - intent: Add Sauce Labs Bike Light to cart
-    js: "await page.locator('[data-test=\"add-to-cart-sauce-labs-bike-light\"]').click()"
+    action: click
+    locator: "locator('[data-test=\"add-to-cart-sauce-labs-bike-light\"]')"
 
   # System object: page is passed as the Playwright Page object
   - intent: Check the cart count with a custom function
@@ -38,7 +40,8 @@ statements:
   #   args: [page, $savedEmail]
 
   - intent: Click the shopping cart icon
-    js: "await page.locator('[data-test=\"shopping-cart-link\"]').click()"
+    action: click
+    locator: "locator('[data-test=\"shopping-cart-link\"]')"
 
   - VERIFY: The cart is empty
     js: "await expect(page.locator('.cart_item')).toHaveCount(0, { timeout: 2000 })"

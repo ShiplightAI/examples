@@ -1,7 +1,7 @@
-# 14 — CODE Statement
-# Demonstrates: CODE shorthand for inline JavaScript
-# Use CODE: for network mocking, localStorage manipulation,
-# and other page-level scripting.
+# 14 — Code Statement
+# Demonstrates: description: + js: for inline JavaScript
+# Use it for network mocking, localStorage manipulation, and other
+# page-level scripting. Raw JS does not self-heal — if it fails, it fails.
 
 goal: Verify page renders correctly with mocked data and localStorage
 
@@ -9,7 +9,8 @@ statements:
   - URL: /inventory.html
 
   # Mock an API endpoint — multiline block scalar
-  - CODE: |
+  - description: Mock the users API to return two users
+    js: |
       await page.route('**/api/users', (route) => route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -20,7 +21,8 @@ statements:
       }));
 
   # Seed localStorage — single-line
-  - CODE: "await page.evaluate(() => localStorage.setItem('feature_beta', 'true'))"
+  - description: Seed a feature flag in localStorage
+    js: "await page.evaluate(() => localStorage.setItem('feature_beta', 'true'))"
 
   # Reload to pick up mocked data and localStorage values
   - URL: /inventory.html
@@ -29,6 +31,7 @@ statements:
     js: "await expect(page.getByText('Products')).toBeVisible({ timeout: 2000 })"
 
   # Inline JS for quick assertions
-  - CODE: |
+  - description: Assert the page title contains Swag Labs
+    js: |
       const title = await page.title();
       expect(title).toContain('Swag Labs');

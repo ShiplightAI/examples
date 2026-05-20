@@ -24,10 +24,12 @@ statements:
     js: "await expect(page.locator('.inventory_item').first()).toBeVisible({ timeout: 2000 })"
 
   - intent: Add Sauce Labs Backpack to cart
-    js: "await page.getByRole('button', { name: 'Add to cart' }).first().click()"
+    action: click
+    locator: "getByRole('button', { name: 'Add to cart' }).first()"
 
   - intent: Click the shopping cart icon
-    js: "await page.locator('[data-test=\"shopping-cart-link\"]').click()"
+    action: click
+    locator: "locator('[data-test=\"shopping-cart-link\"]')"
 
   - VERIFY: The cart contains the selected product
     js: "await expect(page.locator('.cart_item')).toHaveCount(1, { timeout: 2000 })"

@@ -18,7 +18,7 @@ statements:
   - URL: /inventory.html
 
   # ── Save a variable using js: ─────────────────────────────────
-  - intent: Save the product count to a variable
+  - description: Save the product count to a variable
     js: |
       const count = await page.locator('.inventory_item').count();
       agent.agentServices.saveVariable('product_count', String(count));
@@ -29,12 +29,13 @@ statements:
   - IF: "js: (await agent.agentServices.readVariable('product_count')) === '6'"
     THEN:
       - intent: Add Sauce Labs Backpack to cart
-        js: "await page.getByRole('button', { name: 'Add to cart' }).first().click()"
+        action: click
+        locator: "getByRole('button', { name: 'Add to cart' }).first()"
       - VERIFY: Cart badge shows 1
         js: "await expect(page.locator('[data-test=\"shopping-cart-badge\"]')).toHaveText('1', { timeout: 2000 })"
 
   # ── Save cart count for loop ──────────────────────────────────
-  - intent: Save how many items are in the cart
+  - description: Save how many items are in the cart
     js: "agent.agentServices.saveVariable('items_added', '1');"
 
   # ── WHILE with js: condition reading a variable ───────────────
@@ -42,8 +43,9 @@ statements:
   - WHILE: "js: Number(agent.agentServices.readVariable('items_added')) < 3"
     DO:
       - intent: Add the next product to the cart
-        js: "await page.locator('button:has-text(\"Add to cart\")').first().click()"
-      - intent: Increment items_added
+        action: click
+        locator: "locator('button:has-text(\"Add to cart\")').first()"
+      - description: Increment items_added
         js: |
           const current = Number(agent.agentServices.readVariable('items_added'));
           agent.agentServices.saveVariable('items_added', String(current + 1));

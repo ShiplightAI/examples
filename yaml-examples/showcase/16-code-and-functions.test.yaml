@@ -4,7 +4,7 @@
 # and inline JavaScript code execution.
 #
 # The `call:` syntax invokes a function from a helper file.
-# The `CODE:` shorthand runs inline JavaScript directly.
+# The `description: + js:` form runs inline JavaScript directly.
 # Cloud test case ID: 258
 
 test_case_id: 258
@@ -19,7 +19,8 @@ statements:
     call: "../helpers/navigate_to.ts#navigate_to"
     args: [page, "https://www.google.com"]
 
-  # Use inline CODE to go back
-  - CODE: |
+  # Use inline code to go back
+  - description: Go back to the previous page
+    js: |
       await page.goBack({ timeout: 5000 });
       await page.waitForLoadState('load', { timeout: 5000 });

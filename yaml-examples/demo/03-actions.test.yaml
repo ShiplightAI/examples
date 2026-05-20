@@ -1,7 +1,7 @@
 # 03 — ACTION Statements
 # Demonstrates: structured action syntax with locator/xpath, various action types
 # Actions replay deterministically (~1s each) without AI interpretation.
-# For simple click/hover/press, prefer the js: shorthand (see 01-basic).
+# Every action pairs an `intent` with a `locator`/`xpath` cache that self-heals.
 
 goal: Add items to cart and verify using action entities
 
@@ -40,8 +40,9 @@ statements:
   - VERIFY: The shopping cart badge shows the number 2
     js: "await expect(page.locator('[data-test=\"shopping-cart-badge\"]')).toHaveText('2', { timeout: 2000 })"
 
-  # click — navigate to cart (js: shorthand for comparison)
+  # click — navigate to cart
   - intent: Click the shopping cart icon
-    js: "await page.locator('[data-test=\"shopping-cart-link\"]').click()"
+    action: click
+    locator: "locator('[data-test=\"shopping-cart-link\"]')"
 
   - VERIFY: Sauce Labs Backpack and Sauce Labs Bike Light are in the cart
