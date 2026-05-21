@@ -1,7 +1,6 @@
 name: YAML Examples Tests
 
 on:
-  workflow_dispatch:
   push:
     branches: [main]
     paths:
@@ -10,29 +9,46 @@ on:
     branches: [main]
     paths:
       - 'yaml-examples/**'
+  workflow_dispatch: {}
+
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
+  e2e:
+    name: E2E demo tests
+    runs-on: shiplight-medium
     timeout-minutes: 30
-    defaults:
-      run:
-        working-directory: yaml-examples
 
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
+      - uses: actions/checkout@v5
 
       - name: Install dependencies
+        working-directory: yaml-examples
         run: npm install
 
-      - name: Install Chromium
-        run: npx playwright install chromium
-
       - name: Run demo tests
-        env:
-          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+        id: tests
+        continue-on-error: true
+        working-directory: yaml-examples
         run: npx shiplight test --project demo
+
+      - name: Upload results to Shiplight
+        if: always() && steps.tests.outcome != 'skipped'
+        working-directory: yaml-examples
+        run: npx shiplight report
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-report
+          if-no-files-found: ignore
+          path: |
+            yaml-examples/shiplight-report
+            yaml-examples/test-results
+
+      - name: Fail if tests failed
+        if: steps.tests.outcome == 'failure'
+        run: exit 1
