@@ -6,11 +6,11 @@
 #   Each parameter name is also emitted as a Playwright tag (@<name>), so you
 #   select one variant with --grep '@<name>':
 #
-#     shiplight test --grep '@backpack'       # run only the backpack variant
-#     shiplight test --grep '@bike light'     # run only the bike light variant
+#     npx shiplight test --grep '@backpack'       # run only the backpack variant
+#     npx shiplight test --grep '@bike light'     # run only the bike light variant
 #
 #   Combine with the file path to scope to this file + one variant:
-#     shiplight test demo/13-parameterized-tests.test.yaml --grep '@backpack'
+#     npx shiplight test demo/13-parameterized-tests.test.yaml --grep '@bike light'
 
 name: Add product to cart
 goal: Add various products to cart using parameters
