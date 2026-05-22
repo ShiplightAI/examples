@@ -1,6 +1,16 @@
 # 13 — Parameterized Tests
 # Demonstrates: parameters with <<key>> substitution
-# Each parameter set generates a separate test run.
+# Each parameter set generates a separate test run, named "<test name> [<param name>]".
+#
+# Running a single parameter:
+#   Each parameter name is also emitted as a Playwright tag (@<name>), so you
+#   select one variant with --grep '@<name>':
+#
+#     shiplight test --grep '@backpack'       # run only the backpack variant
+#     shiplight test --grep '@bike light'     # run only the bike light variant
+#
+#   Combine with the file path to scope to this file + one variant:
+#     shiplight test demo/13-parameterized-tests.test.yaml --grep '@backpack'
 
 name: Add product to cart
 goal: Add various products to cart using parameters
