@@ -43,7 +43,7 @@ A Shiplight YAML test file (`.test.yaml`) defines one or more end-to-end tests. 
 - **ACTION** statements are enriched DRAFTs with an `intent` and a cache (`action:`/`locator:`) for deterministic replay (<1s each). When the cache fails, the agent auto-heals using the intent.
 - **Suites** group multiple tests in one file with shared hooks and sequential execution.
 - **Lifecycle hooks** (`beforeAll`, `afterAll`, `beforeEach`, `afterEach`) handle setup and cleanup.
-- **Parameterized tests** generate multiple test instances from data sets using `<<variable>>` substitution.
+- **Parameterized tests** generate multiple test instances from data sets using `{{variable}}` runtime variables.
 - The transpiler produces standalone Playwright tests — no runtime YAML dependency.
 
 ---
@@ -570,10 +570,10 @@ At runtime, `{{userEmail}}` is replaced with the actual value before the action 
 
 ### 7.4 Template Params vs Runtime Variables
 
-- **Template params** use `<<paramName>>` syntax and are substituted at compile time (template expansion / parameterized tests).
-- **Runtime variables** use `{{VAR}}` syntax and are resolved at runtime from the project's variables or values saved during the test.
-- The two syntaxes are distinct — `<<param>>` is always resolved before parsing, `{{VAR}}` always passes through to runtime.
-- Param values can contain `{{RUNTIME_VAR}}` — these pass through template expansion unchanged and get resolved at runtime.
+- **Template params** use `<<paramName>>` syntax and are substituted at compile time during template expansion only.
+- **Runtime variables** use `{{VAR}}` syntax and are resolved at runtime from the project's variables, parameterized test values, or values saved during the test.
+- **Parameterized tests** use `{{VAR}}` syntax (same as runtime variables). Parameter values are set as runtime variables at the start of each test instance.
+- The `<<param>>` syntax is reserved for template files only. In all other contexts (including parameterized tests), use `{{VAR}}`.
 
 ---
 
@@ -748,29 +748,30 @@ Hook statement arrays use the same syntax as regular `statements`. Templates are
 
 ## 11. Parameterized Tests
 
-Parameters generate multiple test instances from data sets. Each parameter set produces a separate `test()` with `<<variable>>` placeholders substituted.
+Parameters generate multiple test instances from data sets. Each parameter set produces a separate `test()` with its values set as runtime variables. Use `{{variableName}}` syntax in statements to reference parameter values — the same syntax used for runtime variables (see [Variables](#7-variables)).
 
 ### 11.1 Single-Test Parameters
 
 ```yaml
-name: Add product to cart
+name: Search and verify product
 tags: [e2e, parameterized]
 
 parameters:
   - name: backpack
     values:
-      product_selector: "[data-test=\"add-to-cart-sauce-labs-backpack\"]"
       product_name: Sauce Labs Backpack
+      expected_price: "$29.99"
   - name: bike light
     values:
-      product_selector: "[data-test=\"add-to-cart-sauce-labs-bike-light\"]"
       product_name: Sauce Labs Bike Light
+      expected_price: "$9.99"
 
 statements:
-  - intent: Add product to cart
-    action: click
-    locator: "locator('<<product_selector>>')"
-  - VERIFY: <<product_name>> is in the cart
+  - intent: Search for product
+    action: input_text
+    locator: "getByPlaceholder('Search')"
+    text: "{{product_name}}"
+  - VERIFY: "{{product_name}} is visible with price {{expected_price}}"
 ```
 
 ### 11.2 Suite Test Parameters
@@ -787,7 +788,7 @@ suite:
         - name: editor
           values: { username: editor@test.com }
       statements:
-        - intent: "Enter <<username>>"
+        - intent: "Enter {{username}}"
         - VERIFY: logged in successfully
 ```
 
@@ -796,14 +797,14 @@ suite:
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `name` | `string` | Yes | Variant name. Appended to test title as `[name]`. |
-| `values` | `Record<string, string>` | Yes | Key-value pairs. Keys match `<<key>>` placeholders. |
+| `values` | `Record<string, string>` | Yes | Key-value pairs. Keys become runtime variables referenced via `{{key}}`. |
 
-### 11.4 Substitution Rules
+### 11.4 How Parameters Work
 
-- Substitution happens at transpile time, before code generation
-- The entire TestFlow is serialized → `<<key>>` replaced with the value → deserialized back
-- Each parameter set produces a completely independent test instance
-- `{{VAR}}` placeholders are unaffected by parameter substitution — they are resolved at runtime (see [Variables](#7-variables))
+- Each parameter set produces a separate test instance
+- At the start of each test, parameter values are saved as runtime variables via `agent.agentServices.saveVariable()`
+- `{{key}}` placeholders in statements are resolved at runtime from the variable store — the same mechanism used for pre-defined and dynamic variables
+- Parameter variables can be overridden by `save_variable` actions during the test, and they coexist with pre-defined variables from `playwright.config.ts`
 
 ### 11.5 Validation Rules
 
@@ -929,27 +930,28 @@ suite:
 ### 12.3 Parameterized Test
 
 ```yaml
-name: Add product to cart
+name: Search and verify product
 tags: [e2e, parameterized]
 
 parameters:
   - name: backpack
     values:
-      product_selector: "[data-test=\"add-to-cart-sauce-labs-backpack\"]"
       product_name: Sauce Labs Backpack
+      expected_price: "$29.99"
   - name: bike light
     values:
-      product_selector: "[data-test=\"add-to-cart-sauce-labs-bike-light\"]"
       product_name: Sauce Labs Bike Light
+      expected_price: "$9.99"
 
 statements:
-  - intent: Add product to cart
-    action: click
-    locator: "locator('<<product_selector>>')"
+  - intent: Search for product
+    action: input_text
+    locator: "getByPlaceholder('Search')"
+    text: "{{product_name}}"
 
-  - intent: Click cart icon
+  - intent: Click search button
     action: click
-    locator: "locator('[data-test=\"shopping-cart-link\"]')"
+    locator: "getByRole('button', { name: 'Search' })"
 
-  - VERIFY: <<product_name>> is in the cart
+  - VERIFY: "{{product_name}} is visible with price {{expected_price}}"
 ```
