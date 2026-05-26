@@ -12,29 +12,23 @@
 #   Combine with the file path to scope to this file + one variant:
 #     npx shiplight test demo/13-parameterized-tests.test.yaml --grep '@bike light'
 
-name: Add product to cart
-goal: Add various products to cart using parameters
+name: Search and verify product
 tags: [e2e, parameterized]
-
+goal: Search for products and verify they are displayed
 parameters:
   - name: backpack
     values:
-      product_selector: "[data-test=\"add-to-cart-sauce-labs-backpack\"]"
       product_name: Sauce Labs Backpack
+      expected_price: $29.99
   - name: bike light
     values:
-      product_selector: "[data-test=\"add-to-cart-sauce-labs-bike-light\"]"
       product_name: Sauce Labs Bike Light
-
+      expected_price: $9.99
 statements:
   - URL: /inventory.html
 
-  - intent: Add product to cart
-    action: click
-    locator: "locator('<<product_selector>>')"
+  - intent: Click the {{product_name}}
+    action: ai_action
+    use_pure_vision: false
 
-  - intent: Click cart icon
-    action: click
-    locator: "locator('[data-test=\"shopping-cart-link\"]')"
-
-  - VERIFY: "<<product_name>> is in the cart"
+  - VERIFY: "{{product_name}} is visible with price {{expected_price}}"
