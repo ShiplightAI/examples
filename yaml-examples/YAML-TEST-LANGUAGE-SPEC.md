@@ -366,11 +366,40 @@ statements:
 | `description` | `string` | No | What the code does. Labels the step; informational only (no self-healing). Recommended for readable reports; defaults to a generic label if omitted. |
 | `js` | `string` | Yes | Complete, executable Playwright code (single line or block scalar). |
 
-**Notes:**
-- The code runs in the Playwright test context (Node.js), not in the browser. Use `page.evaluate()` for browser-context code.
-- `page`, `agent`, and `expect` are available in scope.
-- `js:` is meaningful only as a code statement on its own (`description: + js:`) or as a `VERIFY:` assertion cache. On any other structured `action:`, the `js:` is ignored — the action runs as defined.
-- The debugger's flat statement box shows only the `js:` body (the `description:` is rendered separately in the UI). If you copy that snippet into a `.test.yaml` file, re-add a `description:` — otherwise the label defaults to `Code block`.
+**Execution context:**
+
+Code runs in the Playwright test context (Node.js). Use `page.evaluate()` for browser-context code.
+
+The following are in scope:
+
+| Identifier | Description |
+|---|---|
+| `page` | Playwright `Page` |
+| `expect` | Playwright assertion library |
+| `agent` | Shiplight `WebAgent` — see common methods below |
+| `testContext` / `$` / `ctx` | Three aliases for the runtime variable store (same store as `{{variableName}}` in YAML). Use `.get(key)` / `.set(key, value)` or property-style access. |
+| `request` | Playwright `APIRequestContext` — available when any statement in the file passes `request` as a function arg |
+
+`agent` common methods:
+
+```javascript
+await agent.assert(page, "The shopping cart shows 3 items");
+await agent.execute(page, "Click the Submit button");
+await agent.extract(page, "the order confirmation number", "orderNumber");
+await agent.waitForDownloadComplete(page, 10);
+const filePath = agent.getRecentDownloadedFilePath();
+```
+
+**Importing packages** — use dynamic import (static imports are not supported):
+
+```javascript
+const fs = await import("node:fs");
+const { v4: uuidv4 } = await import("uuid");
+```
+
+**Other notes:**
+- `js:` is meaningful only as a standalone code statement (`description:` + `js:`) or as a `VERIFY:` assertion cache. On any other `action:` statement, `js:` is ignored.
+- The debugger shows only the `js:` body; `description:` is rendered separately. If you copy a snippet from the debugger into a YAML file, re-add a `description:` — otherwise the label defaults to `Code block`.
 
 ### 4.9 WAIT_UNTIL (Shorthand)
 
