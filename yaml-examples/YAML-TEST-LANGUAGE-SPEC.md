@@ -377,7 +377,7 @@ The following are in scope:
 | `page` | Playwright `Page` |
 | `expect` | Playwright assertion library |
 | `agent` | Shiplight `WebAgent` — see common methods below |
-| `testContext` / `$` / `ctx` | Three aliases for the runtime variable store (same store as `{{variableName}}` in YAML). Use `.get(key)` / `.set(key, value)` or property-style access. |
+| `testContext` | The runtime variable store (same store as `{{variableName}}` in YAML). Use `.get(key)` / `.set(key, value)` or property-style access. |
 | `request` | Playwright `APIRequestContext` — available when any statement in the file passes `request` as a function arg |
 
 `agent` common methods:
