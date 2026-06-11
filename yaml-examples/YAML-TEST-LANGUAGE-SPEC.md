@@ -69,7 +69,7 @@ A file must be either a **single-test file** (with `goal`/`statements`) or a **s
 | Key | Type | Description |
 |---|---|---|
 | `goal` | `string` | Test objective. Becomes the Playwright test title if `name` is not set. Auto-derived from `name` if omitted. |
-| `statements` | `Statement[]` | Ordered list of test steps. See [Statements](#5-statements). |
+| `statements` | `Statement[]` | Ordered list of test steps. See [Statements](#4-statements). |
 
 ### Required Keys (Suite Files)
 
@@ -169,7 +169,7 @@ statements:
   - intent: Select country
     action: select_dropdown_option
     locator: "getByRole('combobox')"
-    text: "United States"
+    option: "United States"
 ```
 
 **Fields:**
@@ -644,7 +644,7 @@ suite:
         - intent: Sort by price low to high
           action: select_dropdown_option
           locator: "getByRole('combobox')"
-          text: "Price (low to high)"
+          option: "Price (low to high)"
         - VERIFY: Products are sorted by price ascending
 
     - name: View product details
