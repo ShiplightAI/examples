@@ -8,14 +8,12 @@
 # the obstruction, dismisses the modal, and retries the click —
 # all without explicit handling in the test.
 #
-# Requires: auto_dismiss_modal setting (cloud feature)
-# Cloud test case ID: 497
 
 test_case_id: 497
 goal: Demonstrate automatic modal dismissal
 base_url: https://app.shiplight.ai
-settings:
-  auto_dismiss_modal: true
+use:
+  autoDismissModal: true
 
 statements:
   - URL: /testing/modal/index.html
