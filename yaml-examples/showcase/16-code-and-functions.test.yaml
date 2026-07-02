@@ -16,7 +16,7 @@ statements:
 
   # Call a custom function to navigate
   - intent: Navigate to Google using custom function
-    call: "../helpers/navigate_to.ts#navigate_to"
+    call: "helpers/navigate_to.ts#navigate_to"
     args: [page, "https://www.google.com"]
 
   # Use inline code to go back
