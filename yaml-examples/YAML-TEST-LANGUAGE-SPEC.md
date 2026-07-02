@@ -500,7 +500,7 @@ Functions let you call custom TypeScript/JavaScript code from YAML tests. Like t
 ```yaml
 statements:
   - intent: Greet the user
-    call: "../helpers/utils.ts#greet_user"
+    call: "helpers/utils.ts#greet_user"
     args: [page, "hello"]
 ```
 
@@ -511,7 +511,7 @@ The `call` field is all that's needed — no `action: function` required. The tr
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `intent` | `string` | Yes | Human-readable intent (used for self-healing). |
-| `call` | `string` | Yes | `filePath#exportName` reference. Path is relative to the test file. |
+| `call` | `string` | Yes | `filePath#exportName` reference. Path is relative to the project root — including `./`-prefixed paths, which are no longer resolved relative to the YAML file's directory. Absolute paths are rejected with a runtime error. |
 | `args` | `string[]` | No | Arguments to pass to the function. Reads like the function's call signature. |
 
 ### 6.3 Function File Format
@@ -543,7 +543,8 @@ Each value in `args` is transpiled based on what it looks like:
 
 | Rule | Detail |
 |---|---|
-| Path resolution | Relative to the test file, not the project root |
+| Path resolution | Relative to the project root, regardless of whether the path is bare (`helpers/auth.ts`) or `./`-prefixed (`./helpers/auth.ts`) |
+| Absolute paths | Rejected with a runtime error — not supported |
 | Extension stripping | `.ts`/`.js`/`.mjs` is stripped in the generated import |
 | Async | Functions should be `async` — they are always `await`ed |
 | Statement type | Parsed as an `ACTION` — not a separate statement type |
