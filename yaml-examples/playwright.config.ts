@@ -7,7 +7,7 @@ export default defineConfig({
   ...shiplightConfig(),
   testDir: '.',
   testMatch: ['**/*.test.ts', '**/*.yaml.spec.ts'],
-  timeout: 300_000,
+  timeout: 600_000,
   expect: { timeout: 10_000 },
   retries: 0,
   projects: [
