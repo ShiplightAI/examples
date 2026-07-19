@@ -1,0 +1,35 @@
+# 19 — File Download
+#
+# Demonstrates file download handling with wait_for_download_complete.
+#
+# Clicks a button that generates a PDF after a 10-second delay, waits for
+# the download to finish (timeout must cover the delay), then verifies the
+# downloaded file on disk via inline code.
+#
+# Downloaded files land in the test's output directory under downloads/.
+# `agent.getRecentDownloadedFilePath()` returns the saved file's path.
+
+goal: Demonstrate file download and wait_for_download_complete action
+base_url: https://app.shiplight.ai
+
+statements:
+  - URL: /testing/files/download.html
+
+  # Trigger a download that starts after a 10-second delay
+  - intent: Click the delayed PDF download button
+    action: click
+    locator: "getByRole('button', { name: 'Download PDF (10s delay)' })"
+
+  # Wait for the download to finish — default timeout is 10s, which the
+  # 10s server-side delay would exceed, so raise it
+  - intent: Wait for the PDF download to complete
+    action: wait_for_download_complete
+    timeout_seconds: 30
+
+  # Verify the downloaded file exists and is non-empty
+  - description: Verify the downloaded PDF file on disk
+    js: |
+      const filePath = agent.getRecentDownloadedFilePath();
+      expect(filePath).toContain('delayed-document.pdf');
+      const fs = await import('node:fs');
+      expect(fs.statSync(filePath).size).toBeGreaterThan(0);
