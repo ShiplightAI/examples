@@ -46,6 +46,9 @@ npx shiplight test
 | [`14-code-statement.test.yaml`](./demo/14-code-statement.test.yaml) | `JS:` shorthand for inline JavaScript |
 | [`15-verify-code-cache.test.yaml`](./demo/15-verify-code-cache.test.yaml) | `VERIFY` with `js:` cache, try/catch AI fallback |
 | [`16-per-test-accounts.test.yaml`](./demo/16-per-test-accounts.test.yaml) | Per-test account fixtures with `auth:` |
+| [`17-programmatic-variables.test.yaml`](./demo/17-programmatic-variables.test.yaml) | `agent.agentServices` to read/write variables in `js:` actions, conditions, and `VERIFY` |
+| [`18-draft-multi-action.test.yaml`](./demo/18-draft-multi-action.test.yaml) | Bare `intent:` DRAFT statements executed as multi-action tasks |
+| [`19-wait-conditions.test.yaml`](./demo/19-wait-conditions.test.yaml) | `WAIT_UNTIL` with `js:` predicate (no model call) vs. AI condition, `WAIT` |
 
 ### Supporting files
 
