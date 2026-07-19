@@ -125,7 +125,7 @@ A DRAFT is not yet enriched. When the AI agent executes a DRAFT, it enriches int
 | `IF: ...` + `THEN: ...` | `IF_ELSE` | Conditional execution |
 | `WHILE: ...` + `DO: ...` | `WHILE_LOOP` | Loop with timeout |
 | `description:` + `js:` | `ACTION` | Inline JavaScript escape hatch (no self-healing) |
-| `WAIT_UNTIL: ...` | `ACTION` (ai_wait_until) | AI-powered condition wait with timeout |
+| `WAIT_UNTIL: ...` | `ACTION` (ai_wait_until) | Condition wait with timeout — AI (default) or `js:` expression |
 | `WAIT: ...` | `ACTION` (wait) | Fixed duration wait (use sparingly) |
 | `template: ...` | *(inlined)* | Expanded before parsing — not a statement type |
 | `call: "file#export"` | `ACTION` | Calls a custom function — see [Functions](#6-functions) |
@@ -403,9 +403,9 @@ const { v4: uuidv4 } = await import("uuid");
 
 ### 4.9 WAIT_UNTIL (Shorthand)
 
-AI-powered smart wait — repeatedly checks a natural language condition until it's met or the timeout expires.
+Smart wait — repeatedly checks a condition until it's met or the timeout expires. The condition can be **natural language** (checked by the AI agent) or a **JavaScript expression** (checked in-process, no model calls), using the same `js:` prefix convention as [IF_ELSE](#46-if_else) and [WHILE_LOOP](#47-while_loop).
 
-**Syntax:**
+**Syntax — AI condition (default):**
 
 ```yaml
 statements:
@@ -415,13 +415,40 @@ statements:
   - WAIT_UNTIL: Spinner has disappeared
 ```
 
+**Syntax — JavaScript condition:**
+
+```yaml
+statements:
+  - WAIT_UNTIL: "js: !document.querySelector('.spinner')"
+    timeout_seconds: 10
+
+  - WAIT_UNTIL: "js: (await page.locator('.result-row').count()) >= 10"
+```
+
+**Condition types:**
+
+| Prefix | Type | Evaluation |
+|---|---|---|
+| *(none)* | `AI_MODE` | Natural language, polled by the AI agent. Each check is a model call. |
+| `js:` | `JS_CODE` | JavaScript expression, polled in-process (~4×/second). No model calls. Must return truthy/falsy. |
+
 | Key | Type | Default | Description |
 |---|---|---|---|
-| `WAIT_UNTIL` | `string` | *(required)* | Natural language condition to wait for |
-| `timeout_seconds` | `number` | `60` | Maximum seconds to wait before failing |
+| `WAIT_UNTIL` | `string` | *(required)* | Condition to wait for. Natural language, or a `js:` expression. |
+| `timeout_seconds` | `number` | `60` | Maximum seconds to wait before failing. Capped at 300 (applies to both AI and `js:` waits). |
+
+**Which to use:**
+- **Prefer `js:`** for simple DOM/state checks — an element appearing or disappearing, a count reaching a threshold, a class toggling. It is polled cheaply with **no model calls**, so it's far faster and cheaper than an AI wait. An AI check takes 5–15 seconds *and* a model call each poll.
+- **Use natural language** when the condition is semantic ("the order summary looks correct"), when there's no reliable selector, or when the DOM may drift and you want the check to self-heal.
+
+**JavaScript execution context:**
+- The expression runs in the Playwright test context (Node.js) with the same scope as [Code](#48-code) statements — `page`, `expect`, `agent` are in scope, and `await` is allowed (e.g. `await page.locator(...).count()`). Use `page.evaluate()` for browser-context code. It must evaluate to truthy/falsy.
 
 **Notes:**
-- Each condition check can take 5-15 seconds. For short waits, use `WAIT:` instead.
+- Each AI condition check can take 5–15 seconds. For short fixed pauses, use `WAIT:` instead.
+- **A `js:` wait does not self-heal.** If its selector goes stale, the expression can turn truthy immediately — the wait passes early and *silently*, and a later step flakes instead of the wait failing. When a selector may drift, prefer natural language.
+- **The predicate must return truthy/falsy — not a Playwright wait.** `js: await page.locator('.spinner').waitFor({ state: 'detached' })` resolves to `undefined` (falsy), so the poll loop never sees "met" and times out. Use a boolean-returning check instead: `js: (await page.locator('.spinner').count()) === 0`.
+- **Use fast, non-retrying probes** — `count()`, `isVisible()`, `document.querySelector(...)`. An `expect()` assertion auto-retries internally (up to ~5s) and *throws* instead of returning a boolean, which fights the poll loop and can overshoot a short `timeout_seconds`.
 
 ### 4.10 WAIT (Shorthand)
 
