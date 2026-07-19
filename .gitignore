@@ -5,3 +5,5 @@ test-results/
 playwright-report/
 .DS_Store
 .shiplight_cache/
+.claude/
+skills-lock.json
