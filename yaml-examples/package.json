@@ -6,6 +6,6 @@
     "test:headed": "shiplight test --headed"
   },
   "dependencies": {
-    "shiplightai": "^0.1.73"
+    "shiplightai": "^0.1.91"
   }
 }
