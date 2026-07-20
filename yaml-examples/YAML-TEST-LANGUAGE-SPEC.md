@@ -23,6 +23,7 @@
    - [Code](#48-code)
    - [WAIT_UNTIL](#49-wait_until-shorthand)
    - [WAIT](#410-wait-shorthand)
+   - [The `js:` Key — One Model](#411-the-js-key--one-model)
 5. [Templates](#5-templates)
 6. [Functions](#6-functions)
 7. [Variables](#7-variables)
@@ -125,7 +126,7 @@ A DRAFT is not yet enriched. When the AI agent executes a DRAFT, it enriches int
 | `IF: ...` + `THEN: ...` | `IF_ELSE` | Conditional execution |
 | `WHILE: ...` + `DO: ...` | `WHILE_LOOP` | Loop with timeout |
 | `description:` + `js:` | `ACTION` | Inline JavaScript escape hatch (no self-healing) |
-| `WAIT_UNTIL: ...` | `ACTION` (ai_wait_until) | Condition wait with timeout — AI (default) or `js:` expression |
+| `WAIT_UNTIL: ...` | `ACTION` (ai_wait_until) | Condition wait with timeout — AI (default), or JS via a sibling `js:` key |
 | `WAIT: ...` | `ACTION` (wait) | Fixed duration wait (use sparingly) |
 | `template: ...` | *(inlined)* | Expanded before parsing — not a statement type |
 | `call: "file#export"` | `ACTION` | Calls a custom function — see [Functions](#6-functions) |
@@ -211,6 +212,8 @@ When the optional `js` sibling key is present, it acts as a code cache for the a
 
 **Quoting rules:** Same as `js:` and `IF:`/`WHILE:` — quote the value when it contains special YAML characters (`{`, `}`, `:`, `#`, etc.).
 
+VERIFY is the only `js:` surface with an AI fallback — see [The `js:` Key — One Model](#411-the-js-key--one-model) for the cross-statement comparison.
+
 ---
 
 ### 4.4 URL (Shorthand)
@@ -283,7 +286,7 @@ statements:
 
 ```yaml
 statements:
-  - IF: "js: document.querySelector('.modal') !== null"
+  - IF: "js: (await page.locator('.modal').count()) > 0"
     THEN:
       - intent: Close the modal
 ```
@@ -293,7 +296,9 @@ statements:
 | Prefix | Type | Evaluation |
 |---|---|---|
 | *(none)* | `AI_MODE` | Natural language, evaluated by the AI agent at runtime |
-| `js:` | `JS_CODE` | JavaScript expression, evaluated in browser context. Must return truthy/falsy. |
+| `js:` | `JS_CODE` | Inline Playwright expression, evaluated in the test context (Node.js). Must evaluate to truthy/falsy. |
+
+A `js:` condition is a single **expression**, not a statement block — it is inlined verbatim into the transpiled Playwright test (`if (<expr>)`, `while (<expr>)`, or a polled predicate), so it must evaluate to truthy/falsy. It runs in the test context (Node.js) with the same scope as [Code](#48-code) statements (`page`, `expect`, `agent`), and `await` is allowed. Bare `document`/`window` are **not** in scope — use `page.locator(...)` probes, or `page.evaluate()` for browser-side DOM access. This applies to every `js:` condition position: `IF:`, `WHILE:`, and `WAIT_UNTIL:`. See [The `js:` Key — One Model](#411-the-js-key--one-model) for how conditions differ from the other `js:` surfaces.
 
 **Rules:**
 - `IF` (string, required): Condition expression.
@@ -321,7 +326,7 @@ statements:
 
 ```yaml
 statements:
-  - WHILE: "js: document.querySelectorAll('.item').length < 10"
+  - WHILE: "js: (await page.locator('.item').count()) < 10"
     DO:
       - intent: Scroll down
 ```
@@ -405,6 +410,8 @@ const { v4: uuidv4 } = await import("uuid");
 
 Smart wait — repeatedly checks a condition until it's met or the timeout expires. The condition can be **natural language** (checked by the AI agent) or a **JavaScript expression** (checked in-process, no model calls), using the same `js:` prefix convention as [IF_ELSE](#46-if_else) and [WHILE_LOOP](#47-while_loop).
 
+**WAIT_UNTIL synchronizes — it never fails the test.** It is an optimization of a fixed `WAIT:`: when the condition is met the test moves on early; when the timeout expires the test still continues, and the step result records a warning saying the condition was not met (or that the expression never evaluated cleanly). To *assert* that something holds, use `VERIFY:` — a wait is not a correctness gate.
+
 **Syntax — AI condition (default):**
 
 ```yaml
@@ -415,40 +422,53 @@ statements:
   - WAIT_UNTIL: Spinner has disappeared
 ```
 
-**Syntax — JavaScript condition:**
+**Syntax — JS condition with intent (preferred):**
 
 ```yaml
 statements:
-  - WAIT_UNTIL: "js: !document.querySelector('.spinner')"
+  - WAIT_UNTIL: The dashboard has finished loading
+    js: "(await page.locator('.spinner').count()) === 0"
     timeout_seconds: 10
+```
 
+**Syntax — bare JS condition (legacy shorthand, no intent):**
+
+```yaml
+statements:
   - WAIT_UNTIL: "js: (await page.locator('.result-row').count()) >= 10"
 ```
 
-**Condition types:**
+**Semantics:**
 
-| Prefix | Type | Evaluation |
-|---|---|---|
-| *(none)* | `AI_MODE` | Natural language, polled by the AI agent. Each check is a model call. |
-| `js:` | `JS_CODE` | JavaScript expression, polled in-process (~4×/second). No model calls. Must return truthy/falsy. |
+| Form | Behavior |
+|---|---|
+| Natural language only | AI polls the condition. Each check is a model call (~5-15s). |
+| Natural language + sibling `js:` | The `js:` expression is polled exclusively, in-process (~4×/second), no model calls. The natural language is the label shown in reports and the source for regenerating a stale expression at authoring time. **No AI fallback at runtime.** |
+| `"js: ..."` prefix | Same polling as above, without a label. Readable for round-trips, but discouraged for authoring — prefer the sibling form. |
+
+Unlike `VERIFY:` (where `js:` is a cache and the AI re-checks the assertion when it throws), a WAIT_UNTIL `js:` never falls back: a wait has no failure signal to fall back on — falsy means "keep waiting", and a stale selector turning truthy looks like success. Repair happens at authoring time, from the preserved intent.
+
+It is an error to combine both JS forms (a `"js: ..."`-prefixed condition plus a sibling `js:` key).
 
 | Key | Type | Default | Description |
 |---|---|---|---|
-| `WAIT_UNTIL` | `string` | *(required)* | Condition to wait for. Natural language, or a `js:` expression. |
-| `timeout_seconds` | `number` | `60` | Maximum seconds to wait before failing. Capped at 300 (applies to both AI and `js:` waits). |
+| `WAIT_UNTIL` | `string` | *(required)* | The condition. Natural language (the intent when `js:` is present), or a legacy `js:`-prefixed expression. |
+| `js` | `string` | — | JavaScript expression polled in place of the AI check. Single expression, must evaluate to truthy/falsy. |
+| `timeout_seconds` | `number` | `60` | Maximum seconds to wait before continuing (with a warning in the step result). Capped at 300 (applies to both AI and `js:` waits). |
 
 **Which to use:**
-- **Prefer `js:`** for simple DOM/state checks — an element appearing or disappearing, a count reaching a threshold, a class toggling. It is polled cheaply with **no model calls**, so it's far faster and cheaper than an AI wait. An AI check takes 5–15 seconds *and* a model call each poll.
-- **Use natural language** when the condition is semantic ("the order summary looks correct"), when there's no reliable selector, or when the DOM may drift and you want the check to self-heal.
+- **Prefer the intent + `js:` form** for simple DOM/state checks — an element appearing or disappearing, a count reaching a threshold, a class toggling. It is polled cheaply with **no model calls**, so it's far faster and cheaper than an AI wait, and the intent keeps the step readable. An AI check takes 5–15 seconds *and* a model call each poll.
+- **Use natural language alone** when the condition is semantic ("the order summary looks correct"), when there's no reliable selector, or when the DOM may drift and you want the check to self-heal.
 
 **JavaScript execution context:**
 - The expression runs in the Playwright test context (Node.js) with the same scope as [Code](#48-code) statements — `page`, `expect`, `agent` are in scope, and `await` is allowed (e.g. `await page.locator(...).count()`). Use `page.evaluate()` for browser-context code. It must evaluate to truthy/falsy.
 
 **Notes:**
 - Each AI condition check can take 5–15 seconds. For short fixed pauses, use `WAIT:` instead.
-- **A `js:` wait does not self-heal.** If its selector goes stale, the expression can turn truthy immediately — the wait passes early and *silently*, and a later step flakes instead of the wait failing. When a selector may drift, prefer natural language.
-- **The predicate must return truthy/falsy — not a Playwright wait.** `js: await page.locator('.spinner').waitFor({ state: 'detached' })` resolves to `undefined` (falsy), so the poll loop never sees "met" and times out. Use a boolean-returning check instead: `js: (await page.locator('.spinner').count()) === 0`.
-- **Use fast, non-retrying probes** — `count()`, `isVisible()`, `document.querySelector(...)`. An `expect()` assertion auto-retries internally (up to ~5s) and *throws* instead of returning a boolean, which fights the poll loop and can overshoot a short `timeout_seconds`.
+- **A `js:` wait does not self-heal at runtime.** If its selector goes stale, the expression can turn truthy immediately — the wait ends early without having synchronized anything, and a later step flakes. When a selector may drift, prefer natural language — or use the intent + `js:` form, whose preserved intent lets an agent regenerate the expression at authoring time.
+- **A broken expression degrades to a fixed wait.** If the expression throws on every poll (e.g. it references a browser-only global like `document` in the Node test context) or fails to parse, the wait runs the full timeout and continues; the step result's warning names the error (e.g. "never evaluated successfully … document is not defined"). `validate_yaml_test` catches syntax errors at authoring time, but only runtime can catch a bad reference.
+- **The predicate must return truthy/falsy — not a Playwright wait.** `js: await page.locator('.spinner').waitFor({ state: 'detached' })` resolves to `undefined` (falsy), so the poll loop never sees "met" and waits the full timeout. Use a boolean-returning check instead: `js: (await page.locator('.spinner').count()) === 0`.
+- **Use fast, non-retrying probes** — `count()`, `isVisible()`, or a `page.evaluate()` returning a boolean. An `expect()` assertion auto-retries internally (up to ~5s) and *throws* instead of returning a boolean, which fights the poll loop and can overshoot a short `timeout_seconds`.
 
 ### 4.10 WAIT (Shorthand)
 
@@ -466,6 +486,19 @@ statements:
 |---|---|---|---|
 | `WAIT` | `string` | — | Optional intent describing why the wait is needed |
 | `seconds` | `number` | `3` | Number of seconds to wait |
+
+### 4.11 The `js:` Key — One Model
+
+Wherever it appears, `js:` means the same thing: **run this Playwright code in the test context (Node.js) instead of asking the AI.** The scope is always the same — `page`, `expect`, and `agent` are available, `await` is allowed, and `document`/`window` are **not** defined (browser-side state must go through `page.evaluate(() => ...)`). What varies by statement type is the form of the code, the role of the accompanying natural language, and what happens when the JS fails:
+
+| Statement | Natural language is… | `js:` form | When the JS fails | Self-heals at runtime |
+|---|---|---|---|---|
+| [Code](#48-code) (`description:` + `js:`) | label only | statement block | test fails | No |
+| [VERIFY](#43-verify-shorthand) + `js:` | the assertion — AI fallback intent | assertion statement | AI re-evaluates the natural-language assertion | **Yes** |
+| [IF](#46-if_else) / [WHILE](#47-while_loop) `"js: ..."` | *(absent)* | single expression | a throw fails the test; falsy just takes the other branch / ends the loop | No |
+| [WAIT_UNTIL](#49-wait_until-shorthand) + `js:` | the intent — label + regeneration source (absent in the legacy `"js: ..."` prefix form) | single expression | never fails — warning in the step result, test continues at timeout | No at runtime; regenerate from the intent at authoring time |
+
+**Why only VERIFY falls back to AI:** fallback exists only where failure is detectable at runtime. An assertion *throws* when it is wrong, so the runtime knows to re-check the intent. A wait cannot distinguish "not yet" from "never", and a stale selector can turn a wait predicate truthy instantly — there is no failure signal to fall back on. For waits and conditions, the repair path is authoring-time: fix or regenerate the expression.
 
 ---
 
