@@ -1,29 +1,36 @@
 # 19 — Wait Conditions (WAIT_UNTIL / WAIT)
-# Demonstrates: WAIT_UNTIL with a `js:` predicate (polled in-process, no model
-# calls) vs. a natural-language condition (AI-checked), plus fixed-duration WAIT.
+# Demonstrates: WAIT_UNTIL with an intent + `js:` predicate (polled in-process,
+# no model calls) vs. a natural-language condition (AI-checked), plus
+# fixed-duration WAIT.
 #
-# Prefer `js:` WAIT_UNTIL for simple DOM/state checks — it is far cheaper and
-# faster than an AI wait, which costs a model call on every poll. The predicate
-# must RETURN truthy/falsy (a Playwright waitFor() resolves to undefined and
-# never registers as met). Keep natural language for semantic conditions.
+# Prefer the intent + `js:` form for simple DOM/state checks — keep the
+# human-readable intent in WAIT_UNTIL: and attach the cheap predicate as a
+# sibling `js:` key. The js: expression is polled exclusively (no AI fallback);
+# the intent is what reports show and what regenerates a stale predicate.
+# The predicate must RETURN truthy/falsy (a Playwright waitFor() resolves to
+# undefined and never registers as met). Keep natural language alone for
+# semantic conditions. A wait never fails the test — assert with VERIFY.
 
 goal: Wait for page state using JS and natural-language conditions
 
 statements:
   - URL: /inventory.html
 
-  # js: WAIT_UNTIL — poll the DOM in-process until products render. No model call.
-  - WAIT_UNTIL: "js: (await page.locator('.inventory_item').count()) > 0"
+  # Intent + js: WAIT_UNTIL — poll the DOM in-process until products render.
+  # No model call; the intent labels the step in reports.
+  - WAIT_UNTIL: The inventory list has rendered at least one product
+    js: "(await page.locator('.inventory_item').count()) > 0"
     timeout_seconds: 10
 
   - intent: Add Sauce Labs Backpack to cart
     action: click
     locator: "locator('[data-test=\"add-to-cart-sauce-labs-backpack\"]')"
 
-  # js: WAIT_UNTIL — wait until the cart badge shows one item. No model call.
+  # Intent + js: WAIT_UNTIL — wait until the cart badge shows one item.
   # Predicate runs in-process (Node/Playwright), so use page.locator(), not
-  # browser globals like `document` — see the js: wait above.
-  - WAIT_UNTIL: "js: (await page.locator('[data-test=\"shopping-cart-badge\"]').count()) === 1 && (await page.locator('[data-test=\"shopping-cart-badge\"]').textContent()) === '1'"
+  # browser globals like `document`.
+  - WAIT_UNTIL: The cart badge shows exactly one item
+    js: "(await page.locator('[data-test=\"shopping-cart-badge\"]').count()) === 1 && (await page.locator('[data-test=\"shopping-cart-badge\"]').textContent()) === '1'"
     timeout_seconds: 5
 
   - intent: Open the cart
@@ -35,5 +42,6 @@ statements:
   - WAIT_UNTIL: The cart page lists the Sauce Labs Backpack
     timeout_seconds: 15
 
+  # A wait synchronizes but never fails the test — the VERIFY is the gate.
   - VERIFY: The cart shows exactly one item
     js: "await expect(page.locator('.cart_item')).toHaveCount(1, { timeout: 2000 })"
