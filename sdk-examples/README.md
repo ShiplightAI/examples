@@ -89,7 +89,7 @@ configureSdk({
     SHIPLIGHT_API_TOKEN: process.env.SHIPLIGHT_API_TOKEN,
   },
 });
-const agent = createAgent({ model: 'gemini-2.5-pro' });
+const agent = createAgent({ model: 'gemini-3-flash-preview' });
 ```
 
 ### Core Methods

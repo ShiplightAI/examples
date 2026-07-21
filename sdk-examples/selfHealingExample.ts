@@ -37,12 +37,12 @@ async function selfHealingExample() {
 
   // Create agent with default selfHealingStrategy: 'single'
   const agent = createAgent({
-    model: 'gemini-2.5-pro',
+    model: 'gemini-3-flash-preview',
   });
 
   try {
     console.log('=== Self-Healing Example ===');
-    console.log('Model: gemini-2.5-pro\n');
+    console.log('Model: gemini-3-flash-preview\n');
 
     // ================================
     // PART 1: Basic Self-Healing (maxSteps: 1)

@@ -38,7 +38,7 @@ async function variablesExample() {
 
   // Create agent with initial variables
   const agent = createAgent({
-    model: 'gemini-2.5-pro',
+    model: 'gemini-3-flash-preview',
     variables: {
       username: 'standard_user',
       password: 'secret_sauce',
@@ -48,7 +48,7 @@ async function variablesExample() {
 
   try {
     console.log('=== Variables Example ===');
-    console.log('Model: gemini-2.5-pro\n');
+    console.log('Model: gemini-3-flash-preview\n');
 
     // Step 1: Show initial variables set via createAgent
     console.log('1. Initial variables (set via createAgent):');

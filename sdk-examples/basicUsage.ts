@@ -50,7 +50,7 @@ async function basicExample() {
 
   // Create an agent with variables
   const agent = createAgent({
-    model: 'gemini-2.5-pro',
+    model: 'gemini-3-flash-preview',
     variables: {
       username: 'testuser@example.com',
       password: 'secret123',
@@ -60,7 +60,7 @@ async function basicExample() {
 
   try {
     console.log('=== Basic Usage Example ===');
-    console.log('Model: gemini-2.5-pro\n');
+    console.log('Model: gemini-3-flash-preview\n');
 
     // Navigate to a website
     await page.goto('https://example.com');

@@ -41,12 +41,12 @@ async function loginExample() {
   const page = await context.newPage();
 
   const agent = createAgent({
-    model: 'gemini-2.5-pro',
+    model: 'gemini-3-flash-preview',
   });
 
   try {
     console.log('=== Login Example ===');
-    console.log('Model: gemini-2.5-pro\n');
+    console.log('Model: gemini-3-flash-preview\n');
 
     // Use the agent's smart login - it handles everything automatically
     console.log('1. Performing smart login...');

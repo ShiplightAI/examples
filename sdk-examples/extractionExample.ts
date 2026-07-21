@@ -37,12 +37,12 @@ async function extractionExample() {
   const page = await context.newPage();
 
   const agent = createAgent({
-    model: 'gemini-2.5-pro',
+    model: 'gemini-3-flash-preview',
   });
 
   try {
     console.log('=== Data Extraction Example ===');
-    console.log('Model: gemini-2.5-pro\n');
+    console.log('Model: gemini-3-flash-preview\n');
 
     // ================================
     // PART 1: Basic Text Extraction

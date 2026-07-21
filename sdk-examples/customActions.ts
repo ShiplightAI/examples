@@ -42,7 +42,7 @@ async function customActionsExample() {
   const page = await context.newPage();
 
   const agent = createAgent({
-    model: 'gemini-2.5-pro',
+    model: 'gemini-3-flash-preview',
     variables: {
       testEmail: 'user@example.com',
     },
@@ -118,7 +118,7 @@ async function customActionsExample() {
 
   try {
     console.log('=== Custom Actions Example ===');
-    console.log('Model: gemini-2.5-pro\n');
+    console.log('Model: gemini-3-flash-preview\n');
 
     await page.goto('https://example.com');
 

@@ -40,11 +40,11 @@ configureSdk({ env: credentials });
 
 async function quickStart() {
   console.log('=== Quick Start Example ===');
-  console.log('Model: gemini-2.5-pro\n');
+  console.log('Model: gemini-3-flash-preview\n');
 
   // Create an agent
   const agent = createAgent({
-    model: 'gemini-2.5-pro',
+    model: 'gemini-3-flash-preview',
   });
 
   // Use with Playwright
