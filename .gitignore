@@ -6,4 +6,6 @@ playwright-report/
 .DS_Store
 .shiplight_cache/
 .claude/
+.agents/
 skills-lock.json
+.shiplight-agent-skills-last-update
