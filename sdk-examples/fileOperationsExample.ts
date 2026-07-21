@@ -8,7 +8,8 @@
  * Test site: https://the-internet.herokuapp.com/upload
  *
  * Prerequisites:
- * - Set GOOGLE_API_KEY in .env file or environment variable
+ * - Set an LLM credential in .env: GOOGLE_API_KEY, ANTHROPIC_API_KEY,
+ *   OPENAI_API_KEY, or SHIPLIGHT_API_TOKEN (Shiplight LLM proxy)
  */
 
 import 'dotenv/config';
@@ -21,14 +22,20 @@ import { createAgent, configureSdk } from '@shiplightai/sdk';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Configure SDK with API key
-const apiKey = process.env.GOOGLE_API_KEY;
-if (!apiKey) {
-  console.error('Error: GOOGLE_API_KEY not set');
-  console.log('   Add to .env file or get your key from: https://aistudio.google.com/apikey');
+// Configure SDK credentials. Set the key matching your model provider
+// (GOOGLE_API_KEY, ANTHROPIC_API_KEY, OPENAI_API_KEY), or SHIPLIGHT_API_TOKEN
+// to route any provider through the Shiplight LLM proxy.
+const credentials: Record<string, string> = {};
+for (const key of ['GOOGLE_API_KEY', 'ANTHROPIC_API_KEY', 'OPENAI_API_KEY', 'SHIPLIGHT_API_TOKEN']) {
+  const value = process.env[key];
+  if (value) credentials[key] = value;
+}
+if (Object.keys(credentials).length === 0) {
+  console.error('Error: no LLM credentials set');
+  console.log('   Set GOOGLE_API_KEY, ANTHROPIC_API_KEY, OPENAI_API_KEY, or SHIPLIGHT_API_TOKEN in .env');
   process.exit(1);
 }
-configureSdk({ env: { GOOGLE_API_KEY: apiKey } });
+configureSdk({ env: credentials });
 
 async function fileUploadExample() {
   // Create a test file for upload

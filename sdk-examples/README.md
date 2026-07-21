@@ -18,21 +18,29 @@ npm install
 npx playwright install chromium
 ```
 
-### 3. Configure API Key
+### 3. Configure Credentials
 
-Copy the example env file and add your API key:
+Copy the example env file:
 
 ```bash
 cp .env.example .env
 ```
 
-Edit `.env` and add your API key:
+Edit `.env` and set **one** LLM credential:
 
 ```
-GOOGLE_API_KEY=your-google-api-key
+# Option A: a provider API key matching the model you use
+# (examples default to Gemini models, which need GOOGLE_API_KEY)
+GOOGLE_API_KEY=your-google-api-key       # https://aistudio.google.com/apikey
+# ANTHROPIC_API_KEY=your-anthropic-api-key  # for claude-* models
+# OPENAI_API_KEY=your-openai-api-key        # for gpt-* models
+
+# Option B: a Shiplight API token — routes any provider's LLM calls through
+# the Shiplight LLM proxy, no provider key needed
+SHIPLIGHT_API_TOKEN=your-shiplight-api-token
 ```
 
-Get your key from: https://aistudio.google.com/apikey
+A direct provider key takes precedence over the Shiplight token for that provider.
 
 ## Running Examples
 
@@ -74,7 +82,12 @@ Examples use the Sauce Labs demo site (public):
 import { createAgent, configureSdk } from '@shiplightai/sdk';
 
 configureSdk({
-  env: { GOOGLE_API_KEY: process.env.GOOGLE_API_KEY },
+  // A provider API key (GOOGLE_API_KEY / ANTHROPIC_API_KEY / OPENAI_API_KEY)
+  // or a Shiplight API token (LLM proxy, covers all providers)
+  env: {
+    GOOGLE_API_KEY: process.env.GOOGLE_API_KEY,
+    SHIPLIGHT_API_TOKEN: process.env.SHIPLIGHT_API_TOKEN,
+  },
 });
 const agent = createAgent({ model: 'gemini-2.5-pro' });
 ```
