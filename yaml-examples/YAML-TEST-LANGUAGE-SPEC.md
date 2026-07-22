@@ -154,7 +154,7 @@ An enriched browser action that replays deterministically (<1s). Every ACTION ha
 
 In YAML, the presence of an `action` key distinguishes an ACTION from a DRAFT — an `intent`-only object is parsed as a DRAFT. (For one-off Playwright code that has no named action, use the [Code](#48-code) escape hatch — but note it does **not** self-heal.)
 
-**Structured format** — named action with parameters. All fields other than `intent`, `action`, `locator`, `xpath` are passed as arguments to the action. See `shiplight://schemas/action-entity` for available actions and their parameters.
+**Structured format** — named action with parameters. All fields other than `intent`, `action`, `locator`, `xpath` are passed as arguments to the action. Run `npx shiplight spec actions` for available actions and their parameters.
 
 ```yaml
 statements:
@@ -178,7 +178,7 @@ statements:
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `intent` | `string` | Yes | Human-readable intent (used for self-healing). |
-| `action` | `string` | Yes | Action name. See `shiplight://schemas/action-entity` for available actions. |
+| `action` | `string` | Yes | Action name. Run `npx shiplight spec actions` for available actions. |
 | `locator` | `string` | No | Playwright locator string. |
 | `xpath` | `string` | No | XPath selector. Only needed when an ACTION has neither `locator` nor a named target. |
 
@@ -466,7 +466,7 @@ It is an error to combine both JS forms (a `"js: ..."`-prefixed condition plus a
 **Notes:**
 - Each AI condition check can take 5–15 seconds. For short fixed pauses, use `WAIT:` instead.
 - **A `js:` wait does not self-heal at runtime.** If its selector goes stale, the expression can turn truthy immediately — the wait ends early without having synchronized anything, and a later step flakes. When a selector may drift, prefer natural language — or use the intent + `js:` form, whose preserved intent lets an agent regenerate the expression at authoring time.
-- **A broken expression degrades to a fixed wait.** If the expression throws on every poll (e.g. it references a browser-only global like `document` in the Node test context) or fails to parse, the wait runs the full timeout and continues; the step result's warning names the error (e.g. "never evaluated successfully … document is not defined"). `validate_yaml_test` catches syntax errors at authoring time, but only runtime can catch a bad reference.
+- **A broken expression degrades to a fixed wait.** If the expression throws on every poll (e.g. it references a browser-only global like `document` in the Node test context) or fails to parse, the wait runs the full timeout and continues; the step result's warning names the error (e.g. "never evaluated successfully … document is not defined"). `shiplight transpile` catches syntax errors at authoring time, but only runtime can catch a bad reference.
 - **The predicate must return truthy/falsy — not a Playwright wait.** `js: await page.locator('.spinner').waitFor({ state: 'detached' })` resolves to `undefined` (falsy), so the poll loop never sees "met" and waits the full timeout. Use a boolean-returning check instead: `js: (await page.locator('.spinner').count()) === 0`.
 - **Use fast, non-retrying probes** — `count()`, `isVisible()`, or a `page.evaluate()` returning a boolean. An `expect()` assertion auto-retries internally (up to ~5s) and *throws* instead of returning a boolean, which fights the poll loop and can overshoot a short `timeout_seconds`.
 
