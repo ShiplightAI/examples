@@ -5,7 +5,7 @@
  * - The agent can upload files using natural language instructions
  * - Files are resolved from the testDataDir option
  *
- * Test site: https://the-internet.herokuapp.com/upload
+ * Test site: https://static.shiplight.ai/testing/files/upload.html
  *
  * Prerequisites:
  * - Set an LLM credential in .env: GOOGLE_API_KEY, ANTHROPIC_API_KEY,
@@ -63,18 +63,26 @@ async function fileUploadExample() {
     console.log('Model: gemini-3-flash-preview\n');
 
     console.log('1. Navigating to upload test page...');
-    await page.goto('https://the-internet.herokuapp.com/upload');
+    await page.goto('https://static.shiplight.ai/testing/files/upload.html');
     console.log('   ✓ Upload page loaded\n');
 
-    // Use the agent to upload a file with natural language
-    // The agent finds the file input and uploads the file from testDataDir
-    console.log('2. Uploading file using agent...');
-    console.log('   Instruction: "Upload the file test-upload.txt"');
-    await agent.act(page, 'Upload the file test-upload.txt');
+    // agent.act() performs ONE action. Phrase each instruction as a single
+    // action and check result.success — an instruction the agent reads as
+    // multi-step ("upload the file", meaning select *and* submit) is reported
+    // as incomplete and nothing is executed.
+    console.log('2. Selecting file using agent...');
+    console.log('   Instruction: "Select the file test-upload.txt in the upload area"');
+    const selected = await agent.act(page, 'Select the file test-upload.txt in the upload area');
+    if (!selected.success) {
+      throw new Error(`File selection failed: ${selected.details}`);
+    }
     console.log('   ✓ File selected\n');
 
     console.log('3. Submitting upload...');
-    await agent.act(page, 'Click the Upload button');
+    const submitted = await agent.act(page, 'Click the Upload Files button');
+    if (!submitted.success) {
+      throw new Error(`Upload submission failed: ${submitted.details}`);
+    }
     console.log('   ✓ Upload submitted\n');
 
     // Verify upload success
@@ -90,7 +98,8 @@ async function fileUploadExample() {
     console.log('=== File Upload Example Complete ===');
     console.log('\nKey points:');
     console.log('  - Set testDataDir in createAgent() to specify where files are located');
-    console.log('  - Use agent.act() with natural language: "Upload the file <filename>"');
+    console.log('  - agent.act() runs a single action - give it one action per call');
+    console.log('  - Check result.success: a failed action does not throw');
     console.log('  - The agent automatically finds file inputs and handles the upload');
 
   } catch (error) {
