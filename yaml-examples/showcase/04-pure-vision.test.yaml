@@ -18,11 +18,15 @@ base_url: https://static.shiplight.ai
 statements:
   - URL: /testing/interactions/drag-and-drop.html
 
-  # Pure vision: the agent uses screenshot coordinates, not DOM
+  # Pure vision: the agent uses screenshot coordinates, not DOM.
+  # relative_x/relative_y anchor the grab point to the element's centre;
+  # drag_drop needs all four of relative_*/delta_* to run element-anchored.
   - intent: Select the title "Drag to Drop Zone"
     action: drag_drop
     locator: "getByRole('heading', { name: 'Drag to Drop Zone' })"
     pure_vision: true
+    relative_x: 0
+    relative_y: 0
     delta_x: 213
     delta_y: 0
 
@@ -31,5 +35,13 @@ statements:
     action: drag_drop
     locator: "getByText('🔴')"
     pure_vision: true
-    delta_x: 473
-    delta_y: 241
+    relative_x: 0
+    relative_y: 0
+    delta_x: 478
+    delta_y: 200
+
+  # Without this the test passes even when the drop silently misses.
+  # Checked with js: rather than vision — the drop zone contents render
+  # below the 720px fold, so a screenshot-based assert cannot see them.
+  - VERIFY: The red item appears inside the drop zone
+    js: "await expect(page.locator('#drop-zone')).toContainText('red', { timeout: 2000 })"
