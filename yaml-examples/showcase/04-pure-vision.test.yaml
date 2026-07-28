@@ -13,7 +13,7 @@
 
 test_case_id: 284
 goal: Demonstrate pure-vision mode for drag-and-drop interaction
-base_url: https://app.shiplight.ai
+base_url: https://static.shiplight.ai
 
 statements:
   - URL: /testing/interactions/drag-and-drop.html
