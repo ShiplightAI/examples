@@ -10,7 +10,7 @@
 # `agent.getRecentDownloadedFilePath()` returns the saved file's path.
 
 goal: Demonstrate file download and wait_for_download_complete action
-base_url: https://app.shiplight.ai
+base_url: https://static.shiplight.ai
 
 statements:
   - URL: /testing/files/download.html

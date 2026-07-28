@@ -17,7 +17,7 @@
 # the first click — but Shiplight heals it using the intent.
 
 goal: Demonstrate self-healing with a dynamic data-testid button
-base_url: https://app.shiplight.ai
+base_url: https://static.shiplight.ai
 
 statements:
   - URL: /testing/dynamic/dynamic-elements.html
