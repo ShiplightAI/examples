@@ -3,7 +3,7 @@
  *
  * This example demonstrates the variable store features:
  * - Setting initial variables via createAgent()
- * - Marking sensitive variables (masked in logs)
+ * - Marking sensitive variables
  * - Using variables in instructions with $variableName
  * - Getting/setting variables programmatically
  *
@@ -43,7 +43,7 @@ async function variablesExample() {
       username: 'standard_user',
       password: 'secret_sauce',
     },
-    sensitiveKeys: ['password'], // Password will be masked in logs
+    sensitiveKeys: ['password'], // Mark the password as sensitive
   });
 
   try {
@@ -53,16 +53,16 @@ async function variablesExample() {
     // Step 1: Show initial variables set via createAgent
     console.log('1. Initial variables (set via createAgent):');
     console.log(`   username: "${agent.getVariable('username')}"`);
-    console.log(`   password: "${agent.getVariable('password')}" (sensitive - masked in logs)\n`);
+    console.log('   password: <redacted> (sensitive)\n');
 
     // Step 2: Set variables programmatically
     console.log('2. Setting variables programmatically:');
     agent.setVariable('greeting', 'Hello World');
     agent.setVariable('apiKey', 'sk-secret-12345', true); // Mark as sensitive
     console.log(`   agent.setVariable('greeting', 'Hello World')`);
-    console.log(`   agent.setVariable('apiKey', 'sk-secret-12345', true)`);
+    console.log(`   agent.setVariable('apiKey', '<redacted>', true)`);
     console.log(`   greeting: "${agent.getVariable('greeting')}"`);
-    console.log(`   apiKey: "${agent.getVariable('apiKey')}" (sensitive)\n`);
+    console.log('   apiKey: <redacted> (sensitive)\n');
 
     // Step 3: Use variables in agent instructions (two syntaxes supported)
     console.log('3. Using variables in instructions:');
@@ -79,7 +79,7 @@ async function variablesExample() {
     console.log('   Syntax 2: {{ variableName }}');
     console.log('   Instruction: "Type {{ password }} in the password field"');
     await agent.act(page, 'Type {{ password }} in the password field');
-    console.log('   ✓ Used {{ password }} (value masked in logs)\n');
+    console.log('   ✓ Used {{ password }}\n');
 
     console.log('=== Variables Example Complete ===');
     console.log('\nKey points:');

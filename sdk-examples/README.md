@@ -149,6 +149,8 @@ agent.registerAction({
     email: z.string(),
   }),
   async execute(args, ctx) {
+    // When an argument contains a `{{ variable }}` placeholder, the SDK resolves it before
+    // calling you, so `args` holds the real value - no substitution needed here.
     const code = await fetchEmailOTP(args.email);
     ctx.variableStore.set('otp', code);
     return { success: true, message: 'OTP retrieved' };

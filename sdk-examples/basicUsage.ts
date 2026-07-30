@@ -55,7 +55,7 @@ async function basicExample() {
       username: 'testuser@example.com',
       password: 'secret123',
     },
-    sensitiveKeys: ['password'], // Password will be masked in logs
+    sensitiveKeys: ['password'], // Mark the password as sensitive
   });
 
   try {

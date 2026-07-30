@@ -12,6 +12,14 @@
  * - Database operations (check user state, reset data)
  * - File operations (upload, download validation)
  *
+ * Note on variables: when an action argument contains a `{{ variable }}` placeholder, the SDK
+ * resolves it before calling your handler, so `args` holds the real value. Test 1 below asserts
+ * this, since a handler that silently received "{{ testEmail }}" would query a nonexistent
+ * address.
+ *
+ * Requires an SDK build that resolves custom action arguments. 0.1.9 does not - it passes the
+ * raw placeholder through, and Test 1 will fail loudly if you run against it.
+ *
  * Prerequisites:
  * - Set an LLM credential in .env: GOOGLE_API_KEY, ANTHROPIC_API_KEY,
  *   OPENAI_API_KEY, or SHIPLIGHT_API_TOKEN (Shiplight LLM proxy)
@@ -57,6 +65,10 @@ async function customActionsExample() {
       timeout_seconds: z.number().optional().describe('How long to wait for email'),
     }),
     async execute(args, ctx) {
+      // The agent wrote "{{ testEmail }}" for this argument; the SDK resolved it before
+      // calling us, so args.email_address is the real address and is safe to use directly.
+      console.log(`  args.email_address: "${args.email_address}"`);
+
       // In a real implementation, this would call an email API
       console.log(`Checking email for: ${args.email_address}`);
 
@@ -65,6 +77,8 @@ async function customActionsExample() {
 
       // Store the code in a variable for later use
       ctx.variableStore.set('verificationCode', code);
+      // Recorded so Test 1 can verify what the handler actually received.
+      ctx.variableStore.set('receivedEmail', args.email_address);
 
       return {
         success: true,
@@ -130,6 +144,17 @@ async function customActionsExample() {
     const verificationCode = agent.getVariable('verificationCode');
     console.log(`  Variable 'verificationCode' set: ${verificationCode ? `Yes (${verificationCode})` : 'No'}`);
 
+    // The agent wrote "{{ testEmail }}"; check the SDK resolved it before our handler ran.
+    const receivedEmail = agent.getVariable('receivedEmail');
+    if (receivedEmail !== 'user@example.com') {
+      throw new Error(
+        `The custom action received "${receivedEmail}" instead of "user@example.com". ` +
+          'The SDK did not resolve the {{ testEmail }} placeholder in the action argument. ' +
+          'This example needs an SDK build that resolves custom action arguments; 0.1.9 does not.'
+      );
+    }
+    console.log(`  SDK resolved the placeholder before the handler ran: "${receivedEmail}"`);
+
     // Test 2: Ask the agent to check user status
     console.log('\n--- Test 2: Database Check ---');
     console.log('Instruction: "Check if user abc123 is verified in the database"');
@@ -150,10 +175,22 @@ async function customActionsExample() {
     console.log('\n--- Summary ---');
     const actionsSucceeded = [verificationCode, userVerified, smsCode].filter(Boolean).length;
     console.log(`Custom actions successfully executed: ${actionsSucceeded}/3`);
+    if (actionsSucceeded !== 3) {
+      throw new Error(`Only ${actionsSucceeded}/3 custom actions succeeded`);
+    }
+
+    console.log('\nKey points:');
+    console.log('  - agent.registerAction() adds an action the LLM can invoke by name');
+    console.log('  - Use ctx.variableStore.set() to hand values back to the test');
+    console.log('  - When an action argument contains "{{ name }}", the SDK resolves it');
+    console.log('    before your handler runs, so args holds the real value - use it directly.');
 
   } finally {
     await browser.close();
   }
 }
 
-customActionsExample().catch(console.error);
+customActionsExample().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});
