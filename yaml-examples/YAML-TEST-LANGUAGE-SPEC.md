@@ -82,7 +82,7 @@ A file must be either a **single-test file** (with `goal`/`statements`) or a **s
 
 | Key | Type | Default | Description |
 |---|---|---|---|
-| `base_url` | `string` | — | Base URL for relative `URL:` statements. Maps to Playwright `test.use({ baseURL })`. Does **not** auto-navigate — use `URL: /` to navigate. |
+| `base_url` | `string` | — | Base URL for relative `URL:` statements. Maps to Playwright `test.use({ baseURL })`. Applies to single-test **and** suite files. Does **not** auto-navigate — use `URL: /` to navigate. Absolute `URL:` values (`https://…`, `chrome-extension://…`) need no `base_url`. Takes precedence over `use.baseURL`. |
 | `test_case_id` | `number` | — | Links to a cloud test case for sync. |
 | `name` | `string` | — | Test title override (single-test) or suite name (suite). If set on a single-test file without `goal`, `goal` is auto-derived from `name`. |
 | `tags` | `string[]` | — | Playwright tags for `--grep` filtering. Each tag is prefixed with `@` in the test name. |
@@ -721,6 +721,7 @@ suite:
 | Key | Type | Required | Description |
 |---|---|---|---|
 | `tests` | `SuiteTest[]` | Yes | Array of test definitions (at least one). |
+| `base_url` | `string` | No | Alias for the top-level [`base_url`](#optional-keys), written inside `suite:`. Both spellings map to `test.use({ baseURL })`; this one wins if both are present. Prefer the top-level form — the debugger emits this one on save. |
 | `beforeAll` | `Statement[]` | No | Runs once before all tests. See [Lifecycle Hooks](#10-lifecycle-hooks). |
 | `afterAll` | `Statement[]` | No | Runs once after all tests. |
 | `beforeEach` | `Statement[]` | No | Runs before each test. |
