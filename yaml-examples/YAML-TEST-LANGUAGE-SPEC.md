@@ -85,7 +85,7 @@ A file must be either a **single-test file** (with `goal`/`statements`) or a **s
 | `base_url` | `string` | — | Base URL for relative `URL:` statements. Maps to Playwright `test.use({ baseURL })`. Applies to single-test **and** suite files. Does **not** auto-navigate — use `URL: /` to navigate. Absolute `URL:` values (`https://…`, `chrome-extension://…`) need no `base_url`. Takes precedence over `use.baseURL`. |
 | `test_case_id` | `number` | — | Links to a cloud test case for sync. |
 | `name` | `string` | — | Test title override (single-test) or suite name (suite). If set on a single-test file without `goal`, `goal` is auto-derived from `name`. |
-| `tags` | `string[]` | — | Playwright tags for `--grep` filtering. Each tag is prefixed with `@` in the test name. |
+| `tags` | `string[]` | — | Playwright tags for `--grep` filtering, emitted as `test('…', { tag: ['@smoke'] }, …)`. Each tag is prefixed with `@` in the **generated Playwright tag**, so `smoke` and `@smoke` both select with `--grep '@smoke'`; blank entries and duplicates are dropped. Cloud reporting stores the tag exactly as written in YAML, so pick one spelling per project if you filter by tag there. On a suite file the tags go on the `describe`, and Playwright applies them to every test inside it; a suite's individual tests may also carry their own `tags`. |
 | `use` | `object` | — | Playwright `test.use()` config. Supports all Playwright use options (`baseURL`, `viewport`, `storageState`, `locale`, `timezoneId`, `httpCredentials`, etc.). |
 | `teardown` | `Statement[]` | — | Cleanup steps that run in a `finally` block, even if the test fails. Single-test only. |
 | `beforeEach` | `Statement[]` | — | Statements to run before each test. Single-test files only. See [Lifecycle Hooks](#10-lifecycle-hooks). |
@@ -733,6 +733,7 @@ suite:
 |---|---|---|---|
 | `name` | `string` | Yes | Test name. Becomes the Playwright `test()` title. |
 | `statements` | `Statement[]` | Yes | Ordered list of test steps. |
+| `tags` | `string[]` | No | Playwright tags for this test alone, on top of the suite's tags. |
 | `teardown` | `Statement[]` | No | Cleanup steps in a `finally` block for this test. |
 | `parameters` | `ParameterSet[]` | No | Data sets for parameterized variants. See [Parameterized Tests](#11-parameterized-tests). |
 | `timeout` | `number` | No | Per-test timeout in milliseconds. |
@@ -744,7 +745,7 @@ suite:
 ### 9.4 Suite Transpilation Notes
 
 - Suites always transpile to `test.describe.serial()` (sequential execution). For parallel tests, use separate test files.
-- Tags go on the describe block name, not individual tests
+- File-level `tags` go on the describe block as `{ tag: [...] }`; Playwright applies them to every test inside it. A test's own `tags` are added to that test only, and a tag already declared at suite level is not repeated on the test.
 - `test.use()` is placed outside the describe block
 - Each test gets its own `test()` function with `{ page, agent }` fixtures
 
