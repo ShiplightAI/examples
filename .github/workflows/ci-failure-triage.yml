@@ -13,7 +13,8 @@ on:
     workflows:                        # exact `name:` of each workflow to watch
       - Demo Tests
       - Showcase Tests
-      - Triage Fixtures               # deliberately red; exercises this pipeline
+      - Spec Drift Fixture            # red on main, green on its auto-fix PR
+      - App Regression Fixture        # permanently red by design
     types: [completed]
 
 jobs:

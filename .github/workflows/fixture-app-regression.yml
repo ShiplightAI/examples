@@ -1,0 +1,55 @@
+name: App Regression Fixture
+
+# Runs ONLY triage-fixtures/02-app-regression.test.yaml — the Type A fixture,
+# where the test is correct and the application is broken.
+#
+# THIS WORKFLOW IS PERMANENTLY RED, and unlike the spec-drift fixture it has no
+# green end state: the fix belongs in the application, which is a third-party
+# page we do not control. Triage should classify it `app_regression` with
+# `fixable: false` and open NO pull request. An auto-fix PR here would be a
+# pipeline failure — the agent rewriting a correct test to accommodate a broken
+# app, which the triage skill's ground-truth rule forbids.
+#
+# Split out from the spec-drift fixture so its permanent failure cannot redden
+# that fixture's auto-fix PR.
+
+on:
+  schedule:
+    - cron: '0 9 * * *'   # 09:00 UTC daily
+  pull_request:
+    branches: [main]
+    paths:
+      - 'yaml-examples/triage-fixtures/02-app-regression.test.yaml'
+      - '.github/workflows/fixture-app-regression.yml'
+  workflow_dispatch: {}
+
+concurrency:
+  group: fixture-app-regression-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  app-regression:
+    name: App regression fixture (permanently red by design)
+    runs-on: shiplight-small
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install dependencies
+        working-directory: yaml-examples
+        run: npm ci
+
+      # No `continue-on-error` — see fixture-spec-drift.yml.
+      - name: Run the app-regression fixture
+        id: tests
+        working-directory: yaml-examples
+        run: npx shiplight test triage-fixtures/02-app-regression.test.yaml --project triage-fixtures
+
+      # No `npx shiplight report` — see fixture-spec-drift.yml.
+      - name: Upload test report (for triage)
+        if: ${{ !cancelled() }}
+        uses: ShiplightAI/ci-triage/upload-report@v1.2
+        with:
+          name: app-regression-report
+          report-dir: yaml-examples/shiplight-report
