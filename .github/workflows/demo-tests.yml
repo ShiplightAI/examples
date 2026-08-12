@@ -1,0 +1,85 @@
+name: Demo Tests
+
+# The `demo` project only. Kept separate from showcase so this suite finishes
+# well inside saucedemo's session window: it logs in once via the `setup`
+# project, and saucedemo's `session-username` cookie expires ~10 minutes later.
+# Playwright drops expired cookies when restoring storage state, so any test
+# whose context is created after that starts logged out and lands on the login
+# page. Running demo + showcase together took 13 minutes and the last demo tests
+# began failing that way.
+#
+# shiplight-large at 8 workers puts the 24 demo tests at roughly 2-3 minutes,
+# which is margin rather than a thin escape. Deliberately not 16 workers: every
+# test shares the single `standard_user` account, and a demo site is entitled to
+# throttle that many concurrent sessions from one IP.
+
+# The path list is repeated rather than shared via a YAML anchor: the Actions
+# workflow parser does not support anchors/aliases, and a workflow that fails to
+# parse stops running silently.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'yaml-examples/demo/**'
+      - 'yaml-examples/templates/**'
+      - 'yaml-examples/helpers/**'
+      - 'yaml-examples/files/**'
+      - 'yaml-examples/images/**'
+      - 'yaml-examples/playwright.config.ts'
+      - 'yaml-examples/package.json'
+      - 'yaml-examples/package-lock.json'
+      - '.github/workflows/demo-tests.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'yaml-examples/demo/**'
+      - 'yaml-examples/templates/**'
+      - 'yaml-examples/helpers/**'
+      - 'yaml-examples/files/**'
+      - 'yaml-examples/images/**'
+      - 'yaml-examples/playwright.config.ts'
+      - 'yaml-examples/package.json'
+      - 'yaml-examples/package-lock.json'
+      - '.github/workflows/demo-tests.yml'
+  workflow_dispatch: {}
+
+concurrency:
+  group: demo-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  demo:
+    name: E2E demo tests
+    runs-on: shiplight-large
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install dependencies
+        working-directory: yaml-examples
+        run: npm ci
+
+      # No `continue-on-error`. It makes GitHub record this step's *conclusion*
+      # as success, so `gh run view --log-failed` — how CI Failure Triage
+      # collects evidence — returns nothing useful. The uploads below still run
+      # via always()/!cancelled().
+      #
+      # `setup` runs automatically as a dependency of `demo`.
+      - name: Run demo tests
+        id: tests
+        working-directory: yaml-examples
+        run: npx shiplight test --project demo --workers=8
+
+      - name: Upload results to Shiplight
+        if: always() && steps.tests.outcome != 'skipped'
+        working-directory: yaml-examples
+        run: npx shiplight report
+        continue-on-error: true   # a cloud upload hiccup must not mask the test result
+
+      - name: Upload test report (for triage)
+        if: ${{ !cancelled() }}
+        uses: ShiplightAI/ci-triage/upload-report@v1.2
+        with:
+          name: demo-report
+          report-dir: yaml-examples/shiplight-report

@@ -11,9 +11,18 @@ name: Triage Fixtures
 # Deliberately not triggered on push or pull_request — a permanently-failing
 # workflow on every commit is noise, and each red run spends an agent run in
 # triage. Nightly plus on-demand is enough to prove the pipeline works.
+#
+# Path-scoped to the fixtures themselves. Deliberately NOT triggered by changes
+# to playwright.config.ts or package.json: this suite is red by design, so
+# firing it on shared-config edits would turn unrelated PRs red.
 on:
   schedule:
     - cron: '0 9 * * *'   # 09:00 UTC daily
+  pull_request:
+    branches: [main]
+    paths:
+      - 'yaml-examples/triage-fixtures/**'
+      - '.github/workflows/triage-fixtures.yml'
   workflow_dispatch: {}
 
 concurrency:

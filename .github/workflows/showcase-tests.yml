@@ -1,0 +1,70 @@
+name: Showcase Tests
+
+# The `showcase` project only. These tests are unauthenticated — they drive
+# public sites (wikipedia.org, static.shiplight.ai) — so unlike demo they have
+# no session deadline. Split out anyway so a change to one suite does not run
+# the other, and so both run in parallel instead of end to end.
+
+# Path list repeated rather than shared via a YAML anchor — see demo-tests.yml.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'yaml-examples/showcase/**'
+      - 'yaml-examples/templates/**'
+      - 'yaml-examples/helpers/**'
+      - 'yaml-examples/files/**'
+      - 'yaml-examples/images/**'
+      - 'yaml-examples/playwright.config.ts'
+      - 'yaml-examples/package.json'
+      - 'yaml-examples/package-lock.json'
+      - '.github/workflows/showcase-tests.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'yaml-examples/showcase/**'
+      - 'yaml-examples/templates/**'
+      - 'yaml-examples/helpers/**'
+      - 'yaml-examples/files/**'
+      - 'yaml-examples/images/**'
+      - 'yaml-examples/playwright.config.ts'
+      - 'yaml-examples/package.json'
+      - 'yaml-examples/package-lock.json'
+      - '.github/workflows/showcase-tests.yml'
+  workflow_dispatch: {}
+
+concurrency:
+  group: showcase-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  showcase:
+    name: E2E showcase tests
+    runs-on: shiplight-large
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install dependencies
+        working-directory: yaml-examples
+        run: npm ci
+
+      # See demo-tests.yml for why there is no `continue-on-error` here.
+      - name: Run showcase tests
+        id: tests
+        working-directory: yaml-examples
+        run: npx shiplight test --project showcase --workers=8
+
+      - name: Upload results to Shiplight
+        if: always() && steps.tests.outcome != 'skipped'
+        working-directory: yaml-examples
+        run: npx shiplight report
+        continue-on-error: true   # a cloud upload hiccup must not mask the test result
+
+      - name: Upload test report (for triage)
+        if: ${{ !cancelled() }}
+        uses: ShiplightAI/ci-triage/upload-report@v1.2
+        with:
+          name: showcase-report
+          report-dir: yaml-examples/shiplight-report
