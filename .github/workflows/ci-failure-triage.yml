@@ -79,7 +79,11 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       actions: read
+      contents: read
     steps:
+      - name: Checkout integration script
+        uses: actions/checkout@v5
+
       - name: Download triage context
         id: fetch
         continue-on-error: true   # triage may have died before uploading
@@ -98,11 +102,11 @@ jobs:
           pattern: autofix-result-*
           path: /tmp/autofix
 
-      # triage.md is already authored in Slack mrkdwn — single-asterisk bold, no
-      # headers, TL;DR table inside a code fence, under 1500 chars — so it is
-      # posted verbatim rather than reformatted. When the agent produced nothing
-      # (no model credentials, API outage), post a short notice instead: silence
-      # would read as "no failures", which is the opposite of the truth.
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
       - name: Post triage report to Slack
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_RELEASE_BOT_TOKEN }}
@@ -114,55 +118,6 @@ jobs:
           CONCLUSION: ${{ github.event.workflow_run.conclusion }}
         run: |
           set -euo pipefail
-          if [ -z "${SLACK_BOT_TOKEN:-}" ] || [ -z "${SLACK_CHANNEL:-}" ]; then
-            echo "::warning::SLACK_RELEASE_BOT_TOKEN (org secret) or SLACK_ISSUE_CHANNEL_ID (org variable) is unset — skipping the Slack post."
-            exit 0
-          fi
-
-          header=":x: *${WORKFLOW}* ${CONCLUSION} on \`${BRANCH}\` — <${RUN_URL}|failed run> · <${TRIAGE_URL}|triage run>"
-
-          if [ -s /tmp/triage-context/triage.md ]; then
-            body="$(cat /tmp/triage-context/triage.md)"
-          else
-            body=":warning: Triage produced no report. Check the triage run for the cause — a missing model credential fails every engine and still exits green."
-          fi
-
-          # Append what autofix actually did. The diagnosis alone does not say
-          # whether a PR exists, which is the part a reader wants to click.
-          # Skipped entries are dropped: they mean the target was already
-          # covered by an open PR, which is not news.
-          if compgen -G '/tmp/autofix/*/autofix-result.json' >/dev/null 2>&1; then
-            autofix="$(jq -rs '
-              map(select(.skipped != true))
-              | map(
-                  if (.pr_url // "") != "" then
-                    ":wrench: <\(.pr_url)|Auto-fix PR> for `\(.test)` — verification: *\(.verification.status)* (\(.verification.pass_count)/2)"
-                  elif (.has_changes == false) then
-                    ":information_source: Auto-fix made no change for `\(.test)` — the agent judged the application at fault."
-                  else
-                    ":warning: Auto-fix changed `\(.test)` but opened no PR — see <\(.run_url)|the autofix run>."
-                  end)
-              | join("\n")
-            ' /tmp/autofix/*/autofix-result.json)"
-            [ -n "$autofix" ] && body="$(printf '%s\n\n%s' "$body" "$autofix")"
-          fi
-
-          # Build the payload with jq so newlines and quotes in the report cannot
-          # break out of the JSON string.
-          payload="$(jq -n \
-            --arg channel "$SLACK_CHANNEL" \
-            --arg text "$(printf '%s\n\n%s' "$header" "$body")" \
-            '{channel: $channel, text: $text, unfurl_links: false}')"
-
-          resp="$(curl -sS -X POST https://slack.com/api/chat.postMessage \
-            -H "Authorization: Bearer ${SLACK_BOT_TOKEN}" \
-            -H 'Content-type: application/json; charset=utf-8' \
-            -d "$payload")"
-
-          # chat.postMessage returns HTTP 200 even when it refuses, so gate on
-          # the `ok` field rather than the status code.
-          if [ "$(jq -r '.ok' <<<"$resp")" != "true" ]; then
-            echo "Slack rejected the message: $(jq -r '.error // "unknown"' <<<"$resp")" >&2
-            exit 1
-          fi
-          echo "Posted to ${SLACK_CHANNEL}."
+          node .github/scripts/post-slack-triage.ts \
+            /tmp/triage-context/triage.md \
+            /tmp/autofix
