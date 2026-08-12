@@ -121,3 +121,53 @@ jobs:
           node .github/scripts/post-slack-triage.ts \
             /tmp/triage-context/triage.md \
             /tmp/autofix
+
+  # Non-fixable incidents belong in Linear for human follow-up. OAuth client
+  # credentials stay in this caller-owned job, so neither the triage nor
+  # autofix agent can read them. Open incidents are updated by the verdict's
+  # stable dedup_key; completed/cancelled incidents do not suppress a newly
+  # recurring failure.
+  notify-linear:
+    needs: triage
+    if: >-
+      ${{ always() &&
+          (github.event.workflow_run.conclusion == 'failure' ||
+           github.event.workflow_run.conclusion == 'timed_out') }}
+    continue-on-error: true   # Linear must never mask the triage/autofix result
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+    steps:
+      - name: Checkout integration script
+        uses: actions/checkout@v5
+
+      - name: Download triage verdict
+        id: fetch
+        continue-on-error: true   # triage may have died before uploading
+        uses: actions/download-artifact@v8
+        with:
+          name: triage-context
+          path: /tmp/triage-context
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Create or update Linear incidents
+        env:
+          LINEAR_CLIENT_ID: ${{ vars.LINEAR_CLIENT_ID }}
+          LINEAR_CLIENT_SECRET: ${{ secrets.LINEAR_CLIENT_SECRET }}
+          LINEAR_TEAM_KEY: ${{ vars.LINEAR_TEAM_KEY }}
+        run: |
+          set -euo pipefail
+          if [ -z "${LINEAR_CLIENT_ID:-}" ] || [ -z "${LINEAR_CLIENT_SECRET:-}" ] || [ -z "${LINEAR_TEAM_KEY:-}" ]; then
+            echo "Linear OAuth credentials or LINEAR_TEAM_KEY are unset — skipping Linear publishing."
+            exit 0
+          fi
+          if [ ! -s /tmp/triage-context/verdict.json ]; then
+            echo "Triage produced no verdict.json — skipping Linear publishing."
+            exit 0
+          fi
+          node .github/scripts/publish-linear-incidents.ts /tmp/triage-context/verdict.json
