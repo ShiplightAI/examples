@@ -18,11 +18,9 @@ name: App Regression Fixture
 # needs exercising. The pull_request trigger stays so a change to the fixture
 # itself is still verified — that is also how the auto-fix PR gets its check.
 on:
-  pull_request:
-    branches: [main]
-    paths:
-      - 'yaml-examples/triage-fixtures/02-app-regression.test.yaml'
-      - '.github/workflows/fixture-app-regression.yml'
+  # No pull_request trigger. This fixture is permanently red — the fix belongs
+  # in a third-party page we do not control — so it has no green end state and
+  # would only ever redden a PR. Exercise it with workflow_dispatch.
   workflow_dispatch: {}
 
 concurrency:
