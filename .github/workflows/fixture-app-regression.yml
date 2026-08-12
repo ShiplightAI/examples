@@ -13,9 +13,11 @@ name: App Regression Fixture
 # Split out from the spec-drift fixture so its permanent failure cannot redden
 # that fixture's auto-fix PR.
 
+# No schedule. These fail by design and every red run spends an agent run in
+# triage, so they are triggered by hand (workflow_dispatch) when the pipeline
+# needs exercising. The pull_request trigger stays so a change to the fixture
+# itself is still verified — that is also how the auto-fix PR gets its check.
 on:
-  schedule:
-    - cron: '0 9 * * *'   # 09:00 UTC daily
   pull_request:
     branches: [main]
     paths:
