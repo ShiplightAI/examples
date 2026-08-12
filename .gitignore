@@ -9,3 +9,4 @@ playwright-report/
 .agents/
 skills-lock.json
 .shiplight-agent-skills-last-update
+.mcp.json
