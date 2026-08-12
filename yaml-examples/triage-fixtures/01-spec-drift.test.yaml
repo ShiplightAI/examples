@@ -27,5 +27,5 @@ statements:
   - URL: /testing/failure-analysis/renamed-elements.html
 
   # Stale: the button carries id `createReport` and reads "Create Report" now.
-  - VERIFY: The "Generate Report" button is visible on the dashboard
-    js: "await expect(page.locator('#generateReport')).toBeVisible({ timeout: 3000 })"
+  - VERIFY: The "Create Report" button is visible on the dashboard
+    js: "await expect(page.locator('#createReport')).toBeVisible({ timeout: 3000 })"
