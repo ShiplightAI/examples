@@ -51,7 +51,7 @@ jobs:
       # No `npx shiplight report` — see fixture-spec-drift.yml.
       - name: Upload test report (for triage)
         if: ${{ !cancelled() }}
-        uses: ShiplightAI/ci-triage/upload-report@v1.2
+        uses: ShiplightAI/ci-triage/upload-report@v1.3
         with:
           name: app-regression-report
           report-dir: yaml-examples/shiplight-report
