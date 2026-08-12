@@ -19,6 +19,22 @@ on:
 
 jobs:
   triage:
+    # SECURITY GATE — do not remove.
+    #
+    # workflow_run runs from the default branch with FULL access to secrets and
+    # a write token, even when the run that triggered it came from a fork's
+    # pull request. The triage job then checks out
+    # github.event.workflow_run.head_sha — the triggering commit — and runs an
+    # agent over it with `--permission-mode bypassPermissions`, the Claude OAuth
+    # token in its environment, and an MCP config read from that checkout.
+    #
+    # Without this guard, anyone who can open a PR on this public repo could
+    # reach that agent with attacker-controlled files (a crafted .mcp.json
+    # defines commands to execute) and exfiltrate the token.
+    #
+    # Restrict it to runs whose head commit lives in THIS repository. Branch
+    # pushes and PRs from collaborators still trigger triage; forks never do.
+    if: github.event.workflow_run.head_repository.full_name == github.repository
     uses: ShiplightAI/ci-triage/.github/workflows/triage.yml@v1.2
     permissions:
       contents: write
@@ -51,8 +67,12 @@ jobs:
   # of `extra_env` — means the autofix agent never sees it.
   notify-slack:
     needs: triage
+    # Repeats the fork guard: `always()` would otherwise run this job even when
+    # the triage job above was skipped, handing the Slack bot token to a
+    # fork-triggered run.
     if: >-
       ${{ always() &&
+          github.event.workflow_run.head_repository.full_name == github.repository &&
           (github.event.workflow_run.conclusion == 'failure' ||
            github.event.workflow_run.conclusion == 'timed_out') }}
     continue-on-error: true   # Slack being down must never mask a triage result
