@@ -1,0 +1,38 @@
+# Triage fixture — Type A: the app is broken, this test is correct.
+#
+# THIS TEST IS SUPPOSED TO FAIL. It exists to exercise the CI Failure Triage
+# pipeline end to end, and is run only by the "Triage Fixtures" workflow — never
+# by the main E2E suite.
+#
+# The fixture page has a real defect: the increment handler fires and appends to
+# the click history, but a developer bug means it never writes the new value to
+# the DOM, so the counter is stuck at 0. The click is genuinely broken behavior,
+# not a stale locator.
+#
+# Triage should classify this `app_regression` with `fixable: false` and open NO
+# pull request. An autofix PR here would be a FAILURE of the pipeline: it would
+# mean the agent rewrote a correct test to accommodate a broken application,
+# which is exactly the ground-truth rule the triage skill forbids.
+#
+# The click targets a stable id that really exists, so the failure lands on the
+# assertion rather than on locator resolution — self-healing has nothing to
+# rescue, which is what keeps this a clean application-bug signal.
+
+goal: Fixture — clicking increment advances the counter
+
+base_url: https://static.shiplight.ai
+
+statements:
+  - URL: /testing/failure-analysis/broken-assertion.html
+
+  - VERIFY: The counter starts at zero
+    js: "await expect(page.locator('#counter-display')).toContainText('0', { timeout: 3000 })"
+
+  - intent: Click the increment button
+    action: click
+    locator: "locator('#increment-btn')"
+
+  # Correct expectation. The app never updates the display, so this is the gate
+  # that fails.
+  - VERIFY: The counter shows 1 after a single click
+    js: "await expect(page.locator('#counter-display')).toContainText('1', { timeout: 3000 })"
