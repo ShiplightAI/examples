@@ -44,14 +44,22 @@ const verdict: Verdict = {
   ],
 };
 
-test("buildIncident carries the stable dedup marker and latest run context", () => {
+test("buildIncident keeps dedup metadata out of the visible description", () => {
   const incident = buildIncident(verdict, verdict.failures[0]);
 
   assert.equal(
-    incident.marker,
+    incident.legacyMarker,
     "<!-- shiplight-ci-triage-dedup:v1:ShiplightAI%2Fexamples:Demo%20Tests:demo%2Flogin.test.yaml:app_regression -->",
   );
+  assert.equal(
+    incident.dedupUrl,
+    "https://github.com/ShiplightAI/examples/actions#shiplight-ci-triage=v1%3AShiplightAI%252Fexamples%3ADemo%2520Tests%3Ademo%252Flogin.test.yaml%3Aapp_regression",
+  );
   assert.match(incident.title, /^\[CI\]\[app regression\] /);
+  assert.doesNotMatch(
+    incident.description,
+    /shiplight-ci-triage-dedup|Integration key/,
+  );
   assert.match(
     incident.description,
     /\[Failed GitHub Actions run\]\(https:\/\/github\.com\/ShiplightAI\/examples\/actions\/runs\/123\)/,
@@ -139,7 +147,10 @@ test("publishLinearIncidents creates only non-fixable incidents", async () => {
     if (query.includes("ResolveTeam")) {
       return { teams: { nodes: [{ id: "team-1", key: "ENG" }] } };
     }
-    if (query.includes("FindIncident")) {
+    if (query.includes("FindIncidentAttachment")) {
+      return { attachmentsForURL: { nodes: [] } };
+    }
+    if (query.includes("FindLegacyIncident")) {
       return { issues: { nodes: [] } };
     }
     if (query.includes("CreateIncident")) {
@@ -147,9 +158,18 @@ test("publishLinearIncidents creates only non-fixable incidents", async () => {
         issueCreate: {
           success: true,
           issue: {
+            id: "issue-42",
             identifier: "ENG-42",
             url: "https://linear.app/acme/issue/ENG-42",
           },
+        },
+      };
+    }
+    if (query.includes("UpsertIncidentAttachment")) {
+      return {
+        attachmentCreate: {
+          success: true,
+          attachment: { id: "attachment-42" },
         },
       };
     }
@@ -163,9 +183,24 @@ test("publishLinearIncidents creates only non-fixable incidents", async () => {
     operations.filter(({ query }) => query.includes("CreateIncident")).length,
     1,
   );
+  const attachment = operations.find(({ query }) =>
+    query.includes("UpsertIncidentAttachment"),
+  );
+  assert.deepEqual(attachment?.variables.input, {
+    issueId: "issue-42",
+    title: "CI failure: demo/login.test.yaml",
+    subtitle: "Demo Tests · app regression",
+    url: buildIncident(verdict, verdict.failures[0]).dedupUrl,
+    metadata: {
+      dedupKey: verdict.failures[0].dedup_key,
+      workflow: "Demo Tests",
+      test: "demo/login.test.yaml",
+      classification: "app_regression",
+    },
+  });
 });
 
-test("publishLinearIncidents updates an existing open incident", async () => {
+test("publishLinearIncidents updates an open incident found by attachment URL", async () => {
   const operations: Array<{
     query: string;
     variables: Record<string, unknown>;
@@ -175,14 +210,19 @@ test("publishLinearIncidents updates an existing open incident", async () => {
     if (query.includes("ResolveTeam")) {
       return { teams: { nodes: [{ id: "team-1", key: "ENG" }] } };
     }
-    if (query.includes("FindIncident")) {
+    if (query.includes("FindIncidentAttachment")) {
       return {
-        issues: {
+        attachmentsForURL: {
           nodes: [
             {
-              id: "issue-1",
-              identifier: "ENG-7",
-              url: "https://linear.app/acme/issue/ENG-7",
+              id: "attachment-1",
+              issue: {
+                id: "issue-1",
+                identifier: "ENG-7",
+                url: "https://linear.app/acme/issue/ENG-7",
+                state: { type: "started" },
+                team: { id: "team-1" },
+              },
             },
           ],
         },
@@ -199,6 +239,11 @@ test("publishLinearIncidents updates an existing open incident", async () => {
         },
       };
     }
+    if (query.includes("UpsertIncidentAttachment")) {
+      return {
+        attachmentCreate: { success: true, attachment: { id: "attachment-1" } },
+      };
+    }
     throw new Error("unexpected operation");
   };
 
@@ -209,6 +254,114 @@ test("publishLinearIncidents updates an existing open incident", async () => {
     query.includes("UpdateIncident"),
   );
   assert.equal(update?.variables.issueId, "issue-1");
+  assert.equal(
+    operations.filter(({ query }) => query.includes("FindLegacyIncident"))
+      .length,
+    0,
+  );
+});
+
+test("publishLinearIncidents migrates an open marker-based incident without duplicating it", async () => {
+  const operations: Array<{
+    query: string;
+    variables: Record<string, unknown>;
+  }> = [];
+  const request: GraphqlRequest = async (query, variables) => {
+    operations.push({ query, variables });
+    if (query.includes("ResolveTeam")) {
+      return { teams: { nodes: [{ id: "team-1", key: "ENG" }] } };
+    }
+    if (query.includes("FindIncidentAttachment")) {
+      return { attachmentsForURL: { nodes: [] } };
+    }
+    if (query.includes("FindLegacyIncident")) {
+      return {
+        issues: {
+          nodes: [
+            {
+              id: "legacy-1",
+              identifier: "ENG-5",
+              url: "https://linear.app/ENG-5",
+            },
+          ],
+        },
+      };
+    }
+    if (query.includes("UpdateIncident")) {
+      return { issueUpdate: { success: true, issue: { identifier: "ENG-5" } } };
+    }
+    if (query.includes("UpsertIncidentAttachment")) {
+      return {
+        attachmentCreate: { success: true, attachment: { id: "attachment-5" } },
+      };
+    }
+    throw new Error("unexpected operation");
+  };
+
+  const result = await publishLinearIncidents(verdict, "ENG", request);
+
+  assert.deepEqual(result, { created: 0, updated: 1, skipped: 1 });
+  assert.equal(
+    operations.filter(({ query }) => query.includes("CreateIncident")).length,
+    0,
+  );
+  const update = operations.find(({ query }) =>
+    query.includes("UpdateIncident"),
+  );
+  const input = update?.variables.input as { description: string };
+  assert.doesNotMatch(
+    input.description,
+    /shiplight-ci-triage-dedup|Integration key/,
+  );
+});
+
+test("publishLinearIncidents ignores attachments on completed incidents", async () => {
+  const operations: string[] = [];
+  const request: GraphqlRequest = async (query) => {
+    operations.push(query);
+    if (query.includes("ResolveTeam")) {
+      return { teams: { nodes: [{ id: "team-1", key: "ENG" }] } };
+    }
+    if (query.includes("FindIncidentAttachment")) {
+      return {
+        attachmentsForURL: {
+          nodes: [
+            {
+              id: "attachment-old",
+              issue: {
+                id: "issue-old",
+                state: { type: "completed" },
+                team: { id: "team-1" },
+              },
+            },
+          ],
+        },
+      };
+    }
+    if (query.includes("FindLegacyIncident")) return { issues: { nodes: [] } };
+    if (query.includes("CreateIncident")) {
+      return { issueCreate: { success: true, issue: { id: "issue-new" } } };
+    }
+    if (query.includes("UpsertIncidentAttachment")) {
+      return {
+        attachmentCreate: {
+          success: true,
+          attachment: { id: "attachment-new" },
+        },
+      };
+    }
+    throw new Error("unexpected operation");
+  };
+
+  assert.deepEqual(await publishLinearIncidents(verdict, "ENG", request), {
+    created: 1,
+    updated: 0,
+    skipped: 1,
+  });
+  assert.equal(
+    operations.filter((query) => query.includes("CreateIncident")).length,
+    1,
+  );
 });
 
 test("publishLinearIncidents rejects an unknown or ambiguous team key", async () => {
