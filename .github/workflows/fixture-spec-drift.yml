@@ -1,0 +1,62 @@
+name: Spec Drift Fixture
+
+# Runs ONLY triage-fixtures/01-spec-drift.test.yaml — the Type B fixture, where
+# the application is correct and the test is stale.
+#
+# Kept in its own workflow so the auto-fix pull request it produces can go
+# GREEN. When both fixtures shared a workflow, the always-failing app-regression
+# fixture reddened the auto-fix PR too, so a correct and verified fix read as a
+# failure. That defeated the demonstration: the whole point of this fixture is
+# to show triage repairing a drifted test and CI going green on the repair.
+#
+# Expected lifecycle:
+#   main            -> RED  (assertion still points at the old button)
+#   auto-fix PR     -> GREEN (assertion retargeted at the renamed button)
+#
+# Do not merge that auto-fix PR. Merging it makes this fixture pass on main and
+# it stops covering anything; leaving it open is also what stops ci-triage
+# opening a duplicate on the next run.
+
+on:
+  schedule:
+    - cron: '0 9 * * *'   # 09:00 UTC daily
+  pull_request:
+    branches: [main]
+    paths:
+      - 'yaml-examples/triage-fixtures/01-spec-drift.test.yaml'
+      - '.github/workflows/fixture-spec-drift.yml'
+  workflow_dispatch: {}
+
+concurrency:
+  group: fixture-spec-drift-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  spec-drift:
+    name: Spec drift fixture (red until auto-fixed)
+    runs-on: shiplight-small
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install dependencies
+        working-directory: yaml-examples
+        run: npm ci
+
+      # No `continue-on-error` — it would hide the test output from
+      # `gh run view --log-failed`, which is the evidence the triage agent reads.
+      - name: Run the spec-drift fixture
+        id: tests
+        working-directory: yaml-examples
+        run: npx shiplight test triage-fixtures/01-spec-drift.test.yaml --project triage-fixtures
+
+      # No `npx shiplight report`: this fails by design on main, and publishing
+      # it would drag down the pass-rate analytics the `cloud` subcommand
+      # reports. Triage reads the artifact below, not the cloud.
+      - name: Upload test report (for triage)
+        if: ${{ !cancelled() }}
+        uses: ShiplightAI/ci-triage/upload-report@v1.2
+        with:
+          name: spec-drift-report
+          report-dir: yaml-examples/shiplight-report
