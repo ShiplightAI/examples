@@ -22,11 +22,14 @@ name: Spec Drift Fixture
 # needs exercising. The pull_request trigger stays so a change to the fixture
 # itself is still verified — that is also how the auto-fix PR gets its check.
 on:
+  # Scoped to the TEST file only, deliberately not to this workflow file. The
+  # fixture is red until auto-fixed, so gating a PR on it would redden any PR
+  # that merely edits the workflow. The auto-fix PR edits the test, so it still
+  # triggers this and still goes green — which is the demonstration.
   pull_request:
     branches: [main]
     paths:
       - 'yaml-examples/triage-fixtures/01-spec-drift.test.yaml'
-      - '.github/workflows/fixture-spec-drift.yml'
   workflow_dispatch: {}
 
 concurrency:
