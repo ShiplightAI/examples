@@ -11,7 +11,8 @@ name: CI Failure Triage
 on:
   workflow_run:
     workflows:                        # exact `name:` of each workflow to watch
-      - YAML Examples Tests
+      - Demo Tests
+      - Showcase Tests
       - Triage Fixtures               # deliberately red; exercises this pipeline
     types: [completed]
 
