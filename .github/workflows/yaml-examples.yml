@@ -33,9 +33,14 @@ jobs:
         # surfaces here first instead of only breaking the autofix re-run.
         run: npm ci
 
+      # No `continue-on-error`. It makes GitHub record this step's *conclusion*
+      # as success, so `gh run view --log-failed` — which is how CI Failure
+      # Triage collects evidence — returns only the trailing `exit 1` step and
+      # none of the actual test output. Letting the step fail outright keeps the
+      # error text and stack in the triage log. The upload steps below still run
+      # via always()/!cancelled().
       - name: Run demo and showcase tests
         id: tests
-        continue-on-error: true
         working-directory: yaml-examples
         # `setup` runs automatically as a dependency of `demo`. The generated
         # *.yaml.spec.ts files are gitignored; `shiplight test` transpiles the
@@ -46,6 +51,7 @@ jobs:
         if: always() && steps.tests.outcome != 'skipped'
         working-directory: yaml-examples
         run: npx shiplight report
+        continue-on-error: true   # a cloud upload hiccup must not mask the test result
 
       # Failure evidence for the CI Failure Triage workflow. Drops the traces
       # (*.zip) and videos (*.webm) the agent never reads; humans still get the
@@ -55,7 +61,3 @@ jobs:
         uses: ShiplightAI/ci-triage/upload-report@v1.2
         with:
           report-dir: yaml-examples/shiplight-report
-
-      - name: Fail if tests failed
-        if: steps.tests.outcome == 'failure'
-        run: exit 1
