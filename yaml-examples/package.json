@@ -2,8 +2,9 @@
   "name": "my-shiplight-tests",
   "type": "module",
   "scripts": {
-    "test": "shiplight test",
-    "test:headed": "shiplight test --headed"
+    "test": "shiplight test --project demo --project showcase",
+    "test:headed": "shiplight test --project demo --project showcase --headed",
+    "test:triage-fixtures": "shiplight test --project triage-fixtures"
   },
   "dependencies": {
     "shiplightai": "^0.1.99"

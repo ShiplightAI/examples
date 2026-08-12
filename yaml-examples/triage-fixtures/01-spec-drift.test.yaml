@@ -1,0 +1,31 @@
+# Triage fixture — Type B: the app changed, this test did not.
+#
+# THIS TEST IS SUPPOSED TO FAIL. It exists to exercise the CI Failure Triage
+# pipeline end to end, and is run only by the "Triage Fixtures" workflow — never
+# by the main E2E suite.
+#
+# The fixture page renamed its dashboard buttons: "Generate Report" became
+# "Create Report" (id generateReport -> createReport). The application is
+# correct; this spec is stale. Triage should classify it `spec_issue` with
+# `fixable: true` and open an autofix PR that points the assertion at the new
+# name.
+#
+# DO NOT MERGE THAT AUTOFIX PR. Merging it makes this test pass and the fixture
+# stops covering anything. Leaving it open is also what keeps the pipeline from
+# opening a duplicate on every run — ci-triage skips a target that already has
+# an open autofix PR.
+#
+# Deliberately asserted with a `js:` predicate on the old id rather than an
+# `intent:` click. A natural-language click would be self-healed onto the
+# renamed button and the test would pass, producing no failure to triage.
+
+goal: Fixture — dashboard exposes the Generate Report action
+
+base_url: https://static.shiplight.ai
+
+statements:
+  - URL: /testing/failure-analysis/renamed-elements.html
+
+  # Stale: the button carries id `createReport` and reads "Create Report" now.
+  - VERIFY: The "Generate Report" button is visible on the dashboard
+    js: "await expect(page.locator('#generateReport')).toBeVisible({ timeout: 3000 })"
