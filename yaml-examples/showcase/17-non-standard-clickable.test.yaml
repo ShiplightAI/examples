@@ -8,7 +8,7 @@
 # custom components render as div/span with click handlers.
 
 goal: Click non-standard interactive elements (divs, spans, avatar icons)
-base_url: http://localhost:3000
+base_url: https://static.shiplight.ai
 
 statements:
   - URL: /testing/interactions/non-standard-clickable.html
