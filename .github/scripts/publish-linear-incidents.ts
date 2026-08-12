@@ -47,9 +47,13 @@ export type FetchLike = (
 ) => Promise<FetchResponse>;
 
 type Incident = {
-  marker: string;
+  key: string;
+  legacyMarker: string;
+  dedupUrl: string;
   title: string;
   description: string;
+  attachmentTitle: string;
+  attachmentSubtitle: string;
 };
 
 type PublishResult = {
@@ -85,7 +89,8 @@ function dedupKey(verdict: Verdict, failure: Failure): string {
 
 export function buildIncident(verdict: Verdict, failure: Failure): Incident {
   const key = dedupKey(verdict, failure);
-  const marker = `<!-- shiplight-ci-triage-dedup:${key} -->`;
+  const legacyMarker = `<!-- shiplight-ci-triage-dedup:${key} -->`;
+  const dedupUrl = `https://github.com/${encodeURI(verdict.repository)}/actions#shiplight-ci-triage=${encodeURIComponent(key)}`;
   const classification = failure.classification.replaceAll("_", " ");
   const rawTitle = `[CI][${classification}] ${failure.test}`;
   const title =
@@ -94,7 +99,6 @@ export function buildIncident(verdict: Verdict, failure: Failure): Incident {
   const repositoryUrl = `https://github.com/${encodeURI(verdict.repository)}`;
 
   const description = [
-    marker,
     "Automated incident from Shiplight CI failure triage.",
     "",
     `- **Test:** \`${inlineCode(failure.test)}\``,
@@ -108,11 +112,17 @@ export function buildIncident(verdict: Verdict, failure: Failure): Incident {
     "### Triage finding",
     "",
     failure.fix_summary || "The triage agent did not provide a summary.",
-    "",
-    `_Integration key: \`${inlineCode(key)}\`_`,
   ].join("\n");
 
-  return { marker, title, description };
+  return {
+    key,
+    legacyMarker,
+    dedupUrl,
+    title,
+    description,
+    attachmentTitle: `CI failure: ${failure.test}`,
+    attachmentSubtitle: `${verdict.workflow} · ${classification}`,
+  };
 }
 
 function getNodes(
@@ -140,6 +150,87 @@ function mutationSucceeded(
     payload !== null &&
     (payload as Record<string, unknown>).success === true
   );
+}
+
+function issueIdFromMutation(
+  data: Record<string, unknown>,
+  name: string,
+): string | undefined {
+  const payload = data[name];
+  if (typeof payload !== "object" || payload === null) return undefined;
+  const issue = (payload as Record<string, unknown>).issue;
+  if (typeof issue !== "object" || issue === null) return undefined;
+  const id = (issue as Record<string, unknown>).id;
+  return typeof id === "string" ? id : undefined;
+}
+
+function openAttachedIssues(
+  data: Record<string, unknown>,
+  teamId: string,
+): Array<Record<string, unknown>> {
+  const attachments = getNodes(data, "attachmentsForURL");
+  const issues = new Map<string, Record<string, unknown>>();
+  for (const attachment of attachments) {
+    const issue = attachment.issue;
+    if (typeof issue !== "object" || issue === null) continue;
+    const candidate = issue as Record<string, unknown>;
+    const id = candidate.id;
+    const state = candidate.state;
+    const team = candidate.team;
+    const stateType =
+      typeof state === "object" && state !== null
+        ? (state as Record<string, unknown>).type
+        : undefined;
+    const attachedTeamId =
+      typeof team === "object" && team !== null
+        ? (team as Record<string, unknown>).id
+        : undefined;
+    if (
+      typeof id === "string" &&
+      attachedTeamId === teamId &&
+      stateType !== "completed" &&
+      stateType !== "canceled"
+    ) {
+      issues.set(id, candidate);
+    }
+  }
+  return [...issues.values()];
+}
+
+async function upsertIncidentAttachment(
+  request: GraphqlRequest,
+  issueId: string,
+  incident: Incident,
+  verdict: Verdict,
+  failure: Failure,
+): Promise<void> {
+  const attached = await request(
+    `mutation UpsertIncidentAttachment($input: AttachmentCreateInput!) {
+      attachmentCreate(input: $input) {
+        success
+        attachment { id }
+      }
+    }`,
+    {
+      input: {
+        issueId,
+        title: incident.attachmentTitle,
+        subtitle: incident.attachmentSubtitle,
+        url: incident.dedupUrl,
+        metadata: {
+          dedupKey: incident.key,
+          workflow: verdict.workflow,
+          test: failure.test,
+          classification: failure.classification,
+        },
+      },
+    },
+  );
+  if (!mutationSucceeded(attached, "attachmentCreate")) {
+    throw new Error(
+      `Linear did not attach dedup metadata for ${failure.test}.`,
+    );
+  }
 }
 
 export async function publishLinearIncidents(
@@ -171,22 +262,46 @@ export async function publishLinearIncidents(
     }
 
     const incident = buildIncident(verdict, failure);
-    const existingData = await request(
-      `query FindIncident($teamId: ID!, $marker: String!) {
+    const attachmentData = await request(
+      `query FindIncidentAttachment($dedupUrl: String!) {
+        attachmentsForURL(url: $dedupUrl) {
+          nodes {
+            id
+            issue {
+              id
+              identifier
+              url
+              state { type }
+              team { id }
+            }
+          }
+        }
+      }`,
+      { dedupUrl: incident.dedupUrl },
+    );
+    let existing = openAttachedIssues(attachmentData, teamId);
+
+    if (existing.length === 0) {
+      const legacyData = await request(
+        `query FindLegacyIncident($teamId: ID!, $legacyMarker: String!, $title: String!) {
         issues(
           first: 2
           filter: {
             team: { id: { eq: $teamId } }
-            description: { contains: $marker }
             state: { type: { nin: ["completed", "canceled"] } }
+            or: [
+              { description: { contains: $legacyMarker } }
+              { title: { eq: $title } }
+            ]
           }
         ) {
           nodes { id identifier url }
         }
       }`,
-      { teamId, marker: incident.marker },
-    );
-    const existing = getNodes(existingData, "issues");
+        { teamId, legacyMarker: incident.legacyMarker, title: incident.title },
+      );
+      existing = getNodes(legacyData, "issues");
+    }
 
     if (existing.length > 1) {
       throw new Error(
@@ -215,6 +330,13 @@ export async function publishLinearIncidents(
           `Linear did not update the incident for ${failure.test}.`,
         );
       }
+      await upsertIncidentAttachment(
+        request,
+        issueId,
+        incident,
+        verdict,
+        failure,
+      );
       result.updated += 1;
       console.log(`Updated Linear incident for ${failure.test}.`);
       continue;
@@ -240,6 +362,19 @@ export async function publishLinearIncidents(
         `Linear did not create the incident for ${failure.test}.`,
       );
     }
+    const createdIssueId = issueIdFromMutation(created, "issueCreate");
+    if (!createdIssueId) {
+      throw new Error(
+        `Linear created an incident without returning its id for ${failure.test}.`,
+      );
+    }
+    await upsertIncidentAttachment(
+      request,
+      createdIssueId,
+      incident,
+      verdict,
+      failure,
+    );
     result.created += 1;
     console.log(`Created Linear incident for ${failure.test}.`);
   }
