@@ -42,3 +42,75 @@ jobs:
       # No `extra_env`: the demo suite logs into saucedemo with public
       # credentials and the showcase suite hits public sites, so the autofix
       # re-run needs no app secrets. Add KEY=VALUE lines here if that changes.
+
+  # Caller-owned notification. ci-triage deliberately posts nowhere itself; it
+  # publishes artifacts and lets the consumer decide what to route where, using
+  # its own credentials. Keeping SLACK_RELEASE_BOT_TOKEN in this job — and out
+  # of `extra_env` — means the autofix agent never sees it.
+  notify-slack:
+    needs: triage
+    if: >-
+      ${{ always() &&
+          (github.event.workflow_run.conclusion == 'failure' ||
+           github.event.workflow_run.conclusion == 'timed_out') }}
+    continue-on-error: true   # Slack being down must never mask a triage result
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+    steps:
+      - name: Download triage context
+        id: fetch
+        continue-on-error: true   # triage may have died before uploading
+        uses: actions/download-artifact@v4
+        with:
+          name: triage-context
+          path: /tmp/triage-context
+
+      # triage.md is already authored in Slack mrkdwn — single-asterisk bold, no
+      # headers, TL;DR table inside a code fence, under 1500 chars — so it is
+      # posted verbatim rather than reformatted. When the agent produced nothing
+      # (no model credentials, API outage), post a short notice instead: silence
+      # would read as "no failures", which is the opposite of the truth.
+      - name: Post triage report to Slack
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_RELEASE_BOT_TOKEN }}
+          SLACK_CHANNEL: ${{ vars.SLACK_TRIAGE_CHANNEL }}
+          WORKFLOW: ${{ github.event.workflow_run.name }}
+          BRANCH: ${{ github.event.workflow_run.head_branch }}
+          RUN_URL: ${{ github.event.workflow_run.html_url }}
+          TRIAGE_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+        run: |
+          set -euo pipefail
+          if [ -z "${SLACK_BOT_TOKEN:-}" ] || [ -z "${SLACK_CHANNEL:-}" ]; then
+            echo "::warning::SLACK_RELEASE_BOT_TOKEN or SLACK_TRIAGE_CHANNEL is unset — skipping the Slack post."
+            exit 0
+          fi
+
+          header=":x: *${WORKFLOW}* ${CONCLUSION} on \`${BRANCH}\` — <${RUN_URL}|failed run> · <${TRIAGE_URL}|triage run>"
+
+          if [ -s /tmp/triage-context/triage.md ]; then
+            body="$(cat /tmp/triage-context/triage.md)"
+          else
+            body=":warning: Triage produced no report. Check the triage run for the cause — a missing model credential fails every engine and still exits green."
+          fi
+
+          # Build the payload with jq so newlines and quotes in the report cannot
+          # break out of the JSON string.
+          payload="$(jq -n \
+            --arg channel "$SLACK_CHANNEL" \
+            --arg text "$(printf '%s\n\n%s' "$header" "$body")" \
+            '{channel: $channel, text: $text, unfurl_links: false}')"
+
+          resp="$(curl -sS -X POST https://slack.com/api/chat.postMessage \
+            -H "Authorization: Bearer ${SLACK_BOT_TOKEN}" \
+            -H 'Content-type: application/json; charset=utf-8' \
+            -d "$payload")"
+
+          # chat.postMessage returns HTTP 200 even when it refuses, so gate on
+          # the `ok` field rather than the status code.
+          if [ "$(jq -r '.ok' <<<"$resp")" != "true" ]; then
+            echo "Slack rejected the message: $(jq -r '.error // "unknown"' <<<"$resp")" >&2
+            exit 1
+          fi
+          echo "Posted to ${SLACK_CHANNEL}."
