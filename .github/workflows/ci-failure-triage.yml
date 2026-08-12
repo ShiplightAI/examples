@@ -85,7 +85,7 @@ jobs:
       - name: Post triage report to Slack
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_RELEASE_BOT_TOKEN }}
-          SLACK_CHANNEL: ${{ vars.SLACK_RELEASE_CHANNEL_ID }}   # org variable, not a secret
+          SLACK_CHANNEL: ${{ vars.SLACK_ISSUE_CHANNEL_ID }}   # org variable, not a secret
           WORKFLOW: ${{ github.event.workflow_run.name }}
           BRANCH: ${{ github.event.workflow_run.head_branch }}
           RUN_URL: ${{ github.event.workflow_run.html_url }}
@@ -94,7 +94,7 @@ jobs:
         run: |
           set -euo pipefail
           if [ -z "${SLACK_BOT_TOKEN:-}" ] || [ -z "${SLACK_CHANNEL:-}" ]; then
-            echo "::warning::SLACK_RELEASE_BOT_TOKEN (org secret) or SLACK_RELEASE_CHANNEL_ID (org variable) is unset — skipping the Slack post."
+            echo "::warning::SLACK_RELEASE_BOT_TOKEN (org secret) or SLACK_ISSUE_CHANNEL_ID (org variable) is unset — skipping the Slack post."
             exit 0
           fi
 
