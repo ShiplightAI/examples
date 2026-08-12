@@ -67,6 +67,16 @@ jobs:
           name: triage-context
           path: /tmp/triage-context
 
+      # `needs: triage` waits for the whole reusable workflow, autofix included,
+      # so these artifacts already exist by the time this job runs. There are
+      # none when nothing was fixable — hence continue-on-error.
+      - name: Download autofix outcomes
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          pattern: autofix-result-*
+          path: /tmp/autofix
+
       # triage.md is already authored in Slack mrkdwn — single-asterisk bold, no
       # headers, TL;DR table inside a code fence, under 1500 chars — so it is
       # posted verbatim rather than reformatted. When the agent produced nothing
@@ -94,6 +104,26 @@ jobs:
             body="$(cat /tmp/triage-context/triage.md)"
           else
             body=":warning: Triage produced no report. Check the triage run for the cause — a missing model credential fails every engine and still exits green."
+          fi
+
+          # Append what autofix actually did. The diagnosis alone does not say
+          # whether a PR exists, which is the part a reader wants to click.
+          # Skipped entries are dropped: they mean the target was already
+          # covered by an open PR, which is not news.
+          if compgen -G '/tmp/autofix/*/autofix-result.json' >/dev/null 2>&1; then
+            autofix="$(jq -rs '
+              map(select(.skipped != true))
+              | map(
+                  if (.pr_url // "") != "" then
+                    ":wrench: <\(.pr_url)|Auto-fix PR> for `\(.test)` — verification: *\(.verification.status)* (\(.verification.pass_count)/2)"
+                  elif (.has_changes == false) then
+                    ":information_source: Auto-fix made no change for `\(.test)` — the agent judged the application at fault."
+                  else
+                    ":warning: Auto-fix changed `\(.test)` but opened no PR — see <\(.run_url)|the autofix run>."
+                  end)
+              | join("\n")
+            ' /tmp/autofix/*/autofix-result.json)"
+            [ -n "$autofix" ] && body="$(printf '%s\n\n%s' "$body" "$autofix")"
           fi
 
           # Build the payload with jq so newlines and quotes in the report cannot
