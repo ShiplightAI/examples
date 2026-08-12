@@ -58,7 +58,7 @@ jobs:
       # reports. Triage reads the artifact below, not the cloud.
       - name: Upload test report (for triage)
         if: ${{ !cancelled() }}
-        uses: ShiplightAI/ci-triage/upload-report@v1.2
+        uses: ShiplightAI/ci-triage/upload-report@v1.3
         with:
           name: spec-drift-report
           report-dir: yaml-examples/shiplight-report
