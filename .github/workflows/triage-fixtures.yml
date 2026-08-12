@@ -33,9 +33,11 @@ jobs:
         working-directory: yaml-examples
         run: npm ci
 
+      # No `continue-on-error` — see the note in yaml-examples.yml. It would
+      # hide the test output from `gh run view --log-failed`, which is exactly
+      # the evidence the triage agent reads.
       - name: Run triage fixtures
         id: tests
-        continue-on-error: true
         working-directory: yaml-examples
         run: npx shiplight test --project triage-fixtures --workers=2
 
@@ -50,7 +52,3 @@ jobs:
         with:
           name: triage-fixtures-report
           report-dir: yaml-examples/shiplight-report
-
-      - name: Fail if tests failed
-        if: steps.tests.outcome == 'failure'
-        run: exit 1
