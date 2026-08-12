@@ -1,0 +1,40 @@
+name: CI Failure Triage
+
+# Watches the E2E workflow. On a red run an agent diagnoses each failure from
+# the run logs and the uploaded report artifact, and for failures it classifies
+# as fixable spec issues it applies the fix, re-runs the test, and opens a PR.
+# It never auto-merges.
+#
+# The `workflow_run` trigger and the secret names must live here: a
+# `workflow_run` trigger is illegal inside a reusable workflow, and secret names
+# are per-repo. Everything else lives in ShiplightAI/ci-triage.
+on:
+  workflow_run:
+    workflows: [YAML Examples Tests]   # exact `name:` of each workflow to watch
+    types: [completed]
+
+jobs:
+  triage:
+    uses: ShiplightAI/ci-triage/.github/workflows/triage.yml@v1.2
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: read
+    with:
+      # The Shiplight project is not at the repository root.
+      working-directory: yaml-examples
+      triage-runner: ubuntu-latest      # read-only diagnosis, no browser needed
+      autofix-runner: shiplight-small   # re-runs tests, so needs browsers/network
+      node-version: "22"
+      # Relative to working-directory. Hard guard: a change anywhere else aborts
+      # the PR. Scoped to what the fix agent is actually allowed to touch — the
+      # test sources and the templates they reference, not helpers/ or fixtures.
+      allowed-paths: "demo showcase templates"
+      verify-workers: "2"
+    secrets:
+      claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+      openai_api_key: ${{ secrets.OPENAI_API_KEY }}        # Codex fallback
+      autofix_github_token: ${{ secrets.AUTOFIX_GITHUB_TOKEN }}  # falls back to GITHUB_TOKEN
+      # No `extra_env`: the demo suite logs into saucedemo with public
+      # credentials and the showcase suite hits public sites, so the autofix
+      # re-run needs no app secrets. Add KEY=VALUE lines here if that changes.

@@ -17,37 +17,44 @@ concurrency:
 
 jobs:
   e2e:
-    name: E2E demo tests
-    runs-on: shiplight-medium
-    timeout-minutes: 30
+    name: E2E demo + showcase tests
+    runs-on: shiplight-small
+    # 42 AI-driven browser tests (24 demo + 18 showcase) at 2 workers, each
+    # allowed 10 min by playwright.config.ts. The old 30 minutes was sized for
+    # the demo project alone.
+    timeout-minutes: 60
 
     steps:
       - uses: actions/checkout@v5
 
       - name: Install dependencies
         working-directory: yaml-examples
-        run: npm install
+        # `npm ci` matches what the triage autofix job runs, so lockfile drift
+        # surfaces here first instead of only breaking the autofix re-run.
+        run: npm ci
 
-      - name: Run demo tests
+      - name: Run demo and showcase tests
         id: tests
         continue-on-error: true
         working-directory: yaml-examples
-        run: npx shiplight test --project demo
+        # `setup` runs automatically as a dependency of `demo`. The generated
+        # *.yaml.spec.ts files are gitignored; `shiplight test` transpiles the
+        # .test.yaml sources on the fly.
+        run: npx shiplight test --project demo --project showcase --workers=2
 
       - name: Upload results to Shiplight
         if: always() && steps.tests.outcome != 'skipped'
         working-directory: yaml-examples
         run: npx shiplight report
 
-      - name: Upload artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
+      # Failure evidence for the CI Failure Triage workflow. Drops the traces
+      # (*.zip) and videos (*.webm) the agent never reads; humans still get the
+      # full set from the Shiplight cloud report uploaded above.
+      - name: Upload test report (for triage)
+        if: ${{ !cancelled() }}
+        uses: ShiplightAI/ci-triage/upload-report@v1.2
         with:
-          name: e2e-report
-          if-no-files-found: ignore
-          path: |
-            yaml-examples/shiplight-report
-            yaml-examples/test-results
+          report-dir: yaml-examples/shiplight-report
 
       - name: Fail if tests failed
         if: steps.tests.outcome == 'failure'
