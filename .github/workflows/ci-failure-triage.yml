@@ -10,7 +10,9 @@ name: CI Failure Triage
 # are per-repo. Everything else lives in ShiplightAI/ci-triage.
 on:
   workflow_run:
-    workflows: [YAML Examples Tests]   # exact `name:` of each workflow to watch
+    workflows:                        # exact `name:` of each workflow to watch
+      - YAML Examples Tests
+      - Triage Fixtures               # deliberately red; exercises this pipeline
     types: [completed]
 
 jobs:
@@ -29,7 +31,9 @@ jobs:
       # Relative to working-directory. Hard guard: a change anywhere else aborts
       # the PR. Scoped to what the fix agent is actually allowed to touch — the
       # test sources and the templates they reference, not helpers/ or fixtures.
-      allowed-paths: "demo showcase templates"
+      # triage-fixtures is included so autofix can repair the spec-drift
+      # fixture — that PR is the demonstration. Do not merge it.
+      allowed-paths: "demo showcase templates triage-fixtures"
       verify-workers: "2"
     secrets:
       claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
