@@ -7,6 +7,8 @@ name: Runner benchmark
 # steps stay plain.
 
 on:
+  push:
+    branches: [bench/runner-speed]
   workflow_dispatch: {}
 
 jobs:
