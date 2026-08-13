@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Bench Fixture</title>
+<style>
+  body { font: 14px/1.4 sans-serif; margin: 20px; }
+  #rows td { border-bottom: 1px solid #ddd; padding: 2px 8px; }
+  .tab { display: none; } .tab.active { display: block; }
+  .error { color: #b00; }
+</style>
+</head>
+<body>
+  <h1 id="title">Bench Fixture</h1>
+
+  <nav>
+    <button id="tab-a-btn" onclick="showTab('a')">Tab A</button>
+    <button id="tab-b-btn" onclick="showTab('b')">Tab B</button>
+    <button id="tab-c-btn" onclick="showTab('c')">Tab C</button>
+  </nav>
+
+  <section id="tab-a" class="tab active">
+    <button id="render">Render rows</button>
+    <input id="filter" placeholder="filter" aria-label="filter">
+    <span id="count">0</span>
+    <table><tbody id="rows"></tbody></table>
+  </section>
+
+  <section id="tab-b" class="tab">
+    <form id="form" onsubmit="return submitForm(event)">
+      <input id="name" placeholder="name" aria-label="name">
+      <input id="email" placeholder="email" aria-label="email">
+      <button id="submit" type="submit">Submit</button>
+      <p id="form-status"></p>
+    </form>
+  </section>
+
+  <section id="tab-c" class="tab">
+    <button id="sort">Sort heavy</button>
+    <span id="sort-result">unsorted</span>
+  </section>
+
+<script>
+  const N = 3000;
+  let data = [];
+  function showTab(id) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('tab-' + id).classList.add('active');
+  }
+  document.getElementById('render').addEventListener('click', () => {
+    data = Array.from({ length: N }, (_, i) => ({
+      id: i, label: 'item-' + i, group: 'g' + (i % 17),
+    }));
+    paint(data);
+  });
+  function paint(list) {
+    const tbody = document.getElementById('rows');
+    tbody.innerHTML = list
+      .map(r => `<tr><td>${r.id}</td><td class="lbl">${r.label}</td><td>${r.group}</td></tr>`)
+      .join('');
+    document.getElementById('count').textContent = String(list.length);
+  }
+  document.getElementById('filter').addEventListener('input', (e) => {
+    const q = e.target.value;
+    paint(data.filter(r => r.label.includes(q)));
+  });
+  function submitForm(e) {
+    e.preventDefault();
+    const name = document.getElementById('name').value;
+    const email = document.getElementById('email').value;
+    const status = document.getElementById('form-status');
+    if (!name || !email.includes('@')) {
+      status.textContent = 'invalid';
+      status.className = 'error';
+    } else {
+      status.textContent = 'saved ' + name;
+      status.className = '';
+    }
+    return false;
+  }
+  document.getElementById('sort').addEventListener('click', () => {
+    // Deliberate CPU work: real suites spend time in app JS, not just the DOM.
+    let arr = Array.from({ length: 400000 }, (_, i) => (i * 2654435761) % 4294967296);
+    for (let pass = 0; pass < 3; pass++) {
+      arr.sort((a, b) => (a % 1000) - (b % 1000) || a - b);
+      arr = arr.map(v => (v * 31 + pass) % 4294967296);
+    }
+    document.getElementById('sort-result').textContent = 'sorted:' + arr[0];
+  });
+</script>
+</body>
+</html>

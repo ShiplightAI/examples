@@ -1,0 +1,44 @@
+name: Runner benchmark
+
+# Lives only on the bench/runner-speed branch; never merged to main.
+# Same-size comparison: this repo is public, so ubuntu-latest is GitHub's
+# 4 vCPU / 16 GB runner, the same size as shiplight-small. Timings are
+# read from the Actions jobs API afterwards (per-step start/end), so the
+# steps stay plain.
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  bench:
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-latest, shiplight-small]
+    name: bench-${{ matrix.runner }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Machine info
+        run: |
+          echo "runner=${{ matrix.runner }}"
+          nproc
+          grep -m1 'model name' /proc/cpuinfo || true
+          grep MemTotal /proc/meminfo
+          node --version
+          python3 --version
+
+      - name: Install dependencies
+        working-directory: bench
+        run: npm ci
+
+      - name: Install browsers
+        working-directory: bench
+        run: npx playwright install chromium
+
+      - name: Run suite
+        working-directory: bench
+        run: npx playwright test
