@@ -9,8 +9,11 @@ name: Bench - showcase on GitHub-hosted
 #
 # Arm A carries two steps arm B does not, and that asymmetry is the measurement,
 # not a flaw in it:
-#   - Setup Node 22        — the shiplight image bakes Node 22 via the Playwright
-#                            base. Without pinning, ubuntu-latest's newer npm
+#   - Setup Node 24        — pinned to the Node the shiplight image actually
+#                            ships (24.15.0 / npm 11.12.1, measured — the
+#                            Dockerfile comment claiming Node 22 from the
+#                            Playwright base is stale). ubuntu-latest defaults
+#                            to 22.23.2 / npm 10.9.8, and a different npm major
 #                            makes the `npm ci` line uncomparable.
 #   - Install Chromium     — baked into the shiplight runner image
 #                            (mcr.microsoft.com/playwright:v1.60.0-jammy).
@@ -90,11 +93,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      # Arm-A-only. Matches the Node 22 baked into the shiplight runner image.
-      - name: Setup Node 22
+      # Arm-A-only. Matches the Node measured on the shiplight runner image.
+      - name: Setup Node 24
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
 
       - name: Install dependencies
         working-directory: yaml-examples

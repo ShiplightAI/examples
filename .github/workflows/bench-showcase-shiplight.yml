@@ -66,9 +66,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      # No "Setup Node 22" step — the image ships Node 22 via the Playwright
-      # base. The Machine profile step above records the version so the pairing
-      # with arm A's pinned Node 22 is verifiable rather than assumed.
+      # No setup-node step — the image ships Node 24.15.0 / npm 11.12.1, which
+      # is what arm A pins itself to. The Machine profile step above reprints
+      # the version every run so the pairing stays verifiable rather than
+      # assumed; it already caught the Dockerfile's stale "Node 22" comment.
 
       - name: Install dependencies
         working-directory: yaml-examples
