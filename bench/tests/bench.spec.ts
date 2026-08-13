@@ -37,8 +37,11 @@ for (let i = 0; i < 32; i++) {
       timeout: 60_000,
     });
 
-    // Back to the list, verify state survived the tab round-trip.
+    // Back to the list; clear the filter (scenario 00's filter matches
+    // zero rows) and verify the full table repaints.
     await page.click("#tab-a-btn");
+    await page.fill("#filter", "");
+    await expect(page.locator("#count")).toHaveText("3000");
     await expect(page.locator("#rows tr").first()).toBeVisible();
   });
 }
