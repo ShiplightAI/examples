@@ -1,0 +1,133 @@
+name: Bench - showcase on GitHub-hosted
+
+# Runner comparison study, arm A: GitHub-hosted ubuntu-latest.
+#
+# Paired with bench-showcase-shiplight.yml (arm B, shiplight-small). The two
+# files are deliberately near-identical and MUST be edited together: the whole
+# point is that every step boundary lines up so the per-step timings can be
+# subtracted from each other.
+#
+# Arm A carries two steps arm B does not, and that asymmetry is the measurement,
+# not a flaw in it:
+#   - Setup Node 22        — the shiplight image bakes Node 22 via the Playwright
+#                            base. Without pinning, ubuntu-latest's newer npm
+#                            makes the `npm ci` line uncomparable.
+#   - Install Chromium     — baked into the shiplight runner image
+#                            (mcr.microsoft.com/playwright:v1.60.0-jammy).
+#
+# Both arms are triggered by the same push so they start within seconds of each
+# other. That matters: the action-entity cache is cloud-backed in CI, and each
+# run downloads a snapshot before the test phase. Concurrent starts mean both
+# arms read the same snapshot instead of arm B reading what arm A healed.
+
+on:
+  push:
+    branches: [bench/runner-comparison]
+  workflow_dispatch: {}
+
+# No `concurrency` group. Cancelling an in-flight benchmark arm would leave the
+# pair half-measured, which is worse than two runs racing.
+
+jobs:
+  bench:
+    name: showcase / ubuntu-latest / workers=2
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    env:
+      # Arm B receives these by injection from the runner agent. Arm A has to be
+      # given them, or `fetchOrgSettings` 401s and the CLI exits before it ever
+      # launches a browser.
+      SHIPLIGHT_API_TOKEN: ${{ secrets.SHIPLIGHT_API_TOKEN }}
+      SHIPLIGHT_REPORT_TO_CLOUD: '1'
+      # Per-test durations in a machine-readable file, on top of the reporter's
+      # own report-data.json.
+      PLAYWRIGHT_JSON_OUTPUT_FILE: ${{ github.workspace }}/yaml-examples/pw-results.json
+
+    steps:
+      # --- Baseline: what machine did we actually get? ----------------------
+      # GitHub documents ubuntu-latest as 4 vCPU / 16 GB for public repos, but
+      # the CPU model varies by allocation and a 4-core Broadwell is not a
+      # 4-core Sapphire Rapids. Record it rather than assume it.
+      - name: Machine profile
+        run: |
+          echo "== cpu =="
+          nproc
+          grep -m1 'model name' /proc/cpuinfo
+          echo "== memory =="
+          free -h
+          echo "== disk =="
+          df -h /
+          echo "== disk write throughput =="
+          dd if=/dev/zero of=/tmp/bench.bin bs=1M count=1024 conv=fdatasync 2>&1 | tail -1
+          rm -f /tmp/bench.bin
+          echo "== toolchain (pre-setup-node) =="
+          node --version
+          npm --version
+          cat /etc/os-release | head -2
+
+      # --- Baseline: how far is this machine from everything it talks to? ---
+      # The shiplight runner sits in GCP us-central1-a, same region as the
+      # Shiplight API and the GCS bucket behind static.shiplight.ai. A
+      # GitHub-hosted runner is in Azure. Every cloud-cache lookup, LLM call and
+      # report upload pays that distance, so measure it directly instead of
+      # inferring it from the totals.
+      - name: Network probe
+        run: |
+          probe() {
+            echo "-- $1"
+            for i in 1 2 3; do
+              curl -s -o /dev/null \
+                -w "  dns=%{time_namelookup}s tcp=%{time_connect}s tls=%{time_appconnect}s ttfb=%{time_starttransfer}s total=%{time_total}s http=%{http_code}\n" \
+                "$1" || echo "  probe failed"
+            done
+          }
+          probe https://registry.npmjs.org/shiplightai
+          probe https://nova-api.shiplight.ai/health
+          probe https://static.shiplight.ai/testing/index.html
+          probe https://www.wikipedia.org
+
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      # Arm-A-only. Matches the Node 22 baked into the shiplight runner image.
+      - name: Setup Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        working-directory: yaml-examples
+        run: npm ci
+
+      # Arm-A-only. This is the line the study exists to price.
+      - name: Install Chromium
+        working-directory: yaml-examples
+        run: npx playwright install --with-deps chromium
+
+      # No `continue-on-error` — it rewrites the step conclusion to success and
+      # makes `gh run view --log-failed` useless. See demo-tests.yml.
+      - name: Run showcase tests
+        id: tests
+        working-directory: yaml-examples
+        run: npx shiplight test --project showcase --workers=2
+
+      - name: Upload results to Shiplight
+        if: always() && steps.tests.outcome != 'skipped'
+        working-directory: yaml-examples
+        run: npx shiplight report
+        continue-on-error: true   # an upload hiccup must not mask the test result
+
+      # The reporter's report-data.json carries per-test and per-step durations,
+      # per-step LLM token usage, and the cache execution summary
+      # (executed / cache_served / auto_healed). Without it there is no way to
+      # tell whether a fast test phase was a fast machine or a warm cache.
+      - name: Upload timing artifacts
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: bench-gha-timings
+          path: |
+            yaml-examples/shiplight-report/**/report-data.json
+            yaml-examples/pw-results.json
+          if-no-files-found: warn
