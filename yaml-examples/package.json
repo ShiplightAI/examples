@@ -7,6 +7,6 @@
     "test:triage-fixtures": "shiplight test --project triage-fixtures"
   },
   "dependencies": {
-    "shiplightai": "^0.1.99"
+    "shiplightai": "^0.1.100"
   }
 }
