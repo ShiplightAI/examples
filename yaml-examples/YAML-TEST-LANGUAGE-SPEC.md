@@ -384,6 +384,7 @@ The following are in scope:
 | `agent` | Shiplight `WebAgent` — see common methods below |
 | `testContext` | The runtime variable store (same store as `{{variableName}}` in YAML). Use `.get(key)` / `.set(key, value)` or property-style access. |
 | `request` | Playwright `APIRequestContext` — available when any statement in the file passes `request` as a function arg |
+| `extensionActionPopup` | Playwright `Page` for the extension's real toolbar action popup. Requires `use: { extensionDir: "..." }`; referencing it opens the popup before the test runs. |
 
 `agent` common methods:
 
@@ -593,7 +594,7 @@ Each value in `args` is transpiled based on what it looks like:
 
 | Value | Treatment | Example output |
 |---|---|---|
-| `page`, `request`, `testContext` | Passed as the Playwright/system object (unquoted) | `page` |
+| `page`, `request`, `testContext`, `extensionActionPopup` | Passed as the Playwright/system object (unquoted). `extensionActionPopup` requires `use: { extensionDir: "..." }`. | `page` |
 | `null`, `undefined`, `true`, `false` | Passed as JavaScript literals | `null` |
 | Numeric strings | Passed as numbers | `42` |
 | `$variableName` | Resolved from runtime variables | `agent.agentServices.readVariable('variableName')` |
