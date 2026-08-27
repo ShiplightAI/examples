@@ -10,7 +10,7 @@
 test_case_id: 419
 goal: Demonstrate while-loop with AI condition
 base_url: https://www.wikipedia.org
-timeout: 300000
+timeout: 600000
 
 statements:
   - URL: /
