@@ -30,7 +30,7 @@ concurrency:
 jobs:
   app-regression:
     name: App regression fixture (permanently red by design)
-    runs-on: shiplight-small
+    runs-on: shiplight-c4-tiny
     timeout-minutes: 15
 
     steps:

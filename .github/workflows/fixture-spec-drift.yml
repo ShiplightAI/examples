@@ -29,7 +29,7 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - 'yaml-examples/triage-fixtures/01-spec-drift.test.yaml'
+      - "yaml-examples/triage-fixtures/01-spec-drift.test.yaml"
   workflow_dispatch: {}
 
 concurrency:
@@ -39,7 +39,7 @@ concurrency:
 jobs:
   spec-drift:
     name: Spec drift fixture (red until auto-fixed)
-    runs-on: shiplight-small
+    runs-on: shiplight-c4-tiny
     timeout-minutes: 15
 
     steps:

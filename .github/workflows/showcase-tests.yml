@@ -10,27 +10,27 @@ on:
   push:
     branches: [main]
     paths:
-      - 'yaml-examples/showcase/**'
-      - 'yaml-examples/templates/**'
-      - 'yaml-examples/helpers/**'
-      - 'yaml-examples/files/**'
-      - 'yaml-examples/images/**'
-      - 'yaml-examples/playwright.config.ts'
-      - 'yaml-examples/package.json'
-      - 'yaml-examples/package-lock.json'
-      - '.github/workflows/showcase-tests.yml'
+      - "yaml-examples/showcase/**"
+      - "yaml-examples/templates/**"
+      - "yaml-examples/helpers/**"
+      - "yaml-examples/files/**"
+      - "yaml-examples/images/**"
+      - "yaml-examples/playwright.config.ts"
+      - "yaml-examples/package.json"
+      - "yaml-examples/package-lock.json"
+      - ".github/workflows/showcase-tests.yml"
   pull_request:
     branches: [main]
     paths:
-      - 'yaml-examples/showcase/**'
-      - 'yaml-examples/templates/**'
-      - 'yaml-examples/helpers/**'
-      - 'yaml-examples/files/**'
-      - 'yaml-examples/images/**'
-      - 'yaml-examples/playwright.config.ts'
-      - 'yaml-examples/package.json'
-      - 'yaml-examples/package-lock.json'
-      - '.github/workflows/showcase-tests.yml'
+      - "yaml-examples/showcase/**"
+      - "yaml-examples/templates/**"
+      - "yaml-examples/helpers/**"
+      - "yaml-examples/files/**"
+      - "yaml-examples/images/**"
+      - "yaml-examples/playwright.config.ts"
+      - "yaml-examples/package.json"
+      - "yaml-examples/package-lock.json"
+      - ".github/workflows/showcase-tests.yml"
   workflow_dispatch: {}
 
 concurrency:
@@ -40,7 +40,7 @@ concurrency:
 jobs:
   showcase:
     name: E2E showcase tests
-    runs-on: shiplight-large
+    runs-on: shiplight-c4-small
     timeout-minutes: 30
 
     steps:
@@ -60,7 +60,7 @@ jobs:
         if: always() && steps.tests.outcome != 'skipped'
         working-directory: yaml-examples
         run: npx shiplight report
-        continue-on-error: true   # a cloud upload hiccup must not mask the test result
+        continue-on-error: true # a cloud upload hiccup must not mask the test result
 
       - name: Upload test report (for triage)
         if: ${{ !cancelled() }}

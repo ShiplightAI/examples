@@ -20,27 +20,27 @@ on:
   push:
     branches: [main]
     paths:
-      - 'yaml-examples/demo/**'
-      - 'yaml-examples/templates/**'
-      - 'yaml-examples/helpers/**'
-      - 'yaml-examples/files/**'
-      - 'yaml-examples/images/**'
-      - 'yaml-examples/playwright.config.ts'
-      - 'yaml-examples/package.json'
-      - 'yaml-examples/package-lock.json'
-      - '.github/workflows/demo-tests.yml'
+      - "yaml-examples/demo/**"
+      - "yaml-examples/templates/**"
+      - "yaml-examples/helpers/**"
+      - "yaml-examples/files/**"
+      - "yaml-examples/images/**"
+      - "yaml-examples/playwright.config.ts"
+      - "yaml-examples/package.json"
+      - "yaml-examples/package-lock.json"
+      - ".github/workflows/demo-tests.yml"
   pull_request:
     branches: [main]
     paths:
-      - 'yaml-examples/demo/**'
-      - 'yaml-examples/templates/**'
-      - 'yaml-examples/helpers/**'
-      - 'yaml-examples/files/**'
-      - 'yaml-examples/images/**'
-      - 'yaml-examples/playwright.config.ts'
-      - 'yaml-examples/package.json'
-      - 'yaml-examples/package-lock.json'
-      - '.github/workflows/demo-tests.yml'
+      - "yaml-examples/demo/**"
+      - "yaml-examples/templates/**"
+      - "yaml-examples/helpers/**"
+      - "yaml-examples/files/**"
+      - "yaml-examples/images/**"
+      - "yaml-examples/playwright.config.ts"
+      - "yaml-examples/package.json"
+      - "yaml-examples/package-lock.json"
+      - ".github/workflows/demo-tests.yml"
   workflow_dispatch: {}
 
 concurrency:
@@ -50,7 +50,7 @@ concurrency:
 jobs:
   demo:
     name: E2E demo tests
-    runs-on: shiplight-large
+    runs-on: shiplight-c4-small
     timeout-minutes: 30
 
     steps:
@@ -75,7 +75,7 @@ jobs:
         if: always() && steps.tests.outcome != 'skipped'
         working-directory: yaml-examples
         run: npx shiplight report
-        continue-on-error: true   # a cloud upload hiccup must not mask the test result
+        continue-on-error: true # a cloud upload hiccup must not mask the test result
 
       - name: Upload test report (for triage)
         if: ${{ !cancelled() }}
