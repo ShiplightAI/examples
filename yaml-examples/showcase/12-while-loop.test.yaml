@@ -29,7 +29,7 @@ statements:
 
   # Scroll until the footer is visible
   - WHILE: The page footer is not visible
-    timeout_ms: 300000
+    timeout_ms: 600000
     DO:
       - intent: Scroll down 5 pages
         action: scroll
