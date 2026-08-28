@@ -40,7 +40,7 @@ concurrency:
 jobs:
   showcase:
     name: E2E showcase tests
-    runs-on: shiplight-c4-small
+    runs-on: shiplight-c4-tiny
     timeout-minutes: 30
 
     steps:
